@@ -18,15 +18,24 @@ function logging(args) {
     }
 }
 
-function process_response(response) {
+function process_response(response, eval = false, debiased = false) {
     let data = [];
+    let vec1key = debiased ? 'debiased_vectors1' : 'vectors1';
+    let vec2key = debiased ? 'debiased_vectors2' : 'vectors2';
+    let debiased_veckey = debiased ? 'debiased_evalvecs' : 'evalvecs'
 
-    for (let i = 0; i < response.vectors1.length; i++) {
-        data.push({'position': response.vectors1[i], 'label': response.words1[i], 'group': 1});
+    for (let i = 0; i < response[vec1key].length; i++) {
+        data.push({'position': response[vec1key][i], 'label': response.words1[i], 'group': 1});
     }
 
-    for (let i = 0; i < response.vectors2.length; i++) {
-        data.push({'position': response.vectors2[i], 'label': response.words2[i], 'group': 2});
+    for (let i = 0; i < response[vec2key].length; i++) {
+        data.push({'position': response[vec2key][i], 'label': response.words2[i], 'group': 2});
+    }
+
+    if (eval) {
+        for (let i = 0; i < response[debiased_veckey].length; i++) {
+            data.push({'position': response[debiased_veckey][i], 'label': response.evalwords[i], 'group': 3});
+        }
     }
 
     return data;
@@ -128,13 +137,13 @@ function remove_point(event) {
     $('#seedword-form-submit').click();
 }
 
-function draw_svg_scatter(parent_svg, response, plotTitle, mean = true) {
+function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = false, debiased = false) {
     parent_svg.selectAll('*').remove();
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
     let width = parent_svg.node().width.baseVal.value - margin.left - margin.right;
     let height = parent_svg.node().height.baseVal.value - margin.top - margin.bottom;
-    logging(width, height);
-    let data = process_response(response);
+    logging(response);
+    let data = process_response(response, eval, debiased);
 
     if (mean) {
         let mean1 = vector_mean(response.vectors1);
@@ -180,14 +189,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true) {
         .attr('class', d => 'datapoint-group group-' + d.group)
         .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
 
-    datapoint_group.append('text')
-        .attr('class', 'fa cross-button')
-        .attr('x', 10)
-        .attr('y', -10)
-        .attr('visibility', 'hidden')
-        .on('click', remove_point)
-        .text(d => '\uf057');
-
+    // Class label
     datapoint_group.append('foreignObject')
         .attr('x', 15)
         .attr('y', -10)
@@ -196,6 +198,15 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true) {
         .attr('class', 'fobj')
         .append('xhtml:div')
         .html(d => d.label)
+
+    // Remove buttons
+    datapoint_group.append('text')
+        .attr('class', 'fa cross-button')
+        .attr('x', 10)
+        .attr('y', -10)
+        .attr('visibility', 'hidden')
+        .on('click', remove_point)
+        .text(d => '\uf057');
 
     datapoint_group.append('circle')
         .attr('r', 8)
@@ -230,19 +241,23 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true) {
 $('#seedword-form-submit').click(function (event) {
     let seedwords1 = $('#seedword-text-1').val();
     let seedwords2 = $('#seedword-text-2').val();
+    let evalwords = $('#evaluation-list').val();
     console.log(seedwords1, seedwords2);
     $.ajax({
         type: 'POST',
         url: '/seedwords',
-        data: {seedwords1: seedwords1, seedwords2: seedwords2},
+        data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords},
         success: function (response) {
             logging(response);
+
             let svg1 = d3.select('#pca');
             draw_svg_scatter(svg1, response, 'PCA', false);
             let svg2 = d3.select('#two-means');
-            draw_svg_scatter(svg2, response, 'Two-Means', true);
-            let svg3 = d3.select('#force-graph');
-            draw_force_graph(svg3, response.graph);
+            draw_svg_scatter(svg2, response, 'Two-Means', true, true);
+            // let svg3 = d3.select('#force-graph');
+            // draw_force_graph(svg3, response.graph);
+            let svg3 = d3.select('#evaluation');
+            draw_svg_scatter(svg3, response, 'Eval', true, true, true);
 
             // enable toolbar buttons
             d3.select('#toggle-labels-btn').attr('disabled', null);
@@ -256,11 +271,21 @@ $('#seedword-form-submit').click(function (event) {
                 LABEL_VISIBILITY = true;
                 $('#toggle-labels-btn').click();
             }
+
             // let canvas1 = document.getElementById('pca');
             // draw_pca(canvas1, response, 'PCA');
             // let canvas2 = document.getElementById('two-means');
             // draw_pca(canvas2, response, 'Two-Means');
             // canvas_arrow(canvas2.getContext('2d'), 10, 100, 20, 50);
+        }
+    });
+    $.ajax({
+        type: 'POST',
+        url: '/weatscore',
+        data: {seedwords1: seedwords1, seedwords2: seedwords2},
+        success: function (response) {
+            logging(response);
+            $('#weat-score-display').html('WEAT score = ' + response['weat_score'].toFixed(3));
         }
     });
 });
@@ -393,6 +418,7 @@ if (TESTING) {
     // $('#seedword-text-2').val('lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna');
     $('#seedword-text-1').val('john, william, george, liam, andrew, michael, louis, tony, scott, jackson');
     $('#seedword-text-2').val('mary, victoria, carolina, maria, anne, kelly, marie, anna, sarah, jane');
+    $('#evaluation-list').val('engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor');
     $('#seedword-form-submit').click();
 }
 

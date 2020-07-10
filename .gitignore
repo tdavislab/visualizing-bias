@@ -128,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# exclude data and drafts
+# exclude data and pdfs
 data/
-drafts/
+pdfs/
 .idea/

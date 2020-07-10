@@ -16,29 +16,38 @@
 
 <div class="container-fluid">
   <div id="top-bar" class="row m-3">
-    <div class="col-md-12 input-group">
-      <input id="seedword-text-1" class="form-control" type="text" placeholder="Add seed words...">
-      <input id="seedword-text-2" class="form-control" type="text" placeholder="Add seed words...">
+    <div class="input-group">
+      <input id="seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed words...">
+      <input id="seedword-text-2" class="form-control input-group-text" type="text" placeholder="Add seed words...">
+      <input id="evaluation-list" class="form-control input-group-text" type="text" placeholder="Add seed words...">
       <div class="input-group-append">
         <button id="seedword-form-submit" class="btn btn-outline-success my-2 my-sm-0">Run</button>
       </div>
     </div>
   </div>
+  <div id="weat-score" class="row center-block">
+    <h5 id="weat-score-display" style="margin: auto"></h5>
+  </div>
+  <hr/>
   <div id="projections" class="row m-3 h-50">
     <div class="col-md-4">
       {#      <canvas id="pca" width="400" height="400"></canvas>#}
+      <h5 class="text-center">PCA</h5>
       <svg id="pca" width="100%" height="100%"></svg>
     </div>
     <div class="col-md-4">
       {#      <canvas id="two-means" width="400" height="400"></canvas>#}
+      <h5 class="text-center">Two-means</h5>
       <svg id="two-means" width="100%" height="100%"></svg>
     </div>
     <div class="col-md-4">
       {#      <canvas id="two-means" width="400" height="400"></canvas>#}
-      <svg id="force-graph" width="100%" height="100%"></svg>
+      {#      <svg id="force-graph" width="100%" height="100%"></svg>#}
+      <h5 class="text-center">Debiased</h5>
+      <svg id="evaluation" width="100%" height="100%"></svg>
     </div>
   </div>
-  <div id="toolbar" class="row justify-content-center m-3">
+  <div id="toolbar" class="row justify-content-center m-1 p-5">
     <div class="btn-toolbar">
       <button id='toggle-labels-btn' class="btn btn-success mr-2" disabled>
         <i id='toggle-label-icon' class="fa fa-toggle-on" aria-hidden="true"></i>

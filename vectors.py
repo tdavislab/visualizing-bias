@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
 import networkx as nx
 from tqdm import tqdm
+from weat import weat_score
 
 
 def read_embeddings(path, limit=100000):
@@ -21,7 +22,7 @@ def read_embeddings(path, limit=100000):
             if line_idx >= limit:
                 break
 
-    return words, np.vstack(vectors)
+    return words, np.vstack(vectors).astype('float')
 
 
 def save(savepath, obj):
@@ -77,6 +78,16 @@ def knn_graph(embedding, word_list):
     mapping = dict([(x, word_list[x]) for x in range(len(word_list))])
     graph = nx.relabel.relabel_nodes(graph, mapping)
     return nx.readwrite.json_graph.node_link_data(graph)
+
+
+def compute_weat_score(embedding, X, Y, A, B):
+    X_vecs, Y_vecs, A_vecs, B_vecs = [embedding.get_many(wordlist) for wordlist in [X, Y, A, B]]
+    return weat_score(X_vecs, Y_vecs, A_vecs, B_vecs)
+
+
+def debias_linear_projection(embedding, bias_vec):
+    debiased = embedding.vectors - embedding.vectors.dot(bias_vec.reshape(-1, 1)) * bias_vec
+    return debiased
 
 
 if __name__ == '__main__':
