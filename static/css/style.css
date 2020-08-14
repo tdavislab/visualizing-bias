@@ -8,11 +8,6 @@ canvas {
     height: auto;
 }
 
-.container-fluid {
-    height: 100%;
-    overflow: hidden;
-}
-
 svg {
     /*background-color: antiquewhite;*/
 }
@@ -22,6 +17,11 @@ svg {
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
+}
+
+.container-fluid {
+    height: 100%;
+    overflow: hidden;
 }
 
 .dot {

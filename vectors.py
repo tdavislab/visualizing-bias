@@ -31,7 +31,7 @@ def save(savepath, obj):
 
 def load(loadpath):
     with open(loadpath, 'rb') as loadfile:
-        pickle.load(loadfile)
+        return pickle.load(loadfile)
 
 
 class Embedding:
@@ -90,5 +90,7 @@ def debias_linear_projection(embedding, bias_vec):
 
 
 if __name__ == '__main__':
+    # dirty hack to make sure the object can be unpickled in the flask app
+    from vectors import Embedding
     emb = Embedding('data/glove.6B.50d.txt')
     save('data/glove.6B.50d.pkl', emb)

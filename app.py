@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, jsonify
 from vectors import *
 
 app = Flask(__name__)
-app.embedding = Embedding('data/glove.6B.50d.txt')
 
+# app.embedding = Embedding('data/glove.6B.50d.txt')
+app.embedding = load('data/glove.6B.50d.pkl')
 
-# app.embedding = load('data/glove.6B.50d.pkl')
 
 @app.route('/')
 def index():
