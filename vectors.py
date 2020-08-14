@@ -1,5 +1,4 @@
 import pickle
-
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
@@ -16,13 +15,13 @@ def read_embeddings(path, limit=100000):
         for line_idx, line in tqdm(enumerate(vec_file), total=limit, unit_scale=True):
             line = line.rstrip().split()
             words[line[0]] = line_idx
-            vector = np.array(line[1:])
-            vectors.append(vector)
+            # vector = np.array(line[1:])
+            vectors.append(line[1:])
 
             if line_idx >= limit:
                 break
 
-    return words, np.vstack(vectors).astype('float')
+    return words, np.array(vectors).astype('float')
 
 
 def save(savepath, obj):
@@ -57,8 +56,8 @@ class Embedding:
 def dim_reduction(embedding, word_list, method='PCA'):
     vectors = embedding.get_many(word_list)
 
-    if method == 'PCA':
-        vec_low_dim = PCA(n_components=2).fit_transform(vectors)
+    # if method == 'PCA':
+    vec_low_dim = PCA(n_components=2).fit_transform(vectors)
 
     return vec_low_dim
 

@@ -257,7 +257,7 @@ $('#seedword-form-submit').click(function (event) {
             // let svg3 = d3.select('#force-graph');
             // draw_force_graph(svg3, response.graph);
             let svg3 = d3.select('#evaluation');
-            draw_svg_scatter(svg3, response, 'Eval', true, true, true);
+            draw_svg_scatter(svg3, response, 'Eval', false, true, true);
 
             // enable toolbar buttons
             d3.select('#toggle-labels-btn').attr('disabled', null);
