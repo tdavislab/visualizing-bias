@@ -30,6 +30,16 @@
   <div id="weat-score" class="row center-block">
     <h5 id="weat-predebiased" style="margin: auto"></h5>
     <h5 id="weat-postdebiased" style="margin: auto"></h5>
+    <div class="dropdown mr-4">
+      <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
+        Debiasing Method
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="#">Linear Debiasing</a>
+        <a class="dropdown-item" href="#">OSCaR</a>
+      </div>
+    </div>
   </div>
 
   <hr/>
@@ -66,6 +76,10 @@
       <button id='toggle-eval-btn' class="btn btn-success mr-2" disabled>
         <i id='toggle-eval-icon' class="fa fa-toggle-on" aria-hidden="true"></i>
         <span>Show evaluation points</span>
+      </button>
+
+      <button id='animate-btn' class="btn btn-info mr-4">
+        <span>Animate</span>
       </button>
     </div>
   </div>

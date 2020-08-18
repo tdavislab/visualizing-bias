@@ -19,7 +19,7 @@
 
 
 ### Animation Tasks
-- [ ] Animate collapse to two-means
+- [x] Animate collapse to two-means
 - [ ] Animate PCA as rotation and scaling (but from what to what?)
 - [ ] Mean point in debiasing (right)
 - [ ] Animate between one debiasing method to another to show difference between methods

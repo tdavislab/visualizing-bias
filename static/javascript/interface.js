@@ -182,6 +182,32 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         // .attr('transform', 'translate(' + margin.left + ',0)')
         .call(d3.axisLeft(y));
 
+
+    d3.select('#animate-btn').on('click', function () {
+        new_data = process_response(response, eval, false);
+        logging(new_data);
+        logging(svg.selectAll('.datapoint-group'))
+        svg.selectAll('.datapoint-group').data(new_data)
+            .transition()
+            .duration(5)
+            .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')')
+            .on('end', function () {
+                svg.selectAll('.datapoint-group').data(process_response(response, eval, true))
+                    .transition()
+                    .duration(5000)
+                    .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+            })
+
+        // svg.exit().remove();
+
+        // svg.selectAll('.datapoint-group').data(process_response(response, eval, true))
+        //     .transition()
+        //     .duration(500)
+        //     .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+        //
+        // svg.exit().remove();
+
+    })
 }
 
 // Functionality for various toggle buttons
