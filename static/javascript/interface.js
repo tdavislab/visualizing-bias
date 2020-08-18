@@ -3,6 +3,8 @@
 
 // Fill the textboxes while testing
 let TESTING = true;
+
+// Initialize global variables
 let LABEL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 
@@ -250,14 +252,14 @@ $('#seedword-form-submit').click(function (event) {
         success: function (response) {
             logging(response);
 
-            let svg1 = d3.select('#pca');
-            draw_svg_scatter(svg1, response, 'PCA', false);
-            let svg2 = d3.select('#two-means');
-            draw_svg_scatter(svg2, response, 'Two-Means', true, true);
-            // let svg3 = d3.select('#force-graph');
-            // draw_force_graph(svg3, response.graph);
-            let svg3 = d3.select('#evaluation');
-            draw_svg_scatter(svg3, response, 'Eval', false, true, true);
+            let predebiased_svg = d3.select('#pre-debiased-svg');
+            draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
+
+            let postdebiased_svg = d3.select('#post-debiased-svg');
+            draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
+
+            $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
+            $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
 
             // enable toolbar buttons
             d3.select('#toggle-labels-btn').attr('disabled', null);
@@ -271,23 +273,18 @@ $('#seedword-form-submit').click(function (event) {
                 LABEL_VISIBILITY = true;
                 $('#toggle-labels-btn').click();
             }
-
-            // let canvas1 = document.getElementById('pca');
-            // draw_pca(canvas1, response, 'PCA');
-            // let canvas2 = document.getElementById('two-means');
-            // draw_pca(canvas2, response, 'Two-Means');
-            // canvas_arrow(canvas2.getContext('2d'), 10, 100, 20, 50);
         }
     });
-    $.ajax({
-        type: 'POST',
-        url: '/weatscore',
-        data: {seedwords1: seedwords1, seedwords2: seedwords2},
-        success: function (response) {
-            logging(response);
-            $('#weat-score-display').html('WEAT score = ' + response['weat_score'].toFixed(3));
-        }
-    });
+    // $.ajax({
+    //     type: 'POST',
+    //     url: '/weatscore',
+    //     data: {seedwords1: seedwords1, seedwords2: seedwords2},
+    //     success: function (response) {
+    //         logging(response);
+    //         $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
+    //         $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
+    //     }
+    // });
 });
 
 // Functionality for the 'Toggle Labels' button

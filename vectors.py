@@ -36,7 +36,10 @@ def load(loadpath):
 
 class Embedding:
     def __init__(self, path):
-        self.words, self.vectors = read_embeddings(path)
+        if path is None:
+            self.words, self.vectors = [], []
+        else:
+            self.words, self.vectors = read_embeddings(path)
 
     def get(self, word):
         """
@@ -51,6 +54,13 @@ class Embedding:
         """
         indices = [self.words[word] for word in words]
         return self.vectors[indices]
+
+
+def new_embedding_from_vectors(curr_embedding, word_vectors):
+    new_embedding = Embedding(None)
+    new_embedding.words = curr_embedding.words
+    new_embedding.vectors = word_vectors
+    return new_embedding
 
 
 def dim_reduction(embedding, word_list, method='PCA'):
@@ -92,5 +102,6 @@ def debias_linear_projection(embedding, bias_vec):
 if __name__ == '__main__':
     # dirty hack to make sure the object can be unpickled in the flask app
     from vectors import Embedding
+
     emb = Embedding('data/glove.6B.50d.txt')
     save('data/glove.6B.50d.pkl', emb)
