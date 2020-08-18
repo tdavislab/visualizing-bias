@@ -29,11 +29,11 @@ function process_response(response, eval = false, debiased = false) {
     let debiased_veckey = debiased ? 'debiased_evalvecs' : 'evalvecs'
 
     for (let i = 0; i < response[vec1key].length; i++) {
-        data.push({'position': response[vec1key][i], 'label': response.words1[i], 'group': 1});
+        data.push({'position': response[vec1key][i], 'label': response['words1'][i], 'group': 1});
     }
 
     for (let i = 0; i < response[vec2key].length; i++) {
-        data.push({'position': response[vec2key][i], 'label': response.words2[i], 'group': 2});
+        data.push({'position': response[vec2key][i], 'label': response['words2'][i], 'group': 2});
     }
 
     if (eval) {
@@ -64,67 +64,7 @@ function check_if_mean(datapoint) {
     return 0;
 }
 
-function draw_pca(canvas, response, plotTitle) {
-    let data1 = response.vectors1.map((d, i) => {
-        return {x: d[0], y: d[1]}
-    });
-    let data2 = response.vectors2.map((d, i) => {
-        return {x: d[0], y: d[1]}
-    });
-
-    let ctx = canvas.getContext('2d');
-
-    let pca_chart = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [
-                {
-                    label: 'Male Words',
-                    borderColor: 'rgb(54, 162, 235)',
-                    data: data1,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    borderWidth: 4
-                },
-                {
-                    label: 'Female Words',
-                    borderColor: 'rgb(156,227,37)',
-                    data: data2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    borderWidth: 4
-                }]
-        },
-        options: {
-            title: {
-                text: plotTitle,
-                display: true
-            },
-            scales: {
-                xAxes: [{
-                    gridLines: {
-                        drawBorder: true,
-                        display: true,
-                    },
-                    ticks: {
-                        display: true,
-                    }
-                }],
-                yAxes: [{
-                    gridLines: {
-                        drawBorder: true,
-                        display: true
-                    },
-                    ticks: {
-                        display: true
-                    }
-                }]
-            },
-        }
-    })
-}
-
-function remove_point(event) {
+function remove_point() {
     let element = d3.select(this);
     let label = element.datum().label;
     let group = element.datum().group;
@@ -150,8 +90,8 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     let data = process_response(response, eval, debiased);
 
     if (mean) {
-        let mean1 = vector_mean(response.vectors1);
-        let mean2 = vector_mean(response.vectors2);
+        let mean1 = vector_mean(response['vectors1']);
+        let mean2 = vector_mean(response['vectors2']);
         data.push({'position': mean1, 'label': 'mean1', 'group': 1});
         data.push({'position': mean2, 'label': 'mean2', 'group': 2});
     }
@@ -194,11 +134,11 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         .append('g')
         .attr('class', d => 'datapoint-group group-' + d.group)
         .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')')
-        .on('mouseover', function() {
+        .on('mouseover', function () {
             parent_svg.selectAll('g.datapoint-group').classed('translucent', true);
             d3.select(this).classed('translucent', false);
         })
-        .on('mouseout', function() {
+        .on('mouseout', function () {
             parent_svg.selectAll('g.datapoint-group').classed('translucent', false);
         })
 
@@ -206,8 +146,8 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     datapoint_group.append('foreignObject')
         .attr('x', 15)
         .attr('y', -10)
-        .attr('width', '150px')
-        .attr('height', '25px')
+        .attr('width', '1px')
+        .attr('height', '1px')
         .attr('class', 'fobj')
         .append('xhtml:div')
         .html(d => d.label)
@@ -219,7 +159,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         .attr('y', -10)
         .attr('visibility', 'hidden')
         .on('click', remove_point)
-        .text(d => '\uf057');
+        .text('\uf057');
 
     datapoint_group.append('circle')
         .attr('r', 8)
@@ -290,7 +230,7 @@ $('#remove-points-btn').click(function () {
 });
 
 // Functionality for the 'Run' button
-$('#seedword-form-submit').click(function (event) {
+$('#seedword-form-submit').click(function () {
     let seedwords1 = $('#seedword-text-1').val();
     let seedwords2 = $('#seedword-text-2').val();
     let evalwords = $('#evaluation-list').val();
@@ -300,7 +240,6 @@ $('#seedword-form-submit').click(function (event) {
         url: '/seedwords',
         data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords},
         success: function (response) {
-
             let predebiased_svg = d3.select('#pre-debiased-svg');
             draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
 
