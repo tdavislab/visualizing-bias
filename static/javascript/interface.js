@@ -165,9 +165,10 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     // set the ranges
     let x = d3.scaleLinear().range([0, width - 30]);
     let y = d3.scaleLinear().range([height, 0]);
-    x.domain(d3.extent(data, d => d.position[0])).nice();
-    y.domain(d3.extent(data, d => d.position[1])).nice();
-
+    // x.domain(d3.extent(data, d => d.position[0])).nice();
+    // y.domain(d3.extent(data, d => d.position[1])).nice();
+    x.domain([response.bounds.xmin, response.bounds.xmax]).nice();
+    y.domain([response.bounds.ymin, response.bounds.ymax]).nice();
     // Set color-scale
     let color = d3.scaleOrdinal(d3.schemeDark2);
 
@@ -280,19 +281,9 @@ $('#seedword-form-submit').click(function (event) {
             }
         }
     });
-    // $.ajax({
-    //     type: 'POST',
-    //     url: '/weatscore',
-    //     data: {seedwords1: seedwords1, seedwords2: seedwords2},
-    //     success: function (response) {
-    //         logging(response);
-    //         $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
-    //         $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
-    //     }
-    // });
 });
 
-// Functionality for the 'Toggle Labels' button
+// Functionality for various toggle buttons
 $('#toggle-labels-btn').click(function (event) {
     if (LABEL_VISIBILITY === true) {
         d3.selectAll('.fobj').attr('hidden', true);
@@ -326,7 +317,6 @@ $('#toggle-mean-btn').click(function (event) {
     MEAN_VISIBILITY = !MEAN_VISIBILITY;
 });
 
-// Functionality for the 'Remove Points' button
 $('#remove-points-btn').click(function (event) {
     let cross_buttons = d3.selectAll('.cross-button')
     if (REMOVE_POINTS === true) {
@@ -445,4 +435,3 @@ if (TESTING) {
     $('#evaluation-list').val('engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor');
     $('#seedword-form-submit').click();
 }
-

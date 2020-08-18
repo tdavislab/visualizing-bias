@@ -10,7 +10,7 @@
 
 ### UI changes
 - [ ] Remove points without removing the visualization of that word
-- [ ] Align axis ranges for PCA and Two-means
+- [x] Align axis ranges for PCA and Two-means
 - [x] Remove PCA picture
 - [x] Toggle mean-line and purple points
 - [ ] 3D PCA, future stuff

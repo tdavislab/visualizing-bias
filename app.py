@@ -40,12 +40,18 @@ def get_seedwords():
     weatscore_predebiased = utils.get_weat_score(app.base_embedding, seedwords1, seedwords2)
     weatscore_postdebiased = utils.get_weat_score(app.debiased_embedding, seedwords1, seedwords2)
 
-    return jsonify({'vectors1': predebiased_projector.transform(app.base_embedding.get_many(seedwords1)).tolist(),
-                    'vectors2': predebiased_projector.transform(app.base_embedding.get_many(seedwords2)).tolist(),
-                    'evalvecs': predebiased_projector.transform(app.base_embedding.get_many(evalwords)).tolist(),
-                    'debiased_vectors1': postdebiased_projector.transform(app.debiased_embedding.get_many(seedwords1)).tolist(),
-                    'debiased_vectors2': postdebiased_projector.transform(app.debiased_embedding.get_many(seedwords2)).tolist(),
-                    'debiased_evalvecs': postdebiased_projector.transform(app.debiased_embedding.get_many(evalwords)).tolist(),
+    data_payload = {'vectors1': utils.project_to_2d(predebiased_projector, app.base_embedding, seedwords1),
+                    'vectors2': utils.project_to_2d(predebiased_projector, app.base_embedding, seedwords2),
+                    'evalvecs': utils.project_to_2d(predebiased_projector, app.base_embedding, evalwords),
+                    'debiased_vectors1': utils.project_to_2d(postdebiased_projector, app.debiased_embedding, seedwords1),
+                    'debiased_vectors2': utils.project_to_2d(postdebiased_projector, app.debiased_embedding, seedwords2),
+                    'debiased_evalvecs': utils.project_to_2d(postdebiased_projector, app.debiased_embedding, evalwords),
                     'words1': seedwords1, 'words2': seedwords2, 'evalwords': evalwords,
                     'weat_score_predebiased': weatscore_predebiased, 'weat_score_postdebiased': weatscore_postdebiased
-                    })
+                    }
+    all_vectors = np.vstack([data_payload['vectors1'], data_payload['vectors2'], data_payload['evalvecs'],
+                             data_payload['debiased_vectors1'], data_payload['debiased_vectors2'], data_payload['debiased_evalvecs']])
+    data_payload['bounds'] = {'xmin': all_vectors[:, 0].min(), 'xmax': all_vectors[:, 0].max(),
+                              'ymin': all_vectors[:, 1].min(), 'ymax': all_vectors[:, 1].max()}
+
+    return jsonify(data_payload)
