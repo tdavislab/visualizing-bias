@@ -6,6 +6,8 @@ let TESTING = true;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
+let MEAN_VISIBILITY = true;
+let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 
 function getRandomInt(min, max) {
@@ -174,6 +176,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         let mean1 = data[data.length - 2];
         let mean2 = data[data.length - 1];
         svg.append('line')
+            .attr('id', 'mean-line')
             .attr('stroke', 'black')
             .attr('stroke-width', 8)
             .attr('stroke-opacity', 0.5)
@@ -264,6 +267,8 @@ $('#seedword-form-submit').click(function (event) {
             // enable toolbar buttons
             d3.select('#toggle-labels-btn').attr('disabled', null);
             d3.select('#remove-points-btn').attr('disabled', null);
+            d3.select('#toggle-mean-btn').attr('disabled', null);
+            d3.select('#toggle-eval-btn').attr('disabled', null);
             if (REMOVE_POINTS === true) {
                 REMOVE_POINTS = false;
                 $('#remove-points-btn').click();
@@ -297,6 +302,28 @@ $('#toggle-labels-btn').click(function (event) {
         d3.select('#toggle-label-icon').attr('class', 'fa fa-toggle-on');
     }
     LABEL_VISIBILITY = !LABEL_VISIBILITY;
+});
+
+$('#toggle-eval-btn').click(function (event) {
+    if (EVAL_VISIBILITY === true) {
+        d3.selectAll('.group-3').attr('hidden', true);
+        d3.select('#toggle-eval-icon').attr('class', 'fa fa-toggle-on fa-rotate-180');
+    } else {
+        d3.selectAll('.group-3').attr('hidden', null);
+        d3.selectAll('#toggle-eval-icon').attr('class', 'fa fa-toggle-on');
+    }
+    EVAL_VISIBILITY = !EVAL_VISIBILITY;
+});
+
+$('#toggle-mean-btn').click(function (event) {
+    if (MEAN_VISIBILITY === true) {
+        d3.selectAll('#mean-line').attr('hidden', true);
+        d3.select('#toggle-mean-icon').attr('class', 'fa fa-toggle-on fa-rotate-180');
+    } else {
+        d3.selectAll('#mean-line').attr('hidden', null);
+        d3.selectAll('#toggle-mean-icon').attr('class', 'fa fa-toggle-on');
+    }
+    MEAN_VISIBILITY = !MEAN_VISIBILITY;
 });
 
 // Functionality for the 'Remove Points' button

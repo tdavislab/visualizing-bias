@@ -1,6 +1,5 @@
 import pickle
 import numpy as np
-from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
 import networkx as nx
 from tqdm import tqdm
@@ -56,22 +55,6 @@ class Embedding:
         return self.vectors[indices]
 
 
-def new_embedding_from_vectors(curr_embedding, word_vectors):
-    new_embedding = Embedding(None)
-    new_embedding.words = curr_embedding.words
-    new_embedding.vectors = word_vectors
-    return new_embedding
-
-
-def dim_reduction(embedding, word_list, method='PCA'):
-    vectors = embedding.get_many(word_list)
-
-    # if method == 'PCA':
-    vec_low_dim = PCA(n_components=2).fit_transform(vectors)
-
-    return vec_low_dim
-
-
 def two_means(embedding, word_list1, word_list2):
     vec1, vec2 = embedding.get_many(word_list1), embedding.get_many(word_list2)
     vec1_mean, vec2_mean = np.mean(vec1, axis=0), np.mean(vec2, axis=0)
@@ -101,6 +84,7 @@ def debias_linear_projection(embedding, bias_vec):
 
 if __name__ == '__main__':
     # dirty hack to make sure the object can be unpickled in the flask app
+    # noinspection PyUnresolvedReferences
     from vectors import Embedding
 
     emb = Embedding('data/glove.6B.50d.txt')
