@@ -51,6 +51,10 @@ svg {
     /*perspective: 1000px;*/
 }
 
+.translucent {
+    opacity: 0.2;
+}
+
 @keyframes shake {
     10%, 90% {
         transform: translate3d(-1px, 0, 0);

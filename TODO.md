@@ -9,10 +9,11 @@
 - [ ] OSCaR - Orthogonal Subspace Correction and Rectification
 
 ### UI changes
-- [ ] Remove points without removing the visualization of that word
+- [x] Dim other points on hover
 - [x] Align axis ranges for PCA and Two-means
 - [x] Remove PCA picture
 - [x] Toggle mean-line and purple points
+- [ ] Remove points without removing the visualization of that word
 - [ ] 3D PCA, future stuff
 - [ ] Make the mean direction always horizontal and mean 1 on right and mean 2 on left
 
