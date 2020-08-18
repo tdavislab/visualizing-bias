@@ -146,7 +146,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
     let width = parent_svg.node().width.baseVal.value - margin.left - margin.right;
     let height = parent_svg.node().height.baseVal.value - margin.top - margin.bottom;
-    logging(response);
+    // logging(response);
     let data = process_response(response, eval, debiased);
 
     if (mean) {
@@ -155,7 +155,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         data.push({'position': mean1, 'label': 'mean1', 'group': 1});
         data.push({'position': mean2, 'label': 'mean2', 'group': 2});
     }
-    logging(data);
+    // logging(data);
 
     // Append group to the svg
     let svg = parent_svg.append('g')
@@ -294,13 +294,12 @@ $('#seedword-form-submit').click(function (event) {
     let seedwords1 = $('#seedword-text-1').val();
     let seedwords2 = $('#seedword-text-2').val();
     let evalwords = $('#evaluation-list').val();
-    console.log(seedwords1, seedwords2);
+
     $.ajax({
         type: 'POST',
         url: '/seedwords',
         data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords},
         success: function (response) {
-            logging(response);
 
             let predebiased_svg = d3.select('#pre-debiased-svg');
             draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
