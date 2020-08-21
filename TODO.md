@@ -1,6 +1,6 @@
 # TODOs
 
-# Bug fixes
+### Bug fixes
 - [x] Change debiasing from `inplace` to `copy`
 - [x] PCA on A + B only, then apply the projection matrix on the third.
 

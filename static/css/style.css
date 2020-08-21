@@ -59,6 +59,28 @@ svg {
     overflow: visible;
 }
 
+.btn-separator:after {
+    content: '';
+    display: block;
+    float: left;
+    background: #fffcfc;
+    margin: 0 1px;
+    /*height: 34px;*/
+    width: 1px;
+}
+
+.axis {
+    color: #6c757d;
+}
+
+.axis line {
+    stroke: #6c757d;
+}
+
+.axis path {
+    stroke: #6c757d;
+}
+
 @keyframes shake {
     10%, 90% {
         transform: translate3d(-1px, 0, 0);

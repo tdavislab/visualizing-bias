@@ -107,8 +107,8 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     let y = d3.scaleLinear().range([height, 0]);
     // x.domain(d3.extent(data, d => d.position[0])).nice();
     // y.domain(d3.extent(data, d => d.position[1])).nice();
-    x.domain([response.bounds.xmin, response.bounds.xmax]).nice();
-    y.domain([response.bounds.ymin, response.bounds.ymax]).nice();
+    x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
+    y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
     // Set color-scale
     let color = d3.scaleOrdinal(d3.schemeDark2);
 
@@ -175,16 +175,16 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     // Add the X Axis
     svg.append('g')
         .attr('transform', 'translate(0,' + height + ')')
+        .classed('axis', true)
         .call(d3.axisBottom(x));
 
     // Add the Y Axis
     svg.append('g')
-        // .attr('transform', 'translate(' + margin.left + ',0)')
+        .classed('axis', true)
         .call(d3.axisLeft(y));
 
-
-    d3.select('#animate-btn').on('click', function () {
-        new_data = process_response(response, eval, false);
+    d3.select('#play-control-play').on('click', function () {
+        let new_data = process_response(response, eval, false);
         logging(new_data);
         logging(svg.selectAll('.datapoint-group'))
         svg.selectAll('.datapoint-group').data(new_data)
@@ -197,16 +197,6 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
                     .duration(5000)
                     .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
             })
-
-        // svg.exit().remove();
-
-        // svg.selectAll('.datapoint-group').data(process_response(response, eval, true))
-        //     .transition()
-        //     .duration(500)
-        //     .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
-        //
-        // svg.exit().remove();
-
     })
 }
 
@@ -268,6 +258,9 @@ $('#seedword-form-submit').click(function () {
         success: function (response) {
             let predebiased_svg = d3.select('#pre-debiased-svg');
             draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
+
+            let animation_svg = d3.select('#animation-svg');
+            draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
 
             let postdebiased_svg = d3.select('#post-debiased-svg');
             draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
