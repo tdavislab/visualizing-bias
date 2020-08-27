@@ -19,10 +19,10 @@
   <div id="preloaded-examples" class="row m-3">
 
     <div class="dropdown w-100">
-      <button class="btn dropdown-toggle w-100 borders text-muted bg-light" type="button" id="dropdownMenuButton" data-toggle="dropdown">
+      <button class="btn dropdown-toggle w-100 borders bg-dark text-light" type="button" id="example-selection-button" data-toggle="dropdown">
         Choose an example or provide seedword sets below
       </button>
-      <div class="dropdown-menu w-100">
+      <div id="example-dropdown" class="dropdown-menu w-100">
         <h6 class="dropdown-header">Example class 1</h6>
         <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
         <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
@@ -35,6 +35,30 @@
     </div>
   </div>
 
+  <div id="algorithm-selection" class="row m-3">
+    <div class="dropdown w-75 pr-1">
+      <button class="btn dropdown-toggle w-100 borders bg-dark text-light" type="button" id="algorithm-selection-button" data-toggle="dropdown">
+        Select Algorithm
+      </button>
+      <div id="algorithm-dropdown" class="dropdown-menu w-100">
+        <h6 class="dropdown-header">Select Algorithm</h6>
+        <a class="dropdown-item active" href="#">Linear debiasing</a>
+        <a class="dropdown-item" href="#">Hard debiasing</a>
+        <a class="dropdown-item" href="#">OSCaR</a>
+        <a class="dropdown-item">Iterative Null Space Projection</a>
+      </div>
+    </div>
+    <div class="dropdown w-25">
+      <button class="btn dropdown-toggle w-100 borders bg-dark text-light" type="button" id="subspace-selection-button" data-toggle="dropdown">
+        Select subspace method
+      </button>
+      <div id="subspace-dropdown" class="dropdown-menu w-100">
+        <h6 class="dropdown-header">Select subspace method</h6>
+        <a class="dropdown-item active" href="#">Two means</a>
+      </div>
+    </div>
+  </div>
+
   <div id="top-bar" class="row m-3">
     <div class="input-group">
       <input id="seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
@@ -42,20 +66,6 @@
       <input id="evaluation-list" class="form-control input-group-text" type="text" placeholder="Add evaluation set...">
       <div class="input-group-append">
         <button id="seedword-form-submit" class="btn btn-outline-success my-2 my-sm-0">Run</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="algorithm-selection" class="row m-3">
-    <div class="dropdown w-100">
-      <button class="btn dropdown-toggle w-100 borders text-muted bg-light" type="button" id="dropdownMenuButton" data-toggle="dropdown">
-        Select Algorithm
-      </button>
-      <div class="dropdown-menu w-100">
-        <a class="dropdown-item" href="#">Linear debiasing</a>
-        <a class="dropdown-item" href="#">Hard debiasing</a>
-        <a class="dropdown-item" href="#">OSCaR</a>
-        <a class="dropdown-item">Iterative Null Space Projection</a>
       </div>
     </div>
   </div>

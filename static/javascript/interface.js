@@ -200,6 +200,19 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     })
 }
 
+// Functionality for the dropdown-menus
+$('#example-dropdown a').click(function (e) {
+    $('#example-selection-button').text(this.innerHTML);
+});
+
+$('#algorithm-dropdown a').click(function (e) {
+    $('#algorithm-selection-button').text('Algorithm: ' + this.innerHTML);
+});
+
+$('#subspace-dropdown a').click(function (e) {
+    $('#subspace-selection-button').text('Subspace method: ' + this.innerHTML);
+});
+
 // Functionality for various toggle buttons
 $('#toggle-labels-btn').click(function () {
     if (LABEL_VISIBILITY === true) {
