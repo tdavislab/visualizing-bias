@@ -2,13 +2,17 @@
 // lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna
 
 // Fill the textboxes while testing
-let TESTING = true;
+let TESTING = false;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
 let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
+let ANIMSTEP_COUNTER = 0;
+
+// Set global color-scale
+let color = d3.scaleOrdinal(d3.schemeDark2);
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -86,7 +90,6 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
     let width = parent_svg.node().width.baseVal.value - margin.left - margin.right;
     let height = parent_svg.node().height.baseVal.value - margin.top - margin.bottom;
-    // logging(response);
     let data = process_response(response, eval, debiased);
 
     if (mean) {
@@ -95,7 +98,6 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         data.push({'position': mean1, 'label': 'mean1', 'group': 1});
         data.push({'position': mean2, 'label': 'mean2', 'group': 2});
     }
-    // logging(data);
 
     // Append group to the svg
     let svg = parent_svg.append('g')
@@ -109,8 +111,6 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     // y.domain(d3.extent(data, d => d.position[1])).nice();
     x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
     y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
-    // Set color-scale
-    let color = d3.scaleOrdinal(d3.schemeDark2);
 
     // If two-means then draw the line
     if (mean) {
@@ -183,20 +183,140 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         .classed('axis', true)
         .call(d3.axisLeft(y));
 
-    d3.select('#play-control-play').on('click', function () {
-        let new_data = process_response(response, eval, false);
-        logging(new_data);
-        logging(svg.selectAll('.datapoint-group'))
-        svg.selectAll('.datapoint-group').data(new_data)
-            .transition()
-            .duration(5)
-            .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')')
-            .on('end', function () {
-                svg.selectAll('.datapoint-group').data(process_response(response, eval, true))
-                    .transition()
-                    .duration(5000)
-                    .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
-            })
+    // d3.select('#play-control-play').on('click', function () {
+    //     let new_data = process_response(response, eval, false);
+    //
+    //     svg.selectAll('.datapoint-group').data(new_data)
+    //         .transition()
+    //         .duration(5)
+    //         .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')')
+    //         .on('end', function () {
+    //             svg.selectAll('.datapoint-group').data(process_response(response, eval, true))
+    //                 .transition()
+    //                 .duration(5000)
+    //                 .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+    //         })
+    // })
+}
+
+function draw_axes(svg, width, height, x, y) {
+    // Add the X Axis
+    svg.append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .classed('axis', true)
+        .call(d3.axisBottom(x));
+
+    // Add the Y Axis
+    svg.append('g')
+        .classed('axis', true)
+        .call(d3.axisLeft(y));
+}
+
+function draw_scatter(svg, point_data, x, y) {
+    // Add the scatterplot
+    logging(svg);
+    let datapoint_group = svg.selectAll('g')
+        .data(point_data)
+        .enter()
+        .append('g')
+        .attr('class', d => 'datapoint-group group-' + d.group)
+        .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+
+    // Class label
+    datapoint_group.append('foreignObject')
+        .attr('x', 15)
+        .attr('y', -10)
+        .attr('width', '1px')
+        .attr('height', '1px')
+        .attr('class', 'fobj')
+        .append('xhtml:div')
+        .html(d => d.label)
+
+    // Remove buttons
+    datapoint_group.append('text')
+        .attr('class', 'fa cross-button')
+        .attr('x', 10)
+        .attr('y', -10)
+        .attr('visibility', 'hidden')
+        .on('click', remove_point)
+        .text('\uf057');
+
+    datapoint_group.append('circle')
+        .attr('r', 8)
+        .attr('fill', d => color(d.group))
+        .attr('stroke', 'black')
+        .attr('stroke-width', d => check_if_mean(d) * 3);
+}
+
+function add_groups(data) {
+    let grouped_data = [];
+
+    for (let i = 0; i < data['vectors1'].length; i++) {
+        grouped_data.push({'position': data['vectors1'][i], 'label': data['words1'][i], 'group': 1});
+    }
+
+    for (let i = 0; i < data['vectors2'].length; i++) {
+        grouped_data.push({'position': data['vectors2'][i], 'label': data['words2'][i], 'group': 2});
+    }
+
+    for (let i = 0; i < data['evalvecs'].length; i++) {
+        grouped_data.push({'position': data['evalvecs'][i], 'label': data['evalwords'][i], 'group': 3});
+    }
+
+    return grouped_data;
+}
+
+function setup_animation(anim_svg, response, identifier) {
+    logging('setting up stuff');
+    logging(response);
+    let margin = {top: 20, right: 20, bottom: 20, left: 40};
+    let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
+    let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
+
+    // set the ranges
+    let x = d3.scaleLinear().range([0, width - 30]);
+    let y = d3.scaleLinear().range([height, 0]);
+    x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
+    y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
+
+    let svg = anim_svg.append('g')
+        .attr('id', identifier + 'group')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    let data = add_groups(response.anim_steps[0]);
+    logging('Chaku', data);
+    draw_scatter(svg, data, x, y);
+    draw_axes(svg, width, height, x, y);
+
+    $('#play-control-sb').on('click', function (e) {
+        // if already at 0, do nothing
+        if (ANIMSTEP_COUNTER === 0) {
+            logging('Already at first step');
+        } else {
+            ANIMSTEP_COUNTER -= 1;
+            data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
+            svg.selectAll('g')
+                .data(data)
+                .transition()
+                .duration(1000)
+                .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+            $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+        }
+    })
+
+    $('#play-control-sf').on('click', function (e) {
+        if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
+            logging('Already at last step');
+        } else {
+            ANIMSTEP_COUNTER += 1;
+            data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
+            svg.selectAll('g')
+                .data(data)
+                .transition()
+                .duration(1000)
+                .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+            $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+        }
     })
 }
 
@@ -269,11 +389,14 @@ $('#seedword-form-submit').click(function () {
         url: '/seedwords',
         data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords},
         success: function (response) {
+            // logging(response);
+
             let predebiased_svg = d3.select('#pre-debiased-svg');
             draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
 
             let animation_svg = d3.select('#animation-svg');
-            draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
+            // draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
+            setup_animation(animation_svg, response, 'animation')
 
             let postdebiased_svg = d3.select('#post-debiased-svg');
             draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
@@ -305,5 +428,7 @@ if (TESTING) {
     $('#seedword-text-1').val('john, william, george, liam, andrew, michael, louis, tony, scott, jackson');
     $('#seedword-text-2').val('mary, victoria, carolina, maria, anne, kelly, marie, anna, sarah, jane');
     $('#evaluation-list').val('engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor');
+    $('#algorithm-dropdown').children()[1].click();
+    $('#subspace-dropdown').children()[1].click();
     $('#seedword-form-submit').click();
 }
