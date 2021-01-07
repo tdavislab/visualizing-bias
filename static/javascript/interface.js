@@ -2,7 +2,7 @@
 // lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna
 
 // Fill the textboxes while testing
-let TESTING = false;
+let TESTING = true;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
@@ -378,16 +378,27 @@ $('#remove-points-btn').click(function () {
     REMOVE_POINTS = !REMOVE_POINTS;
 });
 
+function svg_cleanup() {
+    $('#pre-debiased-svg').empty();
+    $('#animation-svg').empty();
+    $('#post-debiased-svg').empty();
+}
+
 // Functionality for the 'Run' button
 $('#seedword-form-submit').click(function () {
+    // Perform cleanup
+    svg_cleanup();
+    ANIMSTEP_COUNTER = 0;
+
     let seedwords1 = $('#seedword-text-1').val();
     let seedwords2 = $('#seedword-text-2').val();
     let evalwords = $('#evaluation-list').val();
+    let method = $('#algorithm-selection-button').text();
 
     $.ajax({
         type: 'POST',
         url: '/seedwords',
-        data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords},
+        data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, method: method},
         success: function (response) {
             // logging(response);
 

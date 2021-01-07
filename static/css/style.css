@@ -79,6 +79,7 @@ svg {
 
 .axis path {
     stroke: #6c757d;
+    padding-right: 1em;
 }
 
 @keyframes shake {
@@ -98,3 +99,4 @@ svg {
         transform: translate3d(4px, 0, 0);
     }
 }
+

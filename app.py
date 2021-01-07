@@ -10,6 +10,12 @@ app.debiased_embedding = Embedding(None)
 app.debiased_embedding.words = app.base_embedding.words.copy()
 
 
+def reload_embeddings():
+    app.base_embedding = load('data/glove.6B.50d.pkl')
+    app.debiased_embedding = Embedding(None)
+    app.debiased_embedding.words = app.base_embedding.words.copy()
+
+
 @app.route('/')
 def index():
     return render_template('interface.html')
@@ -17,15 +23,22 @@ def index():
 
 @app.route('/seedwords', methods=['POST'])
 def get_seedwords():
-    seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], \
-                                        request.values['evalwords']
+    reload_embeddings()
+    seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
+    method = request.values['method']
+
     seedwords1 = utils.process_seedwords(seedwords1)
     seedwords2 = utils.process_seedwords(seedwords2)
     evalwords = utils.process_seedwords(evalwords)
 
     # Perform debiasing
-    _, _, bias_direction = two_means(app.base_embedding, seedwords1, seedwords2)
-    app.debiased_embedding.vectors = debias_linear_projection(app.base_embedding, bias_direction)
+    print(method)
+    if method == 'Algorithm: Linear debiasing':
+        _, _, bias_direction = two_means(app.base_embedding, seedwords1, seedwords2)
+        app.debiased_embedding.vectors = debias_linear_projection(app.base_embedding, bias_direction)
+    elif method == 'Algorithm: Hard debiasing':
+        bias_direction = hard_debias_get_bias_direction(app.base_embedding, seedwords1, seedwords2)
+        hard_debias(app.base_embedding, app.debiased_embedding, bias_direction, evalwords)
 
     projection_method = 'PCA'
 
@@ -66,6 +79,11 @@ def get_seedwords():
          'explanation': 'Projecting the points in the new debiased embedding.'
          }
     ]
+
+    # Payload consists of:
+    # 1. Initial vector embeddings
+    # 2. Debiased vector embeddings
+    # 3. Each step of the debiasing process, which includes the vector projection at that step, seed/eval words and explanation
 
     data_payload = {'vectors1': utils.project_to_2d(predebiased_projector, app.base_embedding, seedwords1),
                     'vectors2': utils.project_to_2d(predebiased_projector, app.base_embedding, seedwords2),

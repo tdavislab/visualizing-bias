@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
 import networkx as nx
 from tqdm import tqdm
@@ -33,6 +34,15 @@ def load(loadpath):
         return pickle.load(loadfile)
 
 
+def knn_graph(embedding, word_list):
+    vectors = embedding.get_many(word_list)
+    adjacency_matrix = kneighbors_graph(vectors, n_neighbors=3)
+    graph = nx.from_scipy_sparse_matrix(adjacency_matrix)
+    mapping = dict([(x, word_list[x]) for x in range(len(word_list))])
+    graph = nx.relabel.relabel_nodes(graph, mapping)
+    return nx.readwrite.json_graph.node_link_data(graph)
+
+
 class Embedding:
     def __init__(self, path):
         if path is None:
@@ -63,15 +73,6 @@ def two_means(embedding, word_list1, word_list2):
     return vec1_mean, vec2_mean, bias_direction
 
 
-def knn_graph(embedding, word_list):
-    vectors = embedding.get_many(word_list)
-    adjacency_matrix = kneighbors_graph(vectors, n_neighbors=3)
-    graph = nx.from_scipy_sparse_matrix(adjacency_matrix)
-    mapping = dict([(x, word_list[x]) for x in range(len(word_list))])
-    graph = nx.relabel.relabel_nodes(graph, mapping)
-    return nx.readwrite.json_graph.node_link_data(graph)
-
-
 def compute_weat_score(embedding, X, Y, A, B):
     X_vecs, Y_vecs, A_vecs, B_vecs = [embedding.get_many(wordlist) for wordlist in [X, Y, A, B]]
     return weat_score(X_vecs, Y_vecs, A_vecs, B_vecs)
@@ -80,6 +81,36 @@ def compute_weat_score(embedding, X, Y, A, B):
 def debias_linear_projection(embedding, bias_vec):
     debiased = embedding.vectors - embedding.vectors.dot(bias_vec.reshape(-1, 1)) * bias_vec
     return debiased
+
+
+def hard_debias_get_bias_direction(embedding: Embedding, word_list1: list, word_list2: list, n_components: int = 10):
+    matrix = []
+    for w1, w2 in zip(word_list1, word_list2):
+        center = (embedding.get(w1) + embedding.get(w2)) / 2
+        matrix.append(embedding.get(w1) - center)
+        matrix.append(embedding.get(w2) - center)
+
+    matrix = np.array(matrix)
+    pca = PCA(n_components=n_components)
+    pca.fit(matrix)
+    return pca.components_[0]
+
+
+def remove_component(u, v):
+    return u - v * u.dot(v) / v.dot(v)
+
+
+def hard_debias(base_embedding: Embedding, debiased_embedding: Embedding, bias_vec: np.ndarray, eval_words: list):
+    eval_wordset = set(eval_words)
+    debiased_embedding.vectors = []
+    for i, word in enumerate(base_embedding.words):
+        # remove bias direction from evaluation words
+        if word in eval_wordset:
+            debiased_embedding.vectors.append(remove_component(base_embedding.vectors[i], bias_vec))
+        else:
+            debiased_embedding.vectors.append(base_embedding.vectors[i])
+
+    debiased_embedding.vectors = np.array(debiased_embedding.vectors)
 
 
 if __name__ == '__main__':
