@@ -25,14 +25,13 @@ def index():
 def get_seedwords():
     reload_embeddings()
     seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
-    method = request.values['method']
+    method, subspace_method = request.values['algorithm'], request.values['subspace_method']
 
     seedwords1 = utils.process_seedwords(seedwords1)
     seedwords2 = utils.process_seedwords(seedwords2)
     evalwords = utils.process_seedwords(evalwords)
 
     # Perform debiasing
-    print(method)
     if method == 'Algorithm: Linear debiasing':
         _, _, bias_direction = two_means(app.base_embedding, seedwords1, seedwords2)
         app.debiased_embedding.vectors = debias_linear_projection(app.base_embedding, bias_direction)

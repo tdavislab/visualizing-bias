@@ -339,9 +339,15 @@ $('#subspace-dropdown a').click(function (e) {
         let subspace_method = this.innerHTML;
         $('#subspace-selection-button').text('Subspace method: ' + subspace_method);
 
-        // if (subspace_method === 'PCA' || subspace_method === 'PCA-paired') {
-        //     set_col_layout()
-        // }
+        if (subspace_method === 'PCA' || subspace_method === 'PCA-paired') {
+            $('#seedword-text-2').hide();
+        }
+        else if (subspace_method === 'Two means' || subspace_method === 'Classification') {
+            $('#seedword-text-2').show();
+        }
+        else {
+            console.log('Incorrect subspace method');
+        }
     } catch (e) {
         console.log(e);
     }
@@ -407,12 +413,14 @@ $('#seedword-form-submit').click(function () {
         let seedwords1 = $('#seedword-text-1').val();
         let seedwords2 = $('#seedword-text-2').val();
         let evalwords = $('#evaluation-list').val();
-        let method = $('#algorithm-selection-button').text();
+        let algorithm = $('#algorithm-selection-button').text();
+        let subspace_method = $('#subspace-selection-button').text();
 
         $.ajax({
             type: 'POST',
             url: '/seedwords',
-            data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, method: method},
+            data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords,
+                algorithm: algorithm, subspace_method: subspace_method},
             success: function (response) {
                 // logging(response);
 
