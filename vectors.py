@@ -7,6 +7,7 @@ from tqdm import tqdm
 from weat import weat_score
 
 
+
 def read_embeddings(path, limit=100000):
     words = {}
     vectors = []

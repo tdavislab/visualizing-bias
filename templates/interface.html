@@ -14,59 +14,64 @@
   <h1 class="navbar-brand">Visualizing Word Vector Biases</h1>
 </nav>
 
-<div class="container-fluid">
+<div class="container-fluid p-4">
 
-  <div id="preloaded-examples" class="row m-3">
+  <div id="preloaded-examples" class="dropdown">
 
-    <div class="dropdown w-100">
-      <button class="btn dropdown-toggle w-100 borders bg-dark text-light" type="button" id="example-selection-button" data-toggle="dropdown">
-        Choose an example or provide seedword sets below
-      </button>
-      <div id="example-dropdown" class="dropdown-menu w-100">
-        <h6 class="dropdown-header">Example class 1</h6>
-        <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
-        <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
-        <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
-        <h6 class="dropdown-header">Example class 2</h6>
-        <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
-        <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
-        <a class="dropdown-item" href="#">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
-      </div>
+    <button class="col-sm-12 btn dropdown-toggle borders bg-dark text-light" type="button" id="example-selection-button" data-toggle="dropdown">
+      Choose an example or provide seedword sets below
+    </button>
+    <div id="example-dropdown" class="dropdown-menu col-sm-12">
+      <h6 class="dropdown-header">Example class 1</h6>
+      <a class="dropdown-item">Choose an example or provide seedword sets below </a>
+      <a class="dropdown-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
+      <a class="dropdown-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
+      <a class="dropdown-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
+      <h6 class="dropdown-header">Example class 2</h6>
+      <a class="dropdown-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
+      <a class="dropdown-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
+      <a class="dropdown-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</a>
     </div>
   </div>
 
-  <div id="algorithm-selection" class="row m-3">
-    <div class="dropdown w-75 pr-1">
-      <button class="btn dropdown-toggle w-100 borders bg-dark text-light" type="button" id="algorithm-selection-button" data-toggle="dropdown">
-        Select Algorithm
-      </button>
-      <div id="algorithm-dropdown" class="dropdown-menu w-100">
-        <h6 class="dropdown-header">Select Algorithm</h6>
-        <a class="dropdown-item active" href="#">Linear debiasing</a>
-        <a class="dropdown-item" href="#">Hard debiasing</a>
-        <a class="dropdown-item" href="#">OSCaR</a>
-        <a class="dropdown-item">Iterative Null Space Projection</a>
-      </div>
+  <div id="algorithm-selection" class="dropdown mt-3">
+    <button class="col-sm-12 btn dropdown-toggle borders bg-dark text-light" type="button" id="algorithm-selection-button" data-toggle="dropdown">
+      Select Algorithm
+    </button>
+    <div id="algorithm-dropdown" class="dropdown-menu col-sm-12">
+      <h6 class="dropdown-header">Select Algorithm</h6>
+      <a class="dropdown-item active">Linear debiasing</a>
+      <a class="dropdown-item">Hard debiasing</a>
+      <a class="dropdown-item">OSCaR</a>
+      <a class="dropdown-item">Iterative Null Space Projection</a>
     </div>
-    <div class="dropdown w-25">
-      <button class="btn dropdown-toggle w-100 borders bg-dark text-light" type="button" id="subspace-selection-button" data-toggle="dropdown">
+  </div>
+
+  <div id="subspace-controls" class="row mt-3">
+    <div id="subspace-dropdown" class="col-4 dropdown">
+      <button class="w-100 btn dropdown-toggle borders bg-dark text-light" type="button" id="subspace-selection-button" data-toggle="dropdown">
         Select subspace method
       </button>
-      <div id="subspace-dropdown" class="dropdown-menu w-100">
+      <div id="subspace-dropdown-items" class="w-100 dropdown-menu">
         <h6 class="dropdown-header">Select subspace method</h6>
-        <a class="dropdown-item active" href="#">Two means</a>
+        <a class="dropdown-item active">Two means</a>
+        <a class="dropdown-item">PCA</a>
+        <a class="dropdown-item">PCA-paired</a>
+        <a class="dropdown-item">Classification</a>
+      </div>
+    </div>
+    <div id="top-bar" class="col-8">
+      <div id="input-two-col" class="input-group">
+        <input id="seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
+        <input id="seedword-text-2" class="form-control input-group-text" type="text" placeholder="Add seed set 2...">
       </div>
     </div>
   </div>
 
-  <div id="top-bar" class="row m-3">
-    <div class="input-group">
-      <input id="seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
-      <input id="seedword-text-2" class="form-control input-group-text" type="text" placeholder="Add seed set 2...">
-      <input id="evaluation-list" class="form-control input-group-text" type="text" placeholder="Add evaluation set...">
-      <div class="input-group-append">
-        <button id="seedword-form-submit" class="btn btn-outline-success my-2 my-sm-0">Run</button>
-      </div>
+  <div id="eval-and-run" class="input-group">
+    <input id="evaluation-list" class="mt-3 form-control input-group-text" type="text" placeholder="Add evaluation set...">
+    <div class="input-group-append">
+      <button id="seedword-form-submit" class="mt-3 btn btn-outline-success">Run</button>
     </div>
   </div>
 
@@ -78,8 +83,8 @@
         Debiasing Method
       </button>
       <div class="dropdown-menu">
-        <a class="dropdown-item" href="#">Linear Debiasing</a>
-        <a class="dropdown-item" href="#">OSCaR</a>
+        <a class="dropdown-item">Linear Debiasing</a>
+        <a class="dropdown-item">OSCaR</a>
       </div>
     </div>
   </div>

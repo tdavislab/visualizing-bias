@@ -2,6 +2,7 @@
 // lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna
 
 // Fill the textboxes while testing
+// let TESTING = false;
 let TESTING = true;
 
 // Initialize global variables
@@ -267,57 +268,61 @@ function add_groups(data) {
 }
 
 function setup_animation(anim_svg, response, identifier) {
-    logging('setting up stuff');
-    logging(response);
-    let margin = {top: 20, right: 20, bottom: 20, left: 40};
-    let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
-    let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
+    try {
+        logging('setting up stuff');
+        logging(response);
+        let margin = {top: 20, right: 20, bottom: 20, left: 40};
+        let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
+        let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
 
-    // set the ranges
-    let x = d3.scaleLinear().range([0, width - 30]);
-    let y = d3.scaleLinear().range([height, 0]);
-    x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
-    y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
+        // set the ranges
+        let x = d3.scaleLinear().range([0, width - 30]);
+        let y = d3.scaleLinear().range([height, 0]);
+        x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
+        y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
 
-    let svg = anim_svg.append('g')
-        .attr('id', identifier + 'group')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        let svg = anim_svg.append('g')
+            .attr('id', identifier + 'group')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-    let data = add_groups(response.anim_steps[0]);
-    logging('Chaku', data);
-    draw_scatter(svg, data, x, y);
-    draw_axes(svg, width, height, x, y);
+        let data = add_groups(response.anim_steps[0]);
+        logging('Chaku', data);
+        draw_scatter(svg, data, x, y);
+        draw_axes(svg, width, height, x, y);
 
-    $('#play-control-sb').on('click', function (e) {
-        // if already at 0, do nothing
-        if (ANIMSTEP_COUNTER === 0) {
-            logging('Already at first step');
-        } else {
-            ANIMSTEP_COUNTER -= 1;
-            data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
-            svg.selectAll('g')
-                .data(data)
-                .transition()
-                .duration(1000)
-                .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
-            $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
-        }
-    })
+        $('#play-control-sb').on('click', function (e) {
+            // if already at 0, do nothing
+            if (ANIMSTEP_COUNTER === 0) {
+                logging('Already at first step');
+            } else {
+                ANIMSTEP_COUNTER -= 1;
+                data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
+                svg.selectAll('g')
+                    .data(data)
+                    .transition()
+                    .duration(1000)
+                    .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+                $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+            }
+        })
 
-    $('#play-control-sf').on('click', function (e) {
-        if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
-            logging('Already at last step');
-        } else {
-            ANIMSTEP_COUNTER += 1;
-            data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
-            svg.selectAll('g')
-                .data(data)
-                .transition()
-                .duration(1000)
-                .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
-            $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
-        }
-    })
+        $('#play-control-sf').on('click', function (e) {
+            if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
+                logging('Already at last step');
+            } else {
+                ANIMSTEP_COUNTER += 1;
+                data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
+                svg.selectAll('g')
+                    .data(data)
+                    .transition()
+                    .duration(1000)
+                    .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+                $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+            }
+        })
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 // Functionality for the dropdown-menus
@@ -330,7 +335,16 @@ $('#algorithm-dropdown a').click(function (e) {
 });
 
 $('#subspace-dropdown a').click(function (e) {
-    $('#subspace-selection-button').text('Subspace method: ' + this.innerHTML);
+    try {
+        let subspace_method = this.innerHTML;
+        $('#subspace-selection-button').text('Subspace method: ' + subspace_method);
+
+        // if (subspace_method === 'PCA' || subspace_method === 'PCA-paired') {
+        //     set_col_layout()
+        // }
+    } catch (e) {
+        console.log(e);
+    }
 });
 
 // Functionality for various toggle buttons
@@ -386,60 +400,66 @@ function svg_cleanup() {
 
 // Functionality for the 'Run' button
 $('#seedword-form-submit').click(function () {
-    // Perform cleanup
-    svg_cleanup();
-    ANIMSTEP_COUNTER = 0;
+    try { // Perform cleanup
+        svg_cleanup();
+        ANIMSTEP_COUNTER = 0;
 
-    let seedwords1 = $('#seedword-text-1').val();
-    let seedwords2 = $('#seedword-text-2').val();
-    let evalwords = $('#evaluation-list').val();
-    let method = $('#algorithm-selection-button').text();
+        let seedwords1 = $('#seedword-text-1').val();
+        let seedwords2 = $('#seedword-text-2').val();
+        let evalwords = $('#evaluation-list').val();
+        let method = $('#algorithm-selection-button').text();
 
-    $.ajax({
-        type: 'POST',
-        url: '/seedwords',
-        data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, method: method},
-        success: function (response) {
-            // logging(response);
+        $.ajax({
+            type: 'POST',
+            url: '/seedwords',
+            data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, method: method},
+            success: function (response) {
+                // logging(response);
 
-            let predebiased_svg = d3.select('#pre-debiased-svg');
-            draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
+                let predebiased_svg = d3.select('#pre-debiased-svg');
+                draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
 
-            let animation_svg = d3.select('#animation-svg');
-            // draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
-            setup_animation(animation_svg, response, 'animation')
+                let animation_svg = d3.select('#animation-svg');
+                // draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
+                setup_animation(animation_svg, response, 'animation')
 
-            let postdebiased_svg = d3.select('#post-debiased-svg');
-            draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
+                let postdebiased_svg = d3.select('#post-debiased-svg');
+                draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
 
-            $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
-            $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
+                $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
+                $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
 
-            // enable toolbar buttons
-            d3.select('#toggle-labels-btn').attr('disabled', null);
-            d3.select('#remove-points-btn').attr('disabled', null);
-            d3.select('#toggle-mean-btn').attr('disabled', null);
-            d3.select('#toggle-eval-btn').attr('disabled', null);
-            if (REMOVE_POINTS === true) {
-                REMOVE_POINTS = false;
-                $('#remove-points-btn').click();
+                // enable toolbar buttons
+                d3.select('#toggle-labels-btn').attr('disabled', null);
+                d3.select('#remove-points-btn').attr('disabled', null);
+                d3.select('#toggle-mean-btn').attr('disabled', null);
+                d3.select('#toggle-eval-btn').attr('disabled', null);
+                if (REMOVE_POINTS === true) {
+                    REMOVE_POINTS = false;
+                    $('#remove-points-btn').click();
+                }
+
+                if (LABEL_VISIBILITY === false) {
+                    LABEL_VISIBILITY = true;
+                    $('#toggle-labels-btn').click();
+                }
             }
-
-            if (LABEL_VISIBILITY === false) {
-                LABEL_VISIBILITY = true;
-                $('#toggle-labels-btn').click();
-            }
-        }
-    });
+        });
+    } catch (e) {
+        console.log(e);
+    }
 });
 
 if (TESTING) {
-    // $('#seedword-text-1').val('mike, lewis, noah, james, lucas, william, jacob, daniel, henry, matthew');
-    // $('#seedword-text-2').val('lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna');
-    $('#seedword-text-1').val('john, william, george, liam, andrew, michael, louis, tony, scott, jackson');
-    $('#seedword-text-2').val('mary, victoria, carolina, maria, anne, kelly, marie, anna, sarah, jane');
-    $('#evaluation-list').val('engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor');
-    $('#algorithm-dropdown').children()[1].click();
-    $('#subspace-dropdown').children()[1].click();
-    $('#seedword-form-submit').click();
+    try { // $('#seedword-text-1').val('mike, lewis, noah, james, lucas, william, jacob, daniel, henry, matthew');
+        // $('#seedword-text-2').val('lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna');
+        $('#seedword-text-1').val('john, william, george, liam, andrew, michael, louis, tony, scott, jackson');
+        $('#seedword-text-2').val('mary, victoria, carolina, maria, anne, kelly, marie, anna, sarah, jane');
+        $('#evaluation-list').val('engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor');
+        $('#algorithm-dropdown').children()[1].click();
+        $('#subspace-dropdown-items').children()[1].click();
+        $('#seedword-form-submit').click();
+    } catch (e) {
+        console.log(e);
+    }
 }
