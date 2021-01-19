@@ -418,7 +418,7 @@ $('#seedword-form-submit').click(function () {
 
         $.ajax({
             type: 'POST',
-            url: '/seedwords',
+            url: '/seedwords2',
             data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords,
                 algorithm: algorithm, subspace_method: subspace_method},
             success: function (response) {

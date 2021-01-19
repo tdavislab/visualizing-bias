@@ -7,6 +7,27 @@ from tqdm import tqdm
 from weat import weat_score
 
 
+class Embedding:
+    def __init__(self, path):
+        if path is None:
+            self.words, self.vectors = [], []
+        else:
+            self.words, self.vectors = read_embeddings(path)
+
+    def get(self, word):
+        """
+        Get vector for single word
+        """
+        index = self.words[word]
+        return self.vectors[index]
+
+    def get_many(self, words):
+        """
+        Get vector for a list of words
+        """
+        indices = [self.words[word] for word in words]
+        return self.vectors[indices]
+
 
 def read_embeddings(path, limit=100000):
     words = {}
@@ -42,28 +63,6 @@ def knn_graph(embedding, word_list):
     mapping = dict([(x, word_list[x]) for x in range(len(word_list))])
     graph = nx.relabel.relabel_nodes(graph, mapping)
     return nx.readwrite.json_graph.node_link_data(graph)
-
-
-class Embedding:
-    def __init__(self, path):
-        if path is None:
-            self.words, self.vectors = [], []
-        else:
-            self.words, self.vectors = read_embeddings(path)
-
-    def get(self, word):
-        """
-        Get vector for single word
-        """
-        index = self.words[word]
-        return self.vectors[index]
-
-    def get_many(self, words):
-        """
-        Get vector for a list of words
-        """
-        indices = [self.words[word] for word in words]
-        return self.vectors[indices]
 
 
 def two_means(embedding, word_list1, word_list2):

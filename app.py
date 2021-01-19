@@ -9,6 +9,20 @@ app.base_embedding = load('data/glove.6B.50d.pkl')
 app.debiased_embedding = Embedding(None)
 app.debiased_embedding.words = app.base_embedding.words.copy()
 
+ALGORITHMS = {
+    'Algorithm: Linear debiasing': 'Linear',
+    'Algorithm: Hard debiasing': 'Hard',
+    'Algorithm: OSCaR': 'OSCar',
+    'Algorithm: Iterative Null Space Projection': 'INLP'
+}
+
+SUBSPACE_METHODS = {
+    'Subspace method: Two means': 'Two-means',
+    'Subspace method: PCA': 'PCA',
+    'Subspace method: PCA-paired': 'PCA-paired',
+    'Subspace method: Classification': 'Classification'
+}
+
 
 def reload_embeddings():
     app.base_embedding = load('data/glove.6B.50d.pkl')
@@ -101,3 +115,19 @@ def get_seedwords():
                               'ymin': all_vectors[:, 1].min(), 'ymax': all_vectors[:, 1].max()}
 
     return jsonify(data_payload)
+
+
+@app.route('/seedwords2', methods=['POST'])
+def get_seedwords2():
+    reload_embeddings()
+    seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
+    algorithm, subspace_method = ALGORITHMS[request.values['algorithm']], SUBSPACE_METHODS[request.values['subspace_method']]
+
+    seedwords1 = utils.process_seedwords(seedwords1)
+    seedwords2 = utils.process_seedwords(seedwords2)
+    evalwords = utils.process_seedwords(evalwords)
+
+    # Perform debiasing according to algorithm and subspace direction method
+    
+
+    return jsonify({'nothing': 'nada'})
