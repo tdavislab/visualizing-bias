@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 # app.embedding = Embedding('data/glove.6B.50d.txt')
 app.base_embedding = load('data/glove.6B.50d.pkl')
-app.debiased_embedding = Embedding(None)
-app.debiased_embedding.words = app.base_embedding.word_vectors.copy()
+app.debiased_embedding = load('data/glove.6B.50d.pkl')  # Embedding(None)
+# app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
 ALGORITHMS = {
     'Algorithm: Linear debiasing': 'Linear',
@@ -27,8 +27,8 @@ SUBSPACE_METHODS = {
 
 def reload_embeddings():
     app.base_embedding = load('data/glove.6B.50d.pkl')
-    app.debiased_embedding = Embedding(None)
-    app.debiased_embedding.words = app.base_embedding.word_vectors.copy()
+    app.debiased_embedding = load('data/glove.6B.50d.pkl')  # Embedding(None)
+    # app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
 
 @app.route('/')
@@ -128,10 +128,18 @@ def get_seedwords2():
     seedwords2 = utils.process_seedwords(seedwords2)
     evalwords = utils.process_seedwords(evalwords)
 
+    if subspace_method == 'PCA-paired':
+        seedwords1, seedwords2 = list(zip(*[(w.split('-')[0], w.split('-')[1]) for w in seedwords1]))
+
+    if subspace_method == 'PCA':
+        seedwords2 = []
+
     # Perform debiasing according to algorithm and subspace direction method
     bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
     print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
+
     if algorithm == 'Linear':
         debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
+        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
 
-    return jsonify({'nothing': 'nada'})
+    return jsonify({'points': debiaser.animator.convert_to_payload()})

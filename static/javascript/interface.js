@@ -276,10 +276,10 @@ function setup_animation(anim_svg, response, identifier) {
         let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
 
         // set the ranges
-        let x = d3.scaleLinear().range([0, width - 30]);
-        let y = d3.scaleLinear().range([height, 0]);
-        x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
-        y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
+        let x_axis = d3.scaleLinear().range([0, width - 30]);
+        let y_axis = d3.scaleLinear().range([height, 0]);
+        x_axis.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
+        y_axis.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
 
         let svg = anim_svg.append('g')
             .attr('id', identifier + 'group')
@@ -287,8 +287,8 @@ function setup_animation(anim_svg, response, identifier) {
 
         let data = add_groups(response.anim_steps[0]);
         logging('Chaku', data);
-        draw_scatter(svg, data, x, y);
-        draw_axes(svg, width, height, x, y);
+        draw_scatter(svg, data, x_axis, y_axis);
+        draw_axes(svg, width, height, x_axis, y_axis);
 
         $('#play-control-sb').on('click', function (e) {
             // if already at 0, do nothing
@@ -301,7 +301,7 @@ function setup_animation(anim_svg, response, identifier) {
                     .data(data)
                     .transition()
                     .duration(1000)
-                    .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+                    .attr('transform', d => 'translate(' + x_axis(d.position[0]) + ',' + y_axis(d.position[1]) + ')');
                 $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
             }
         })
@@ -316,7 +316,7 @@ function setup_animation(anim_svg, response, identifier) {
                     .data(data)
                     .transition()
                     .duration(1000)
-                    .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+                    .attr('transform', d => 'translate(' + x_axis(d.position[0]) + ',' + y_axis(d.position[1]) + ')');
                 $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
             }
         })
@@ -422,7 +422,7 @@ $('#seedword-form-submit').click(function () {
             data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords,
                 algorithm: algorithm, subspace_method: subspace_method},
             success: function (response) {
-                // logging(response);
+                logging(response);
 
                 let predebiased_svg = d3.select('#pre-debiased-svg');
                 draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
