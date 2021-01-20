@@ -87,15 +87,15 @@ class LinearDebiaser(Debiaser):
 
         # Use base projector to project base embedding of seedset and evalset
         step1 = self.animator.add_anim_step()
-        step1.add_points(base_projector.project(self.base_emb, seedwords1, label=1))
-        step1.add_points(base_projector.project(self.base_emb, seedwords2, label=2))
-        step1.add_points(base_projector.project(self.base_emb, evalwords, label=3))
+        step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
+        step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
+        step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
 
         # Use base_projector to project debiased embedding of seedset and evalset to 2-d
         step2 = self.animator.add_anim_step()
-        step2.add_points(base_projector.project(self.debiased_emb, seedwords1, label=1))
-        step2.add_points(base_projector.project(self.debiased_emb, seedwords2, label=2))
-        step2.add_points(base_projector.project(self.debiased_emb, evalwords, label=3))
+        step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
+        step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
+        step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
 
         # Create debiased_projector for debiased embeddings
         self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
@@ -104,9 +104,9 @@ class LinearDebiaser(Debiaser):
 
         # Use debiased projector to project debiased embedding of seedset and evalset to 2-d
         step3 = self.animator.add_anim_step()
-        step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, label=1))
-        step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, label=2))
-        step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, label=3))
+        step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
+        step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
+        step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
 
 
 class Projector:
@@ -117,30 +117,30 @@ class Projector:
     def fit(self, embedding, words):
         self.projector.fit(embedding.get_vecs(words))
 
-    def project(self, embedding, words, label=None):
+    def project(self, embedding, words, group=None):
         word_vecs_2d = []
         projection = self.projector.transform(embedding.get_vecs(words))
 
         for i, word in enumerate(words):
             x, y = projection[i][0], projection[i][1]
-            word_vecs_2d.append(WordVec2D(word, x, y, label=label))
+            word_vecs_2d.append(WordVec2D(word, x, y, group=group))
 
         return word_vecs_2d
 
 
 class WordVec2D:
-    def __init__(self, word, x, y, label=None, meta=None):
-        self.word = word
+    def __init__(self, word, x, y, group=None, meta=None):
+        self.label = word
         self.x = x
         self.y = y
-        self.label = label
+        self.group = group
         self.meta = meta
 
     def to_dict(self):
-        return {'word': self.word, 'x': self.x, 'y': self.y, 'label': self.label}
+        return {'label': self.label, 'x': self.x, 'y': self.y, 'group': self.group}
 
     def __repr__(self):
-        return f'WordVec2D("{self.word}", {self.x}, {self.y}, label={self.label}))'
+        return f'WordVec2D("{self.label}", {self.x}, {self.y}, group={self.group}))'
 
 
 class AnimStep:
@@ -170,6 +170,19 @@ class Animator:
             payload.append([point.to_dict() for point in step.points])
 
         return payload
+
+    def get_bounds(self):
+        vectors = []
+
+        for step in self.anim_steps:
+            for point in step.points:
+                vectors.append((point.x, point.y))
+        vectors = np.array(vectors)
+
+        return {
+            'xmin': vectors[:, 0].min(), 'xmax': vectors[:, 0].max(),
+            'ymin': vectors[:, 1].min(), 'ymax': vectors[:, 1].max()
+        }
 
 
 # Various bias direction computation methods

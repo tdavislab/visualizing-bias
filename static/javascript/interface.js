@@ -424,15 +424,15 @@ $('#seedword-form-submit').click(function () {
             success: function (response) {
                 logging(response);
 
-                let predebiased_svg = d3.select('#pre-debiased-svg');
-                draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
+                // let predebiased_svg = d3.select('#pre-debiased-svg');
+                // draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
 
                 let animation_svg = d3.select('#animation-svg');
                 // draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
                 setup_animation(animation_svg, response, 'animation')
 
-                let postdebiased_svg = d3.select('#post-debiased-svg');
-                draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
+                // let postdebiased_svg = d3.select('#post-debiased-svg');
+                // draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
 
                 $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
                 $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));

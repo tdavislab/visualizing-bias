@@ -142,4 +142,11 @@ def get_seedwords2():
         debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
         debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
 
-    return jsonify({'points': debiaser.animator.convert_to_payload()})
+    anim_steps = debiaser.animator.convert_to_payload()
+    data_payload = {'base': anim_steps[0],
+                    'debiased': anim_steps[-1],
+                    'anim_steps': anim_steps,
+                    'bounds': debiaser.animator.get_bounds()
+                    }
+
+    return jsonify(data_payload)
