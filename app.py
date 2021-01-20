@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from vectors import *
 import utils
+from vectors import get_bias_direction
 
 app = Flask(__name__)
 
@@ -128,6 +129,6 @@ def get_seedwords2():
     evalwords = utils.process_seedwords(evalwords)
 
     # Perform debiasing according to algorithm and subspace direction method
-    
-
+    if subspace_method == 'Two-means':
+        bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
     return jsonify({'nothing': 'nada'})

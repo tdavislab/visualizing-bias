@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
+from sklearn.svm import LinearSVC as SVM
 import networkx as nx
 from tqdm import tqdm
 from weat import weat_score
@@ -73,6 +74,41 @@ def two_means(embedding, word_list1, word_list2):
     return vec1_mean, vec2_mean, bias_direction
 
 
+def bias_two_means(embedding, word_list1, word_list2):
+    vec1, vec2 = embedding.get_many(word_list1), embedding.get_many(word_list2)
+    vec1_mean, vec2_mean = np.mean(vec1, axis=0), np.mean(vec2, axis=0)
+    bias_direction = (vec1_mean - vec2_mean) / np.linalg.norm(vec1_mean - vec2_mean)
+
+    return bias_direction
+
+
+def bias_pca(embedding, word_list):
+    vecs = embedding.get_many(word_list)
+    bias_direction = PCA().fit_transform(vecs).components_[0]
+
+    return bias_direction
+
+
+def bias_pca_paired(embedding, pair1, pair2):
+    assert len(pair1) == len(pair2)
+    vec1, vec2 = embedding.get_many(pair1), embedding.get_many(pair2)
+    paired_vecs = vec1 - vec2
+    bias_direction = PCA().fit_transform(paired_vecs).components_[0]
+
+    return bias_direction
+
+
+def bias_classification(embedding, seedwords1, seedwords2):
+    vec1, vec2 = embedding.get_many(seedwords1), embedding.get_many(seedwords2)
+    x = np.vstack([vec1, vec2])
+    y = np.concatenate([[0] * vec1.shape[0], [1] * vec2.shape[0]])
+
+    classifier = SVM().fit(x, y)
+    bias_direction = classifier.coef_[0]
+
+    return bias_direction
+
+
 def compute_weat_score(embedding, X, Y, A, B):
     X_vecs, Y_vecs, A_vecs, B_vecs = [embedding.get_many(wordlist) for wordlist in [X, Y, A, B]]
     return weat_score(X_vecs, Y_vecs, A_vecs, B_vecs)
@@ -111,6 +147,22 @@ def hard_debias(base_embedding: Embedding, debiased_embedding: Embedding, bias_v
             debiased_embedding.vectors.append(base_embedding.vectors[i])
 
     debiased_embedding.vectors = np.array(debiased_embedding.vectors)
+
+
+def get_bias_direction(embedding, seedwords1, seedwords2, subspace_method):
+    if subspace_method == 'Two-means':
+        bias_direction = bias_two_means(embedding, seedwords1, seedwords2)
+    elif subspace_method == 'PCA':
+        bias_direction = bias_pca(embedding, seedwords1)
+    elif subspace_method == 'PCA-paired':
+        pair1, pair2 = list(zip(*[(w.split('-')[0], w.split('-')[1]) for w in seedwords1]))
+        bias_direction = bias_pca_paired(embedding, pair1, pair2)
+    elif subspace_method == 'Classification':
+        bias_direction = bias_classification(embedding, seedwords1, seedwords2)
+    else:
+        raise ValueError('Incorrect subspace method')
+
+    return bias_direction
 
 
 if __name__ == '__main__':
