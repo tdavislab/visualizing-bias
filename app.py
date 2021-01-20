@@ -8,7 +8,7 @@ app = Flask(__name__)
 # app.embedding = Embedding('data/glove.6B.50d.txt')
 app.base_embedding = load('data/glove.6B.50d.pkl')
 app.debiased_embedding = Embedding(None)
-app.debiased_embedding.words = app.base_embedding.words.copy()
+app.debiased_embedding.words = app.base_embedding.word_vectors.copy()
 
 ALGORITHMS = {
     'Algorithm: Linear debiasing': 'Linear',
@@ -28,7 +28,7 @@ SUBSPACE_METHODS = {
 def reload_embeddings():
     app.base_embedding = load('data/glove.6B.50d.pkl')
     app.debiased_embedding = Embedding(None)
-    app.debiased_embedding.words = app.base_embedding.words.copy()
+    app.debiased_embedding.words = app.base_embedding.word_vectors.copy()
 
 
 @app.route('/')
@@ -129,6 +129,9 @@ def get_seedwords2():
     evalwords = utils.process_seedwords(evalwords)
 
     # Perform debiasing according to algorithm and subspace direction method
-    if subspace_method == 'Two-means':
-        bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
+    bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
+    print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
+    if algorithm == 'Linear':
+        debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
+
     return jsonify({'nothing': 'nada'})
