@@ -67,9 +67,20 @@
 
 - Take dot product with subspace direction, that will be x coordinate
 - X - gender direction = X', and then PCA of X', which will have orthogonal components to gender direction
+- ^Rather than above, project X to null space of gender direction and then take PCA 
 - Color theme accessible to color-blind people, plus shape encoding, triangle or square
 - Hover over point, click to retain highlighting across all views
 - Classifier method - sample grid, check sign of classifier, and color accordingly
 - WEAT score and residual bias measures
 
 - Submit the slide deck
+_______________________________________
+
+- Lighter shade for menu
+- Show equalize set, show gender-specific words do not move
+- Classification - two point along the normal vector and then draw the vector in 2-d space
+- x-axis alignment
+- evaluation set dialog for OSCaR, 1st direction, 2nd direction.
+- Show direction vectors for two dirs in OSCaR
+- Top two - align x-axis, show vectors
+- preloaded examples

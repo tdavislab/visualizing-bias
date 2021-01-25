@@ -65,7 +65,15 @@
         <input id="seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
         <input id="seedword-text-2" class="form-control input-group-text" type="text" placeholder="Add seed set 2...">
       </div>
+      <div id="input-two-col-oscar" class="input-group mt-3">
+        <input id="oscar-seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
+{#        <input id="oscar-seedword-text-2" class="form-control input-group-text" type="text" placeholder="Add seed set 2...">#}
+      </div>
     </div>
+  </div>
+
+  <div id="equalize-holder" class="input-group" style="display: None">
+    <input id="equalize-list" class="mt-3 form-control input-group-text" type="text" placeholder="Add equalize set for Hard Debiasing...">
   </div>
 
   <div id="eval-and-run" class="input-group">
@@ -135,15 +143,15 @@
       <button id='play-control-fb' class="btn btn-success" title="Go to the start of animation">
         <i class="fa fa-fast-backward"></i>
       </button>
-      <span class="btn-separator" title="Step backward"></span>
-      <button id='play-control-sb' class="btn btn-success">
+      <span class="btn-separator"></span>
+      <button id='play-control-sb' class="btn btn-success" title="Step backward">
         <i class="fa fa-step-backward"></i>
       </button>
       <span class="btn-separator"></span>
-      <button id='play-control-play' class="btn btn-success" title="Play animation">
-        <i class="fa fa-play"></i>
-      </button>
-      <span class="btn-separator"></span>
+{#      <button id='play-control-play' class="btn btn-success" title="Play animation">#}
+{#        <i class="fa fa-play"></i>#}
+{#      </button>#}
+{#      <span class="btn-separator"></span>#}
       <button id='play-control-sf' class="btn btn-success" title="Step forward">
         <i class="fa fa-step-forward"></i>
       </button>

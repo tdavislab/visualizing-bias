@@ -11,6 +11,7 @@ let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
+let ANIMATION_DURATION = 1000;
 
 // Set global color-scale
 let color = d3.scaleOrdinal(d3.schemeDark2);
@@ -19,12 +20,6 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function logging(args) {
-    if (TESTING) {
-        console.log(...arguments);
-    }
 }
 
 function process_response(response, eval = false, debiased = false) {
@@ -86,19 +81,19 @@ function remove_point() {
     $('#seedword-form-submit').click();
 }
 
-function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = false, debiased = false) {
+function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     parent_svg.selectAll('*').remove();
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
     let width = parent_svg.node().width.baseVal.value - margin.left - margin.right;
     let height = parent_svg.node().height.baseVal.value - margin.top - margin.bottom;
-    let data = process_response(response, eval, debiased);
+    // let data = process_response(response, eval, debiased);
 
-    if (mean) {
-        let mean1 = vector_mean(response['vectors1']);
-        let mean2 = vector_mean(response['vectors2']);
-        data.push({'position': mean1, 'label': 'mean1', 'group': 1});
-        data.push({'position': mean2, 'label': 'mean2', 'group': 2});
-    }
+    // if (mean) {
+    //     let mean1 = vector_mean(response['vectors1']);
+    //     let mean2 = vector_mean(response['vectors2']);
+    //     data.push({'position': mean1, 'label': 'mean1', 'group': 1});
+    //     data.push({'position': mean2, 'label': 'mean2', 'group': 2});
+    // }
 
     // Append group to the svg
     let svg = parent_svg.append('g')
@@ -110,23 +105,24 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
     let y = d3.scaleLinear().range([height, 0]);
     // x.domain(d3.extent(data, d => d.position[0])).nice();
     // y.domain(d3.extent(data, d => d.position[1])).nice();
-    x.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
-    y.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
+    x.domain([response.bounds.xmin - 0.1, response.bounds.xmax + 0.1]).nice();
+    y.domain([response.bounds.ymin - 0.1, response.bounds.ymax + 0.1]).nice();
 
     // If two-means then draw the line
-    if (mean) {
-        let mean1 = data[data.length - 2];
-        let mean2 = data[data.length - 1];
-        svg.append('line')
-            .attr('id', 'mean-line')
-            .attr('stroke', 'black')
-            .attr('stroke-width', 8)
-            .attr('stroke-opacity', 0.5)
-            .attr('x1', x(mean1.position[0]))
-            .attr('y1', y(mean1.position[1]))
-            .attr('x2', x(mean2.position[0]))
-            .attr('y2', y(mean2.position[1]));
-    }
+    // if (mean) {
+    //     let mean1 = data[data.length - 2];
+    //     let mean2 = data[data.length - 1];
+    //     svg.append('line')
+    //         .attr('id', 'mean-line')
+    //         .attr('stroke', 'black')
+    //         .attr('stroke-width', 8)
+    //         .attr('stroke-opacity', 0.5)
+    //         .attr('x1', x(mean1.position[0]))
+    //         .attr('y1', y(mean1.position[1]))
+    //         .attr('x2', x(mean2.position[0]))
+    //         .attr('y2', y(mean2.position[1]));
+    // }
+    let data = debiased ? response.debiased : response.base;
 
     // Add the scatterplot
     let datapoint_group = svg.selectAll('g')
@@ -134,7 +130,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, mean = true, eval = f
         .enter()
         .append('g')
         .attr('class', d => 'datapoint-group group-' + d.group)
-        .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')')
+        .attr('transform', d => 'translate(' + x(d.x) + ',' + y(d.y) + ')')
         .on('mouseover', function () {
             parent_svg.selectAll('g.datapoint-group').classed('translucent', true);
             d3.select(this).classed('translucent', false);
@@ -215,13 +211,21 @@ function draw_axes(svg, width, height, x, y) {
 
 function draw_scatter(svg, point_data, x, y) {
     // Add the scatterplot
-    logging(svg);
+    console.log('In draw scatter', point_data);
+
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
         .enter()
         .append('g')
         .attr('class', d => 'datapoint-group group-' + d.group)
-        .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
+        .attr('transform', d => 'translate(' + x(d.x) + ',' + y(d.y) + ')')
+        .on('mouseover', function () {
+            svg.selectAll('g.datapoint-group').classed('translucent', true);
+            d3.select(this).classed('translucent', false);
+        })
+        .on('mouseout', function () {
+            svg.selectAll('g.datapoint-group').classed('translucent', false);
+        })
 
     // Class label
     datapoint_group.append('foreignObject')
@@ -269,8 +273,8 @@ function add_groups(data) {
 
 function setup_animation(anim_svg, response, identifier) {
     try {
-        logging('setting up stuff');
-        logging(response);
+        // console.log('setting up stuff');
+        console.log(response);
         let margin = {top: 20, right: 20, bottom: 20, left: 40};
         let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
         let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
@@ -278,51 +282,149 @@ function setup_animation(anim_svg, response, identifier) {
         // set the ranges
         let x_axis = d3.scaleLinear().range([0, width - 30]);
         let y_axis = d3.scaleLinear().range([height, 0]);
-        x_axis.domain([response.bounds.xmin - 0.5, response.bounds.xmax + 0.5]).nice();
-        y_axis.domain([response.bounds.ymin - 0.5, response.bounds.ymax + 0.5]).nice();
+        x_axis.domain([response.bounds.xmin - 0.1, response.bounds.xmax + 0.1]).nice();
+        y_axis.domain([response.bounds.ymin - 0.1, response.bounds.ymax + 0.1]).nice();
+
+        let step_indicator = anim_svg.append('text')
+            .attr('id', 'step-indicator')
+            .attr('x', width)
+            .attr('y', 20)
+            .attr('text-anchor', 'end')
+            .text('Step=0');
 
         let svg = anim_svg.append('g')
             .attr('id', identifier + 'group')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        let data = add_groups(response.anim_steps[0]);
-        logging('Chaku', data);
-        draw_scatter(svg, data, x_axis, y_axis);
+        // let data = add_groups(response.anim_steps[0]);
+        draw_scatter(svg, response.anim_steps[0], x_axis, y_axis);
         draw_axes(svg, width, height, x_axis, y_axis);
 
-        $('#play-control-sb').on('click', function (e) {
+        // Step back
+        let step_backward_btn = $('#play-control-sb');
+        let step_forward_btn = $('#play-control-sf');
+        let fast_backward_btn = $('#play-control-fb');
+        let fast_forward_btn = $('#play-control-ff');
+
+        btn_active(step_backward_btn, false);
+        btn_active(fast_backward_btn, false);
+        btn_active(step_forward_btn, true);
+        btn_active(fast_forward_btn, true);
+
+        // Step backward
+        step_backward_btn.unbind('click').on('click', function (e) {
             // if already at 0, do nothing
             if (ANIMSTEP_COUNTER === 0) {
-                logging('Already at first step');
+                console.log('Already at first step');
             } else {
                 ANIMSTEP_COUNTER -= 1;
-                data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
+                btn_active(step_forward_btn, true);
+                btn_active(fast_forward_btn, true);
+                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
+
                 svg.selectAll('g')
-                    .data(data)
+                    .data(response.anim_steps[ANIMSTEP_COUNTER])
                     .transition()
-                    .duration(1000)
-                    .attr('transform', d => 'translate(' + x_axis(d.position[0]) + ',' + y_axis(d.position[1]) + ')');
-                $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+                    .duration(ANIMATION_DURATION)
+                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+
+                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+                $('#explanation-text').text("Dummy text");
+
+                if (ANIMSTEP_COUNTER === 0) {
+                    btn_active(step_backward_btn, false);
+                    btn_active(fast_backward_btn, false);
+                }
             }
+            d3.select('#step-indicator').text(`Step=${ANIMSTEP_COUNTER}`);
         })
 
-        $('#play-control-sf').on('click', function (e) {
+        // To the first step
+        fast_backward_btn.unbind('click').on('click', function (e) {
+            if (ANIMSTEP_COUNTER === 0) {
+                console.log('Already at first step');
+            } else {
+                ANIMSTEP_COUNTER = 0;
+                btn_active(step_forward_btn, true);
+                btn_active(fast_forward_btn, true);
+                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
+
+                svg.selectAll('g')
+                    .data(response.anim_steps[ANIMSTEP_COUNTER])
+                    .transition()
+                    .duration(ANIMATION_DURATION)
+                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+                $('#explanation-text').text("Dummy text");
+
+                if (ANIMSTEP_COUNTER === 0) {
+                    btn_active(step_backward_btn, false);
+                    btn_active(fast_backward_btn, false);
+                }
+            }
+            d3.select('#step-indicator').text(`Step=${ANIMSTEP_COUNTER}`);
+
+        })
+
+        // Step forward
+        step_forward_btn.unbind('click').on('click', function (e) {
             if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
-                logging('Already at last step');
+                console.log('Already at last step');
             } else {
                 ANIMSTEP_COUNTER += 1;
-                data = add_groups(response.anim_steps[ANIMSTEP_COUNTER]);
+                btn_active(step_backward_btn, true);
+                btn_active(fast_backward_btn, true);
+                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
+
                 svg.selectAll('g')
-                    .data(data)
+                    .data(response.anim_steps[ANIMSTEP_COUNTER])
                     .transition()
-                    .duration(1000)
-                    .attr('transform', d => 'translate(' + x_axis(d.position[0]) + ',' + y_axis(d.position[1]) + ')');
-                $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+                    .duration(ANIMATION_DURATION)
+                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+                $('#explanation-text').text("Dummy text");
+
+                if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
+                    btn_active(step_forward_btn, false);
+                    btn_active(fast_forward_btn, false);
+                }
             }
+            d3.select('#step-indicator').text(`Step=${ANIMSTEP_COUNTER}`);
+        })
+
+        // To the last step
+        fast_forward_btn.unbind('click').on('click', function (e) {
+            if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
+                console.log('Already at last step');
+            } else {
+                ANIMSTEP_COUNTER = response.anim_steps.length - 1;
+                btn_active(step_backward_btn, true);
+                btn_active(fast_backward_btn, true);
+                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
+
+                svg.selectAll('g')
+                    .data(response.anim_steps[ANIMSTEP_COUNTER])
+                    .transition()
+                    .duration(ANIMATION_DURATION)
+                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
+                $('#explanation-text').text("Dummy text");
+
+                if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
+                    btn_active(step_forward_btn, false);
+                    btn_active(fast_forward_btn, false);
+                }
+            }
+            d3.select('#step-indicator').text(`Step=${ANIMSTEP_COUNTER}`);
+
         })
     } catch (e) {
         console.log(e);
     }
+}
+
+function btn_active(btn, bool_active) {
+    btn.prop('disabled', !bool_active);
 }
 
 // Functionality for the dropdown-menus
@@ -331,7 +433,20 @@ $('#example-dropdown a').click(function (e) {
 });
 
 $('#algorithm-dropdown a').click(function (e) {
-    $('#algorithm-selection-button').text('Algorithm: ' + this.innerHTML);
+    let algorithm = this.innerHTML;
+    $('#algorithm-selection-button').text('Algorithm: ' + algorithm);
+
+    if (algorithm === 'Hard debiasing') {
+        $('#equalize-holder').show();
+    } else {
+        $('#equalize-holder').hide();
+    }
+
+    if (algorithm === 'OSCaR') {
+        $('#input-two-col-oscar').show();
+    } else {
+        $('#input-two-col-oscar').hide();
+    }
 });
 
 $('#subspace-dropdown a').click(function (e) {
@@ -341,11 +456,9 @@ $('#subspace-dropdown a').click(function (e) {
 
         if (subspace_method === 'PCA' || subspace_method === 'PCA-paired') {
             $('#seedword-text-2').hide();
-        }
-        else if (subspace_method === 'Two means' || subspace_method === 'Classification') {
+        } else if (subspace_method === 'Two means' || subspace_method === 'Classification') {
             $('#seedword-text-2').show();
-        }
-        else {
+        } else {
             console.log('Incorrect subspace method');
         }
     } catch (e) {
@@ -413,29 +526,33 @@ $('#seedword-form-submit').click(function () {
         let seedwords1 = $('#seedword-text-1').val();
         let seedwords2 = $('#seedword-text-2').val();
         let evalwords = $('#evaluation-list').val();
+        let equalize = $('#equalize-list').val()
+        let orth_subspace = $('#oscar-seedword-text-1').val();
         let algorithm = $('#algorithm-selection-button').text();
         let subspace_method = $('#subspace-selection-button').text();
 
         $.ajax({
             type: 'POST',
             url: '/seedwords2',
-            data: {seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords,
-                algorithm: algorithm, subspace_method: subspace_method},
+            data: {
+                seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, equalize: equalize, orth_subspace: orth_subspace,
+                algorithm: algorithm, subspace_method: subspace_method
+            },
             success: function (response) {
-                logging(response);
+                // console.log(response);
 
-                // let predebiased_svg = d3.select('#pre-debiased-svg');
-                // draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', true, true);
+                let predebiased_svg = d3.select('#pre-debiased-svg');
+                draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', false,);
 
                 let animation_svg = d3.select('#animation-svg');
                 // draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
                 setup_animation(animation_svg, response, 'animation')
 
-                // let postdebiased_svg = d3.select('#post-debiased-svg');
-                // draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', false, true, true);
+                let postdebiased_svg = d3.select('#post-debiased-svg');
+                draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', true,);
 
-                $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
-                $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
+                // $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
+                // $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
 
                 // enable toolbar buttons
                 d3.select('#toggle-labels-btn').attr('disabled', null);
@@ -464,7 +581,15 @@ if (TESTING) {
         $('#seedword-text-1').val('john, william, george, liam, andrew, michael, louis, tony, scott, jackson');
         $('#seedword-text-2').val('mary, victoria, carolina, maria, anne, kelly, marie, anna, sarah, jane');
         $('#evaluation-list').val('engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor');
-        $('#algorithm-dropdown').children()[1].click();
+        $('#equalize-list').val('monastery-convent, spokesman-spokeswoman, dad-mom, men-women, councilman-councilwoman,' +
+            ' grandpa-grandma, grandsons-granddaughters, testosterone-estrogen, uncle-aunt, wives-husbands, father-mother,' +
+            ' grandpa-grandma, he-she, boy-girl, boys-girls, brother-sister, brothers-sisters, businessman-businesswoman,' +
+            ' chairman-chairwoman, colt-filly, congressman-congresswoman, dads-moms, dudes-gals, father-mother, fatherhood-motherhood,' +
+            ' fathers-mothers, fella-granny, fraternity-sorority, gelding-mare, gentleman-lady, gentlemen-ladies,' +
+            ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
+            ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
+        $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
+        $('#algorithm-dropdown').children()[4].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {

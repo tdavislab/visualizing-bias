@@ -13,7 +13,7 @@ app.debiased_embedding = load('data/glove.6B.50d.pkl')  # Embedding(None)
 ALGORITHMS = {
     'Algorithm: Linear debiasing': 'Linear',
     'Algorithm: Hard debiasing': 'Hard',
-    'Algorithm: OSCaR': 'OSCar',
+    'Algorithm: OSCaR': 'OSCaR',
     'Algorithm: Iterative Null Space Projection': 'INLP'
 }
 
@@ -122,11 +122,16 @@ def get_seedwords():
 def get_seedwords2():
     reload_embeddings()
     seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
+    equalize_set = request.values['equalize']
+    orth_subspace_words = request.values['orth_subspace']
+
     algorithm, subspace_method = ALGORITHMS[request.values['algorithm']], SUBSPACE_METHODS[request.values['subspace_method']]
 
     seedwords1 = utils.process_seedwords(seedwords1)
     seedwords2 = utils.process_seedwords(seedwords2)
     evalwords = utils.process_seedwords(evalwords)
+    equalize_set = [word.split('-') for word in set(utils.process_seedwords(equalize_set))]
+    orth_subspace_words = utils.process_seedwords(orth_subspace_words)
 
     if subspace_method == 'PCA-paired':
         seedwords1, seedwords2 = list(zip(*[(w.split('-')[0], w.split('-')[1]) for w in seedwords1]))
@@ -140,6 +145,18 @@ def get_seedwords2():
 
     if algorithm == 'Linear':
         debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
+        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
+
+    elif algorithm == 'Hard':
+        debiaser = HardDebiaser(app.base_embedding, app.debiased_embedding)
+        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set)
+
+    elif algorithm == 'OSCaR':
+        debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding)
+        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words)
+
+    elif algorithm == 'INLP':
+        debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)
         debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
 
     anim_steps = debiaser.animator.convert_to_payload()
