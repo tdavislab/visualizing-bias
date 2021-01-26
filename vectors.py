@@ -81,13 +81,14 @@ class LinearDebiaser(Debiaser):
         # self.debiased_emb.update_vectors(self.base_emb.words(), debiased_vectors)
 
         prebase_projector = self.animator.add_projector(PCA(n_components=2), name='prebase_projector')
-        prebase_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        prebase_projector.fit(self.base_emb, seedwords1 + seedwords2)
 
         # Use base projector to project base embedding of seedset and evalset
         step0 = self.animator.add_anim_step()
         step0.add_points(prebase_projector.project(self.base_emb, seedwords1, group=1))
         step0.add_points(prebase_projector.project(self.base_emb, seedwords2, group=2))
         step0.add_points(prebase_projector.project(self.base_emb, evalwords, group=3))
+        step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
         # Create base_projector for base embedding
         # self.animator.add_projector(PCA(n_components=2), name='base_projector')
@@ -99,6 +100,7 @@ class LinearDebiaser(Debiaser):
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
+        step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
         # Use base_projector to project debiased embedding of seedset and evalset to 2-d
         debiased_vectors = self.base_emb.vectors() - self.base_emb.vectors().dot(bias_direction.reshape(-1, 1)) * bias_direction
@@ -111,16 +113,18 @@ class LinearDebiaser(Debiaser):
         step2.add_points(interim_projector.project(self.debiased_emb, seedwords1, group=1))
         step2.add_points(interim_projector.project(self.debiased_emb, seedwords2, group=2))
         step2.add_points(interim_projector.project(self.debiased_emb, evalwords, group=3))
+        step2.add_points(interim_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
-        # Create debiased_projector for debiased embeddings
-        debiased_projector = self.animator.add_projector(BiasPCA(), name='debiased_projector')
-        debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
-
-        # Use debiased projector to project debiased embedding of seedset and evalset to 2-d
-        step3 = self.animator.add_anim_step()
-        step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
-        step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
-        step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
+        # # Create debiased_projector for debiased embeddings
+        # debiased_projector = self.animator.add_projector(BiasPCA(), name='debiased_projector')
+        # debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        #
+        # # Use debiased projector to project debiased embedding of seedset and evalset to 2-d
+        # step3 = self.animator.add_anim_step()
+        # step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
+        # step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
+        # step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
+        # step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # Create debiased_projector for debiased embeddings
         debiased_projector2 = self.animator.add_projector(PCA(n_components=2), name='debiased_projector2')
@@ -131,6 +135,7 @@ class LinearDebiaser(Debiaser):
         step4.add_points(debiased_projector2.project(self.debiased_emb, seedwords1, group=1))
         step4.add_points(debiased_projector2.project(self.debiased_emb, seedwords2, group=2))
         step4.add_points(debiased_projector2.project(self.debiased_emb, evalwords, group=3))
+        step4.add_points(debiased_projector2.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
 
 class HardDebiaser(Debiaser):
@@ -387,9 +392,18 @@ class Projector:
         else:
             self.projector.fit(embedding.get_vecs(words), bias_direction)
 
-    def project(self, embedding, words, group=None):
+    def project(self, embedding, words, group=None, direction=None):
         word_vecs_2d = []
-        projection = self.projector.transform(embedding.get_vecs(words))
+        if direction is not None:
+            dim = direction.shape[0]
+            origin = np.zeros(dim)
+            projection = self.projector.transform(np.vstack([origin, direction / np.linalg.norm(direction)]))
+            words = ['Origin', 'Bias']
+        else:
+            if len(words) != 0:
+                projection = self.projector.transform(embedding.get_vecs(words))
+            else:
+                projection = None
 
         for i, word in enumerate(words):
             x, y = projection[i][0], projection[i][1]
@@ -402,16 +416,21 @@ class BiasPCA:
     def __init__(self):
         self.vectors = None
         self.bias_direction = None
-        self.pca = PCA(n_components=1)
+        self.secondary_direction = None
+        self.pca = PCA(n_components=2)
 
-    def fit(self, vectors, bias_direction):
+    def fit(self, vectors, bias_direction, secondary_direction=None):
         self.vectors = vectors
         self.bias_direction = bias_direction
+        self.secondary_direction = secondary_direction
 
     def transform(self, vectors):
         debiased_vectors = vectors - self.bias_direction
         x_component = np.expand_dims(vectors.dot(self.bias_direction), 1)
-        y_component = self.pca.fit_transform(vectors)
+        if self.secondary_direction is None:
+            y_component = np.expand_dims(self.pca.fit_transform(vectors)[:, 1], 1)
+        else:
+            y_component = np.expand_dims(vectors.dot(self.secondary_direction), 1)
 
         return np.hstack([x_component, y_component])
 

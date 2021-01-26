@@ -12,15 +12,15 @@ let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
 let ANIMATION_DURATION = 1000;
-let AXIS_TOLERANCE = 0.1;
+let AXIS_TOLERANCE = 0.05;
 
 // Set global color-scale
-let color = d3.scaleOrdinal(d3.schemeTableau10);
-let shape = d3.scaleOrdinal([1, 2, 3, 4, 5, 6],
-    [d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolCross, d3.symbolStar].map(d => symbolGenerator(d)));
+let color = d3.scaleOrdinal(d3.schemeDark2);
+let shape = d3.scaleOrdinal([0, 1, 2, 3, 4, 5, 6],
+    [d3.symbolCircle, d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolCross, d3.symbolStar].map(d => symbolGenerator(d)));
 
 function symbolGenerator(symbolObj) {
-    return d3.symbol().type(symbolObj).size(200)();
+    return d3.symbol().type(symbolObj).size(100)();
 }
 
 function getRandomInt(min, max) {
@@ -174,7 +174,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     //     .attr('class', 'point');
 
     datapoint_group.append('path')
-        .attr('fill', d => color(d.group))
+        .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
         .attr('d', d => shape(d.group))
 
 
@@ -188,6 +188,15 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     svg.append('g')
         .classed('axis', true)
         .call(d3.axisLeft(y));
+
+    // Draw the bias direction arrow
+    let arrow_endpoints = data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
+    let arrow_group = d3.select
+    svg.append('path')
+        .attr('id', 'bias-direction-line')
+        .attr('d', d3.line()(arrow_endpoints))
+        .attr('stroke', '#5b5b5b')
+        .attr('stroke-width', '4px');
 
     // d3.select('#play-control-play').on('click', function () {
     //     let new_data = process_response(response, eval, false);
@@ -262,9 +271,20 @@ function draw_scatter(svg, point_data, x, y) {
     //     .attr('stroke', 'black')
     //     .attr('stroke-width', d => check_if_mean(d) * 3)
     //     .attr('class', 'point');
+
     datapoint_group.append('path')
-        .attr('fill', d => color(d.group))
+        // .attr('fill', d => color(d.group))
+        .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
         .attr('d', d => shape(d.group))
+
+    // Draw the bias direction arrow
+    let arrow_endpoints = point_data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
+    let arrow_group = d3.select
+    svg.append('path')
+        .attr('id', 'bias-direction-line')
+        .attr('d', d3.line()(arrow_endpoints))
+        .attr('stroke', '#5b5b5b')
+        .attr('stroke-width', '4px');
 }
 
 function add_groups(data) {
@@ -295,6 +315,12 @@ function setup_animation(anim_svg, response, identifier) {
             .transition()
             .duration(ANIMATION_DURATION)
             .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+
+        let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
+        svg.select('#bias-direction-line')
+            .transition()
+            .duration(ANIMATION_DURATION)
+            .attr('d', d3.line()(arrow_endpoints));
     }
 
     try {
@@ -448,6 +474,9 @@ $('#algorithm-dropdown a').click(function (e) {
     } else {
         $('#input-two-col-oscar').hide();
     }
+    if (algorithm === 'Iterative Null Space Projection') {
+        $('#subspace-dropdown-items').children()[4].click();
+    }
 });
 
 $('#subspace-dropdown a').click(function (e) {
@@ -455,7 +484,12 @@ $('#subspace-dropdown a').click(function (e) {
         let subspace_method = this.innerHTML;
         $('#subspace-selection-button').text('Subspace method: ' + subspace_method);
 
-        if (subspace_method === 'PCA' || subspace_method === 'PCA-paired') {
+        if (subspace_method === 'PCA') {
+            // let seedwords1 = $('#seedword-text-1').val()
+            // let seedwords2 = $('#seedword-text-2').val();
+            // $('#seedword-text-1').val(seedwords1 + ', ' + seedwords2)
+            $('#seedword-text-2').hide();
+        } else if (subspace_method === 'PCA-paired') {
             $('#seedword-text-2').hide();
         } else if (subspace_method === 'Two means' || subspace_method === 'Classification') {
             $('#seedword-text-2').show();
@@ -492,10 +526,12 @@ $('#toggle-eval-btn').click(function () {
 
 $('#toggle-mean-btn').click(function () {
     if (MEAN_VISIBILITY === true) {
-        d3.selectAll('#mean-line').attr('hidden', true);
+        d3.selectAll('#bias-direction-line').attr('hidden', true);
+        d3.selectAll('.group-0').attr('hidden', true);
         d3.select('#toggle-mean-icon').attr('class', 'fa fa-toggle-on fa-rotate-180');
     } else {
-        d3.selectAll('#mean-line').attr('hidden', null);
+        d3.selectAll('#bias-direction-line').attr('hidden', null);
+        d3.selectAll('.group-0').attr('hidden', null);
         d3.selectAll('#toggle-mean-icon').attr('class', 'fa fa-toggle-on');
     }
     MEAN_VISIBILITY = !MEAN_VISIBILITY;
@@ -590,7 +626,7 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[1].click();
+        $('#algorithm-dropdown').children()[3].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {
