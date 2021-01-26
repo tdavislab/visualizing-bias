@@ -12,6 +12,7 @@ let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
 let ANIMATION_DURATION = 1000;
+let AXIS_TOLERANCE = 0.1;
 
 // Set global color-scale
 let color = d3.scaleOrdinal(d3.schemeDark2);
@@ -105,8 +106,8 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     let y = d3.scaleLinear().range([height, 0]);
     // x.domain(d3.extent(data, d => d.position[0])).nice();
     // y.domain(d3.extent(data, d => d.position[1])).nice();
-    x.domain([response.bounds.xmin - 0.1, response.bounds.xmax + 0.1]).nice();
-    y.domain([response.bounds.ymin - 0.1, response.bounds.ymax + 0.1]).nice();
+    x.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
+    y.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
 
     // If two-means then draw the line
     // if (mean) {
@@ -272,6 +273,17 @@ function add_groups(data) {
 }
 
 function setup_animation(anim_svg, response, identifier) {
+    function update_anim_svg(svg, x_axis, y_axis, step) {
+        let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
+        $('#explanation-text').text(explanation_text);
+
+        svg.selectAll('g')
+            .data(response.anim_steps[step])
+            .transition()
+            .duration(ANIMATION_DURATION)
+            .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+    }
+
     try {
         // console.log('setting up stuff');
         console.log(response);
@@ -282,8 +294,8 @@ function setup_animation(anim_svg, response, identifier) {
         // set the ranges
         let x_axis = d3.scaleLinear().range([0, width - 30]);
         let y_axis = d3.scaleLinear().range([height, 0]);
-        x_axis.domain([response.bounds.xmin - 0.1, response.bounds.xmax + 0.1]).nice();
-        y_axis.domain([response.bounds.ymin - 0.1, response.bounds.ymax + 0.1]).nice();
+        x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
+        y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
 
         let step_indicator = anim_svg.append('text')
             .attr('id', 'step-indicator')
@@ -299,6 +311,7 @@ function setup_animation(anim_svg, response, identifier) {
         // let data = add_groups(response.anim_steps[0]);
         draw_scatter(svg, response.anim_steps[0], x_axis, y_axis);
         draw_axes(svg, width, height, x_axis, y_axis);
+        $('#explanation-text').text(response.explanations[0]);
 
         // Step back
         let step_backward_btn = $('#play-control-sb');
@@ -322,14 +335,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(fast_forward_btn, true);
                 console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
-                svg.selectAll('g')
-                    .data(response.anim_steps[ANIMSTEP_COUNTER])
-                    .transition()
-                    .duration(ANIMATION_DURATION)
-                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
-
-                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
-                $('#explanation-text').text("Dummy text");
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
                 if (ANIMSTEP_COUNTER === 0) {
                     btn_active(step_backward_btn, false);
@@ -349,13 +355,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(fast_forward_btn, true);
                 console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
-                svg.selectAll('g')
-                    .data(response.anim_steps[ANIMSTEP_COUNTER])
-                    .transition()
-                    .duration(ANIMATION_DURATION)
-                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
-                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
-                $('#explanation-text').text("Dummy text");
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
                 if (ANIMSTEP_COUNTER === 0) {
                     btn_active(step_backward_btn, false);
@@ -376,13 +376,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(fast_backward_btn, true);
                 console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
-                svg.selectAll('g')
-                    .data(response.anim_steps[ANIMSTEP_COUNTER])
-                    .transition()
-                    .duration(ANIMATION_DURATION)
-                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
-                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
-                $('#explanation-text').text("Dummy text");
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
                 if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
                     btn_active(step_forward_btn, false);
@@ -402,13 +396,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(fast_backward_btn, true);
                 console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
-                svg.selectAll('g')
-                    .data(response.anim_steps[ANIMSTEP_COUNTER])
-                    .transition()
-                    .duration(ANIMATION_DURATION)
-                    .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
-                // $('#explanation-text').text(response.anim_steps[ANIMSTEP_COUNTER].explanation);
-                $('#explanation-text').text("Dummy text");
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
                 if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
                     btn_active(step_forward_btn, false);
@@ -589,7 +577,7 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[4].click();
+        $('#algorithm-dropdown').children()[1].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {

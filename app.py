@@ -2,12 +2,16 @@ from flask import Flask, render_template, request, jsonify
 from vectors import *
 import utils
 from vectors import get_bias_direction
+import json
 
 app = Flask(__name__)
 
 # app.embedding = Embedding('data/glove.6B.50d.txt')
 app.base_embedding = load('data/glove.6B.50d.pkl')
 app.debiased_embedding = load('data/glove.6B.50d.pkl')  # Embedding(None)
+with open('static/assets/explanations.json', 'r') as explanation_json:
+    app.explanations = json.load(explanation_json)
+
 # app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
 ALGORITHMS = {
@@ -163,7 +167,8 @@ def get_seedwords2():
     data_payload = {'base': anim_steps[0],
                     'debiased': anim_steps[-1],
                     'anim_steps': anim_steps,
-                    'bounds': debiaser.animator.get_bounds()
+                    'bounds': debiaser.animator.get_bounds(),
+                    'explanations': app.explanations[algorithm]
                     }
 
     return jsonify(data_payload)
