@@ -162,7 +162,7 @@ def get_seedwords2():
     elif algorithm == 'INLP':
         debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)
         debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
-
+    print(app.explanations)
     anim_steps = debiaser.animator.convert_to_payload()
     data_payload = {'base': anim_steps[0],
                     'debiased': anim_steps[-1],

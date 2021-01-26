@@ -45,7 +45,7 @@ svg {
 }
 
 .shaker {
-    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+    animation: shake 0.75s cubic-bezier(.36, .07, .19, .97) both infinite;
     /*transform: translate3d(0, 0, 0);*/
     /*backface-visibility: hidden;*/
     /*perspective: 1000px;*/
@@ -100,3 +100,14 @@ svg {
     }
 }
 
+.class-label {
+    opacity: 0.8;
+}
+
+.point {
+    opacity: 0.8;
+}
+
+.bg-dark-red{
+    background-color: #2844a7;
+}

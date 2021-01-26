@@ -15,7 +15,13 @@ let ANIMATION_DURATION = 1000;
 let AXIS_TOLERANCE = 0.1;
 
 // Set global color-scale
-let color = d3.scaleOrdinal(d3.schemeDark2);
+let color = d3.scaleOrdinal(d3.schemeTableau10);
+let shape = d3.scaleOrdinal([1, 2, 3, 4, 5, 6],
+    [d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolCross, d3.symbolStar].map(d => symbolGenerator(d)));
+
+function symbolGenerator(symbolObj) {
+    return d3.symbol().type(symbolObj).size(200)();
+}
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -148,7 +154,8 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .attr('height', '1px')
         .attr('class', 'fobj')
         .append('xhtml:div')
-        .html(d => d.label)
+        .attr('class', 'class-label')
+        .html(d => d.label);
 
     // Remove buttons
     datapoint_group.append('text')
@@ -159,16 +166,17 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .on('click', remove_point)
         .text('\uf057');
 
-    datapoint_group.append('circle')
-        .attr('r', 8)
-        // .attr('cx', d => x(d.position[0]))
-        // .attr('cy', d => y(d.position[1]))
+    // datapoint_group.append('circle')
+    //     .attr('r', 8)
+    //     .attr('fill', d => color(d.group))
+    //     .attr('stroke', 'black')
+    //     .attr('stroke-width', d => check_if_mean(d) * 3)
+    //     .attr('class', 'point');
+
+    datapoint_group.append('path')
         .attr('fill', d => color(d.group))
-        .attr('stroke', 'black')
-        .attr('stroke-width', d => check_if_mean(d) * 3)
-    // .append('title')
-    // .text(d => 'x: ' + d.position[0].toFixed(2) + ', y:' + d.position[1].toFixed(2));
-    // .text(d => 'Label: ' + d.label)
+        .attr('d', d => shape(d.group))
+
 
     // Add the X Axis
     svg.append('g')
@@ -236,7 +244,8 @@ function draw_scatter(svg, point_data, x, y) {
         .attr('height', '1px')
         .attr('class', 'fobj')
         .append('xhtml:div')
-        .html(d => d.label)
+        .attr('class', 'class-label')
+        .html(d => d.label);
 
     // Remove buttons
     datapoint_group.append('text')
@@ -247,11 +256,15 @@ function draw_scatter(svg, point_data, x, y) {
         .on('click', remove_point)
         .text('\uf057');
 
-    datapoint_group.append('circle')
-        .attr('r', 8)
+    // datapoint_group.append('circle')
+    //     .attr('r', 8)
+    //     .attr('fill', d => color(d.group))
+    //     .attr('stroke', 'black')
+    //     .attr('stroke-width', d => check_if_mean(d) * 3)
+    //     .attr('class', 'point');
+    datapoint_group.append('path')
         .attr('fill', d => color(d.group))
-        .attr('stroke', 'black')
-        .attr('stroke-width', d => check_if_mean(d) * 3);
+        .attr('d', d => shape(d.group))
 }
 
 function add_groups(data) {
