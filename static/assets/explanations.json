@@ -3,7 +3,7 @@
     "[Step=0] The points show the PCA projection of the original word vector embeddings.",
     "[Step=1] Project points to a new space where the bias direction is aligned to the x-axis.",
     "[Step=2] From each word's embedding vector, remove the component along the bias direction.",
-    "[Step=3] Reorient the embeddings using PCA projection of the debiased word vectors."
+    "[Step=3] Reorient the embeddings using PCA projection of the debiased word vectors in the new debiased space."
   ],
   "Hard": [
     "Step1 explanation",

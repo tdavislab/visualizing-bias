@@ -84,3 +84,6 @@ _______________________________________
 - Show direction vectors for two dirs in OSCaR
 - Top two - align x-axis, show vectors
 - preloaded examples
+
+------------------------------------
+Linear debiasing - use same fitted PCA for base and debiased 

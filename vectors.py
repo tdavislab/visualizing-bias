@@ -77,43 +77,42 @@ class Debiaser:
 
 class LinearDebiaser(Debiaser):
     def debias(self, bias_direction, seedwords1, seedwords2, evalwords):
-        # debiased_vectors = self.base_emb.vectors() - self.base_emb.vectors().dot(bias_direction.reshape(-1, 1)) * bias_direction
-        # self.debiased_emb.update_vectors(self.base_emb.words(), debiased_vectors)
+        # Debias the embedding
+        debiased_vectors = self.base_emb.vectors() - self.base_emb.vectors().dot(bias_direction.reshape(-1, 1)) * bias_direction
+        self.debiased_emb.update_vectors(self.base_emb.words(), debiased_vectors)
 
+        # Step 0 - PCA of points in the original word vector space
+        # ---------------------------------------------------------
         prebase_projector = self.animator.add_projector(PCA(n_components=2), name='prebase_projector')
         prebase_projector.fit(self.base_emb, seedwords1 + seedwords2)
 
-        # Use base projector to project base embedding of seedset and evalset
         step0 = self.animator.add_anim_step()
         step0.add_points(prebase_projector.project(self.base_emb, seedwords1, group=1))
         step0.add_points(prebase_projector.project(self.base_emb, seedwords2, group=2))
         step0.add_points(prebase_projector.project(self.base_emb, evalwords, group=3))
         step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=bias_direction))
+        # ---------------------------------------------------------
 
-        # Create base_projector for base embedding
-        # self.animator.add_projector(PCA(n_components=2), name='base_projector')
+        # Step 1 - Project points such that bias direction is aligned with the x-axis
+        # ---------------------------------------------------------
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-        base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        base_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
-        # Use base projector to project base embedding of seedset and evalset
         step1 = self.animator.add_anim_step()
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
         step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
+        # ---------------------------------------------------------
 
-        # Use base_projector to project debiased embedding of seedset and evalset to 2-d
-        debiased_vectors = self.base_emb.vectors() - self.base_emb.vectors().dot(bias_direction.reshape(-1, 1)) * bias_direction
-        self.debiased_emb.update_vectors(self.base_emb.words(), debiased_vectors)
-
-        interim_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-        interim_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        # interim_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
+        # interim_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
         step2 = self.animator.add_anim_step()
-        step2.add_points(interim_projector.project(self.debiased_emb, seedwords1, group=1))
-        step2.add_points(interim_projector.project(self.debiased_emb, seedwords2, group=2))
-        step2.add_points(interim_projector.project(self.debiased_emb, evalwords, group=3))
-        step2.add_points(interim_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
+        step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
+        step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # # Create debiased_projector for debiased embeddings
         # debiased_projector = self.animator.add_projector(BiasPCA(), name='debiased_projector')
@@ -168,7 +167,7 @@ class HardDebiaser(Debiaser):
         step1.add_points(base_projector.project(self.base_emb, equalize_words[1], group=5))
         step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
-        # Remove gender component from the evalwords except gender specific words
+        # Remove gender component from the evalwords except gender-specific words
         for i, word in enumerate(self.base_emb.words()):
             # remove bias direction from dataset
             if word not in seedwords1 + seedwords2:
@@ -459,12 +458,13 @@ class BiasPCA:
         self.vectors = vectors
         self.bias_direction = bias_direction
         self.secondary_direction = secondary_direction
+        self.pca.fit(vectors)
 
     def transform(self, vectors):
         debiased_vectors = vectors - self.bias_direction
         x_component = np.expand_dims(vectors.dot(self.bias_direction), 1)
         if self.secondary_direction is None:
-            y_component = np.expand_dims(self.pca.fit_transform(vectors)[:, 1], 1)
+            y_component = np.expand_dims(self.pca.transform(vectors)[:, 1], 1)
         else:
             y_component = np.expand_dims(vectors.dot(self.secondary_direction), 1)
 
