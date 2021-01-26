@@ -143,6 +143,18 @@ class HardDebiaser(Debiaser):
         equalize_words = list(zip(*equalize_set))
 
         # Create base_projector for base embedding
+        prebase_projector = self.animator.add_projector(PCA(n_components=2), name='prebase_projector')
+        prebase_projector.fit(self.base_emb, seedwords1 + seedwords2)
+
+        # Use base projector to project base embedding of seedset and evalset
+        step0 = self.animator.add_anim_step()
+        step0.add_points(prebase_projector.project(self.base_emb, seedwords1, group=1))
+        step0.add_points(prebase_projector.project(self.base_emb, seedwords2, group=2))
+        step0.add_points(prebase_projector.project(self.base_emb, evalwords, group=3))
+        step0.add_points(prebase_projector.project(self.base_emb, equalize_words[0], group=4))
+        step0.add_points(prebase_projector.project(self.base_emb, equalize_words[1], group=5))
+        step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=bias_direction))
+
         self.animator.add_projector(BiasPCA(), name='base_projector')
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
         base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
@@ -152,20 +164,23 @@ class HardDebiaser(Debiaser):
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
-        # step1.add_points(base_projector.project(self.base_emb, equalize_words[0], group=4))
-        # step1.add_points(base_projector.project(self.base_emb, equalize_words[1], group=5))
+        step1.add_points(base_projector.project(self.base_emb, equalize_words[0], group=4))
+        step1.add_points(base_projector.project(self.base_emb, equalize_words[1], group=5))
+        step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
-        # Remove gender component from the evalwords
+        # Remove gender component from the evalwords except gender specific words
         for i, word in enumerate(self.base_emb.words()):
             # remove bias direction from dataset
-            self.debiased_emb.word_vectors[word].vector = remove_component(self.base_emb.word_vectors[word].vector, bias_direction)
+            if word not in seedwords1 + seedwords2:
+                self.debiased_emb.word_vectors[word].vector = remove_component(self.base_emb.word_vectors[word].vector, bias_direction)
 
         step2 = self.animator.add_anim_step()
         step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
         step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
         step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
-        # step2.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
-        # step2.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
+        step2.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
+        step2.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # Equalize words in equalize_set such that they are equidistant to set defining the gender direction
         for a, b in equalize_set:
@@ -176,18 +191,19 @@ class HardDebiaser(Debiaser):
                 if (self.base_emb.word_vectors[a].vector - self.base_emb.word_vectors[b].vector).dot(bias_direction) < 0:
                     z = -z
 
-                self.debiased_emb.word_vectors[a] = z * bias_direction + y
-                self.debiased_emb.word_vectors[b] = -z * bias_direction + y
+                self.debiased_emb.word_vectors[a].vector = z * bias_direction + y
+                self.debiased_emb.word_vectors[b].vector = -z * bias_direction + y
 
         step3 = self.animator.add_anim_step()
         step3.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
         step3.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
         step3.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
-        # step3.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
-        # step3.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
+        step3.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
+        step3.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
+        step3.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # Create debiased_projector for debiased embeddings
-        debiased_projector = self.animator.add_projector(BiasPCA(), name='debiased_projector')
+        debiased_projector = self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
         debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
         # Use debiased projector to project debiased embedding of seedset and evalset to 2-d
@@ -195,16 +211,31 @@ class HardDebiaser(Debiaser):
         step4.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
         step4.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step4.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
-        # step4.add_points(debiased_projector.project(self.debiased_emb, equalize_words[0], group=4))
-        # step4.add_points(debiased_projector.project(self.debiased_emb, equalize_words[1], group=5))
+        step4.add_points(debiased_projector.project(self.debiased_emb, equalize_words[0], group=4))
+        step4.add_points(debiased_projector.project(self.debiased_emb, equalize_words[1], group=5))
+        step4.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
 
 class OscarDebiaser(Debiaser):
     def debias(self, bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words):
+        orth_direction = bias_pca(self.base_emb, orth_subspace_words)
+
+        prebase_projector = self.animator.add_projector(PCA(n_components=2), name='prebase_projector')
+        prebase_projector.fit(self.base_emb, seedwords1 + seedwords2)
+
+        # Use base projector to project base embedding of seedset and evalset
+        step0 = self.animator.add_anim_step()
+        step0.add_points(prebase_projector.project(self.base_emb, seedwords1, group=1))
+        step0.add_points(prebase_projector.project(self.base_emb, seedwords2, group=2))
+        step0.add_points(prebase_projector.project(self.base_emb, evalwords, group=3))
+        step0.add_points(prebase_projector.project(self.base_emb, orth_subspace_words, group=4))
+        step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=bias_direction))
+        step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=orth_direction))
+
         # Create base_projector for base embedding
-        self.animator.add_projector(PCA(n_components=2), name='base_projector')
+        self.animator.add_projector(BiasPCA(), name='base_projector')
         base_projector = self.animator.projectors['base_projector']
-        base_projector.fit(self.base_emb, seedwords1 + seedwords2)
+        base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction)
 
         # Use base projector to project base embedding of seedset and evalset
         step1 = self.animator.add_anim_step()
@@ -212,8 +243,9 @@ class OscarDebiaser(Debiaser):
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
         step1.add_points(base_projector.project(self.base_emb, orth_subspace_words, group=4))
+        step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
+        step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=orth_direction))
 
-        orth_direction = bias_pca(self.base_emb, orth_subspace_words)
         rot_matrix = self.gs_constrained(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
 
         for word in seedwords1 + seedwords2 + evalwords + orth_subspace_words:
@@ -225,6 +257,8 @@ class OscarDebiaser(Debiaser):
         step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
         step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
         step2.add_points(base_projector.project(self.debiased_emb, orth_subspace_words, group=4))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=orth_direction))
 
         # Create debiased_projector for debiased embeddings
         self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
@@ -237,6 +271,8 @@ class OscarDebiaser(Debiaser):
         step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
         step3.add_points(debiased_projector.project(self.debiased_emb, orth_subspace_words, group=4))
+        step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=orth_direction))
 
     @staticmethod
     def correction(rotation_matrix, v1, v2, x):
@@ -386,11 +422,11 @@ class Projector:
         self.projector = projector
         self.name = name
 
-    def fit(self, embedding, words, bias_direction=None):
+    def fit(self, embedding, words, bias_direction=None, secondary_direction=None):
         if bias_direction is None:
             self.projector.fit(embedding.get_vecs(words))
         else:
-            self.projector.fit(embedding.get_vecs(words), bias_direction)
+            self.projector.fit(embedding.get_vecs(words), bias_direction=bias_direction, secondary_direction=secondary_direction)
 
     def project(self, embedding, words, group=None, direction=None):
         word_vecs_2d = []

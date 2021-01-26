@@ -516,9 +516,13 @@ $('#toggle-labels-btn').click(function () {
 $('#toggle-eval-btn').click(function () {
     if (EVAL_VISIBILITY === true) {
         d3.selectAll('.group-3').attr('hidden', true);
+        d3.selectAll('.group-4').attr('hidden', true);
+        d3.selectAll('.group-5').attr('hidden', true);
         d3.select('#toggle-eval-icon').attr('class', 'fa fa-toggle-on fa-rotate-180');
     } else {
         d3.selectAll('.group-3').attr('hidden', null);
+        d3.selectAll('.group-4').attr('hidden', null);
+        d3.selectAll('.group-5').attr('hidden', null);
         d3.selectAll('#toggle-eval-icon').attr('class', 'fa fa-toggle-on');
     }
     EVAL_VISIBILITY = !EVAL_VISIBILITY;
@@ -626,7 +630,7 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[3].click();
+        $('#algorithm-dropdown').children()[1].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {
