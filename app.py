@@ -134,7 +134,7 @@ def get_seedwords2():
     seedwords1 = utils.process_seedwords(seedwords1)
     seedwords2 = utils.process_seedwords(seedwords2)
     evalwords = utils.process_seedwords(evalwords)
-    equalize_set = [word.split('-') for word in set(utils.process_seedwords(equalize_set))]
+    equalize_set = [word.split('-') for word in utils.process_seedwords(equalize_set)][:2]
     orth_subspace_words = utils.process_seedwords(orth_subspace_words)
 
     if subspace_method == 'PCA-paired':
@@ -153,7 +153,7 @@ def get_seedwords2():
 
     elif algorithm == 'Hard':
         debiaser = HardDebiaser(app.base_embedding, app.debiased_embedding)
-        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set)
+        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set=equalize_set)
 
     elif algorithm == 'OSCaR':
         debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding)

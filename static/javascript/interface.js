@@ -229,7 +229,7 @@ function draw_axes(svg, width, height, x, y) {
 
 function draw_scatter(svg, point_data, x, y) {
     // Add the scatterplot
-    console.log('In draw scatter', point_data);
+    // console.log('In draw scatter', point_data);
 
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
@@ -310,6 +310,8 @@ function setup_animation(anim_svg, response, identifier) {
         let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
         $('#explanation-text').text(explanation_text);
 
+        response.anim_steps[step].filter(d => d.group === 0).map(d => console.log('Step =', step, ', x=', d.x, 'y=', d.y));
+
         svg.selectAll('g')
             .data(response.anim_steps[step])
             .transition()
@@ -326,6 +328,8 @@ function setup_animation(anim_svg, response, identifier) {
     try {
         // console.log('setting up stuff');
         console.log(response);
+        response.anim_steps[0].filter(d => d.group === 0).map(d => console.log('Step =', 0, ', x=', d.x, 'y=', d.y));
+
         let margin = {top: 20, right: 20, bottom: 20, left: 40};
         let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
         let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
@@ -372,7 +376,6 @@ function setup_animation(anim_svg, response, identifier) {
                 ANIMSTEP_COUNTER -= 1;
                 btn_active(step_forward_btn, true);
                 btn_active(fast_forward_btn, true);
-                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
                 update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
@@ -392,7 +395,6 @@ function setup_animation(anim_svg, response, identifier) {
                 ANIMSTEP_COUNTER = 0;
                 btn_active(step_forward_btn, true);
                 btn_active(fast_forward_btn, true);
-                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
                 update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
@@ -413,7 +415,6 @@ function setup_animation(anim_svg, response, identifier) {
                 ANIMSTEP_COUNTER += 1;
                 btn_active(step_backward_btn, true);
                 btn_active(fast_backward_btn, true);
-                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
                 update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
@@ -433,7 +434,6 @@ function setup_animation(anim_svg, response, identifier) {
                 ANIMSTEP_COUNTER = response.anim_steps.length - 1;
                 btn_active(step_backward_btn, true);
                 btn_active(fast_backward_btn, true);
-                console.log(`Loading ANIMSTEP=${ANIMSTEP_COUNTER}`)
 
                 update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
 
@@ -461,7 +461,10 @@ $('#example-dropdown a').click(function (e) {
 
 $('#algorithm-dropdown a').click(function (e) {
     let algorithm = this.innerHTML;
+    let subspace_selector = $('#subspace-dropdown-items').children();
+
     $('#algorithm-selection-button').text('Algorithm: ' + algorithm);
+    subspace_selector.removeClass('disabled');
 
     if (algorithm === 'Hard debiasing') {
         $('#equalize-holder').show();
@@ -475,7 +478,9 @@ $('#algorithm-dropdown a').click(function (e) {
         $('#input-two-col-oscar').hide();
     }
     if (algorithm === 'Iterative Null Space Projection') {
-        $('#subspace-dropdown-items').children()[4].click();
+        subspace_selector.addClass('disabled');
+        subspace_selector[4].click();
+        $(subspace_selector[4]).removeClass('disabled');
     }
 });
 
@@ -630,7 +635,7 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[1].click();
+        $('#algorithm-dropdown').children()[2].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {

@@ -118,3 +118,7 @@ svg {
     color: #717171;
     font-weight: 450;
 }
+
+.dropdown-item {
+    cursor: pointer;
+}
