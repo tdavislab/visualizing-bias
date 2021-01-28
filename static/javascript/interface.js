@@ -11,7 +11,7 @@ let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
-let ANIMATION_DURATION = 1000;
+let ANIMATION_DURATION = 3000;
 let AXIS_TOLERANCE = 0.05;
 
 // Set global color-scale
@@ -108,12 +108,21 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
     // set the ranges
-    let x = d3.scaleLinear().range([0, width - 30]);
-    let y = d3.scaleLinear().range([height, 0]);
+    // let x = d3.scaleLinear().range([0, width - 30]);
+    // let y = d3.scaleLinear().range([height, 0]);
     // x.domain(d3.extent(data, d => d.position[0])).nice();
     // y.domain(d3.extent(data, d => d.position[1])).nice();
-    x.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
-    y.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
+    // x.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
+    // y.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
+
+    // set the ranges
+    let x = d3.scaleLinear().range([0, width - 30]);
+    let y = d3.scaleLinear().range([height, 0]);
+    // x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
+    // y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
+    let axes_limits = compute_axes_limits_sym(response.anim_steps[0]);
+    x.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
+    y.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
 
     // If two-means then draw the line
     // if (mean) {
@@ -216,20 +225,21 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
 
 function draw_axes(svg, width, height, x, y) {
     // Add the X Axis
-    svg.append('g')
+    let x_axis = svg.append('g')
         .attr('transform', 'translate(0,' + height + ')')
-        .classed('axis', true)
+        .classed('x axis', true)
         .call(d3.axisBottom(x));
 
     // Add the Y Axis
-    svg.append('g')
-        .classed('axis', true)
+    let y_axis = svg.append('g')
+        .classed('y axis', true)
         .call(d3.axisLeft(y));
+
+    return [x_axis, y_axis];
 }
 
 function draw_scatter(svg, point_data, x, y) {
     // Add the scatterplot
-    // console.log('In draw scatter', point_data);
 
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
@@ -305,12 +315,40 @@ function add_groups(data) {
     return grouped_data;
 }
 
+function compute_axes_limits_sym(points) {
+    let x_coords = points.map(d => Math.abs(d.x));
+    let y_coords = points.map(d => Math.abs(d.y));
+    let x = Math.max(...x_coords), y = Math.max(...y_coords);
+    return {
+        x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
+        y_min: -y - 0.2 * y, y_max: y + 0.2 * y
+    }
+}
+
 function setup_animation(anim_svg, response, identifier) {
+    function compute_axes_limits(points) {
+        let x_coords = points.map(d => d.x);
+        let x_min = Math.min(...x_coords), x_max = Math.max(...x_coords);
+        let y_coords = points.map(d => d.y);
+        let y_min = Math.min(...y_coords), y_max = Math.max(...y_coords);
+        return {
+            x_min: x_min - 0.5 * Math.abs(x_min), x_max: x_max + 0.5 * Math.abs(x_max),
+            y_min: y_min - 0.5 * Math.abs(y_min), y_max: y_max + 0.5 * Math.abs(y_max)
+        }
+    }
+
     function update_anim_svg(svg, x_axis, y_axis, step) {
         let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
         $('#explanation-text').text(explanation_text);
 
-        response.anim_steps[step].filter(d => d.group === 0).map(d => console.log('Step =', step, ', x=', d.x, 'y=', d.y));
+        let axes_limits = compute_axes_limits_sym(response.anim_steps[step]);
+
+        let x_axis_obj = svg.select('.x');
+        let y_axis_obj = svg.select('.y');
+        x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
+        y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
+        x_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisBottom(x_axis));
+        y_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisLeft(y_axis));
 
         svg.selectAll('g')
             .data(response.anim_steps[step])
@@ -326,10 +364,6 @@ function setup_animation(anim_svg, response, identifier) {
     }
 
     try {
-        // console.log('setting up stuff');
-        console.log(response);
-        response.anim_steps[0].filter(d => d.group === 0).map(d => console.log('Step =', 0, ', x=', d.x, 'y=', d.y));
-
         let margin = {top: 20, right: 20, bottom: 20, left: 40};
         let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
         let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
@@ -337,8 +371,11 @@ function setup_animation(anim_svg, response, identifier) {
         // set the ranges
         let x_axis = d3.scaleLinear().range([0, width - 30]);
         let y_axis = d3.scaleLinear().range([height, 0]);
-        x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
-        y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
+        // x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
+        // y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
+        let axes_limits = compute_axes_limits_sym(response.anim_steps[0]);
+        x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
+        y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
 
         let step_indicator = anim_svg.append('text')
             .attr('id', 'step-indicator')
@@ -353,7 +390,8 @@ function setup_animation(anim_svg, response, identifier) {
 
         // let data = add_groups(response.anim_steps[0]);
         draw_scatter(svg, response.anim_steps[0], x_axis, y_axis);
-        draw_axes(svg, width, height, x_axis, y_axis);
+        let axes = draw_axes(svg, width, height, x_axis, y_axis);
+        let x_axes_obj = axes[0], y_axes_obj = axes[1];
         $('#explanation-text').text(response.explanations[0]);
 
         // Step back
@@ -585,8 +623,6 @@ $('#seedword-form-submit').click(function () {
                 algorithm: algorithm, subspace_method: subspace_method
             },
             success: function (response) {
-                // console.log(response);
-
                 let predebiased_svg = d3.select('#pre-debiased-svg');
                 draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', false,);
 
@@ -635,8 +671,8 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[2].click();
-        $('#subspace-dropdown-items').children()[1].click();
+        $('#algorithm-dropdown').children()[4].click();
+        $('#subspace-dropdown-items').children()[4].click();
         $('#seedword-form-submit').click();
     } catch (e) {
         console.log(e);

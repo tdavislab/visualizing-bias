@@ -86,26 +86,27 @@ _______________________________________
 - preloaded examples
 
 --------------------------------------
-- Linear debiasing - use same fitted PCA for base and debiased 
-- Add step to show subspace method computations
-- Rotation for bias direction alignment instead of flipping
-- Visual indication for camera movement vs actual projections
-- gendered words instead of names, use names in the critiques of debiasing
-- Bias direction projection
-- Checkbox for toggle buttons
-- Do not remove origin bias labels on toggle data labels
-- WEAT score in initial and debiased embedding
-- Not show all equalize set
-- Bias1 and Bias 2 -> ~concept 1 and concept 2~; subspace 1 and subspace 2, ability to name the subspaces
-- Update v to v' in Oscar step
-- Disable other subspace methods
-- INLP - always reorient to classifier at each step, should be two steps - reorient to classifier direciton and project away from it
-- Scale of x and y-axis be same, balance +-x and +-y, animate axes
+- [x] Linear debiasing - use same fitted PCA for base and debiased 
+- [x] Add step to show subspace method computations
+- [ ] Rotation for bias direction alignment instead of flipping
+- [ ] Visual indication for camera movement vs actual projections
+- [ ] gendered words instead of names, use names in the critiques of debiasing
+- [x] Bias direction projection
+- [ ] Checkbox for toggle buttons
+- [ ] Do not remove origin bias labels on toggle data labels
+- [ ] WEAT score in initial and debiased embedding
+- [x] Not show all equalize set
+- [x] Bias1 and Bias 2 -> ~concept 1 and concept 2~; subspace 1 and subspace 2 
+- [ ] ability to name the subspaces
+- [ ] Update v to v' in Oscar step
+- [x] Disable other subspace methods
+- [ ] INLP - always reorient to classifier at each step, should be two steps - reorient to classifier direciton and project away from it
+- [x] Scale of x and y-axis be same, balance +-x and +-y, animate axes
 - Low words in chosen examples
-- Slow animation
-- Rotation using dynamic projections
+- [x] Slow animation
+- [ ] Rotation using dynamic projections
 
 - Implementation of all methods
 - Send github invite
 - Meet friday 3-4
-- On update send email****
+- On update send email
