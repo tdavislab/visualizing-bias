@@ -11,7 +11,7 @@ let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
-let ANIMATION_DURATION = 3000;
+let ANIMATION_DURATION = 2000;
 let AXIS_TOLERANCE = 0.05;
 
 // Set global color-scale
