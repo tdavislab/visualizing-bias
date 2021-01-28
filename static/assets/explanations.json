@@ -1,14 +1,16 @@
 {
   "Linear": [
     "[Step=0] The points show the PCA projection of the original word vector embeddings.",
-    "[Step=1] Project points to a new space where the bias direction is aligned to the x-axis.",
+    "[Step=1] Reorient points to a new space where the bias direction is aligned to the x-axis.",
     "[Step=2] From each word's embedding vector, remove the component along the bias direction.",
     "[Step=3] Reorient the embeddings using PCA projection of the debiased word vectors in the new debiased space."
   ],
   "Hard": [
-    "Step1 explanation",
-    "Step2 explanation",
-    "Step3 explanation"
+    "[Step=0] The points show the PCA projection of the original word vector embeddings.",
+    "[Step=1] Reorient points to a new space where the bias direction is aligned to the x-axis.",
+    "[Step=2] Remove the gender component from all but the gender-specific words.",
+    "[Step=3] Modify the equalize set such that they are equidistant (?).",
+    "[Step=4] Reorient the embeddings using PCA projection of the debiased word vectors in the new debiased space."
   ],
   "OSCaR": [
     "Step1 explanation",

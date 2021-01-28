@@ -97,7 +97,7 @@ class LinearDebiaser(Debiaser):
         # Step 1 - Project points such that bias direction is aligned with the x-axis
         # ---------------------------------------------------------
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-        base_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
         step1 = self.animator.add_anim_step()
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
@@ -152,7 +152,6 @@ class HardDebiaser(Debiaser):
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
         base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
-        # Use base projector to project base embedding of seedset and evalset
         step1 = self.animator.add_anim_step()
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
@@ -463,10 +462,10 @@ class BiasPCA:
         self.vectors = vectors
         self.bias_direction = bias_direction
         self.secondary_direction = secondary_direction
-        self.pca.fit(vectors)
+        self.pca.fit(vectors - vectors.dot(self.bias_direction.reshape(-1, 1)) * self.bias_direction)
 
     def transform(self, vectors):
-        debiased_vectors = vectors - self.bias_direction
+        debiased_vectors = vectors - vectors.dot(self.bias_direction.reshape(-1, 1)) * self.bias_direction
         x_component = np.expand_dims(vectors.dot(self.bias_direction), 1)
         if self.secondary_direction is None:
             y_component = np.expand_dims(self.pca.transform(debiased_vectors)[:, 0], 1)
