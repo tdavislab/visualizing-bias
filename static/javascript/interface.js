@@ -671,8 +671,8 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[4].click();
-        $('#subspace-dropdown-items').children()[4].click();
+        $('#algorithm-dropdown').children()[1].click();
+        $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {
         console.log(e);
