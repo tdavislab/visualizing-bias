@@ -150,16 +150,16 @@ class HardDebiaser(Debiaser):
         # Step 1 - Project points such that bias direction is aligned with the x-axis
         # ---------------------------------------------------------
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-        base_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
         # Use base projector to project base embedding of seedset and evalset
         step1 = self.animator.add_anim_step()
-        step1.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
-        step1.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
-        step1.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
-        step1.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
-        step1.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
-        step1.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
+        step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
+        step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
+        step1.add_points(base_projector.project(self.base_emb, equalize_words[0], group=4))
+        step1.add_points(base_projector.project(self.base_emb, equalize_words[1], group=5))
+        step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
         # ---------------------------------------------------------
         # Step 2 - Remove gender component from the evalwords except gender-specific words
@@ -469,9 +469,9 @@ class BiasPCA:
         debiased_vectors = vectors - self.bias_direction
         x_component = np.expand_dims(vectors.dot(self.bias_direction), 1)
         if self.secondary_direction is None:
-            y_component = np.expand_dims(self.pca.transform(vectors)[:, 0], 1)
+            y_component = np.expand_dims(self.pca.transform(debiased_vectors)[:, 0], 1)
         else:
-            y_component = np.expand_dims(vectors.dot(self.secondary_direction), 1)
+            y_component = np.expand_dims(debiased_vectors.dot(self.secondary_direction), 1)
 
         return np.hstack([x_component, y_component])
 
@@ -542,14 +542,14 @@ def bias_two_means(embedding, word_list1, word_list2):
     vec1_mean, vec2_mean = np.mean(vec1, axis=0), np.mean(vec2, axis=0)
     bias_direction = (vec1_mean - vec2_mean) / np.linalg.norm(vec1_mean - vec2_mean)
 
-    return bias_direction
+    return bias_direction / np.linalg.norm(bias_direction)
 
 
 def bias_pca(embedding, word_list):
     vecs = embedding.get_vecs(word_list)
     bias_direction = PCA(n_components=2).fit(vecs).components_[0]
 
-    return bias_direction
+    return bias_direction / np.linalg.norm(bias_direction)
 
 
 def bias_pca_paired(embedding, pair1, pair2):
@@ -558,7 +558,7 @@ def bias_pca_paired(embedding, pair1, pair2):
     paired_vecs = vec1 - vec2
     bias_direction = PCA().fit(paired_vecs).components_[0]
 
-    return bias_direction
+    return bias_direction / np.linalg.norm(bias_direction)
 
 
 def bias_classification(embedding, seedwords1, seedwords2):
@@ -567,9 +567,9 @@ def bias_classification(embedding, seedwords1, seedwords2):
     y = np.concatenate([[0] * vec1.shape[0], [1] * vec2.shape[0]])
 
     classifier = SVM().fit(x, y)
-    bias_direction = classifier.coef_[0] / np.linalg.norm(classifier.coef_[0])
+    bias_direction = classifier.coef_[0]
 
-    return bias_direction
+    return bias_direction / np.linalg.norm(bias_direction)
 
 
 def get_bias_direction(embedding, seedwords1, seedwords2, subspace_method):
