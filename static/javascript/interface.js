@@ -17,7 +17,7 @@ let AXIS_TOLERANCE = 0.05;
 // Set global color-scale
 let color = d3.scaleOrdinal(d3.schemeDark2);
 let shape = d3.scaleOrdinal([0, 1, 2, 3, 4, 5, 6],
-    [d3.symbolCircle, d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolCross, d3.symbolStar].map(d => symbolGenerator(d)));
+    [d3.symbolCircle, d3.symbolCircle, d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolCross].map(d => symbolGenerator(d)));
 
 function symbolGenerator(symbolObj) {
     return d3.symbol().type(symbolObj).size(100)();

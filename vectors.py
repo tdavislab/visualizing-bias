@@ -199,12 +199,11 @@ class HardDebiaser(Debiaser):
         step3.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
         step3.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
+        # Step 4 - Reorient the embeddings back to the debiased space
         # ---------------------------------------------------------
-        # Create debiased_projector for debiased embeddings
         debiased_projector = self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
         debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
-        # Use debiased projector to project debiased embedding of seedset and evalset to 2-d
         step4 = self.animator.add_anim_step()
         step4.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
         step4.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))

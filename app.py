@@ -134,7 +134,7 @@ def get_seedwords2():
     seedwords1 = utils.process_seedwords(seedwords1)
     seedwords2 = utils.process_seedwords(seedwords2)
     evalwords = utils.process_seedwords(evalwords)
-    equalize_set = [word.split('-') for word in utils.process_seedwords(equalize_set)][:2]
+    equalize_set = [word.split('-') for word in utils.process_seedwords(equalize_set)][:5]
     orth_subspace_words = utils.process_seedwords(orth_subspace_words)
 
     if subspace_method == 'PCA-paired':
