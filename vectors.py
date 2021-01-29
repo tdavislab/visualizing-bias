@@ -359,7 +359,6 @@ class OscarDebiaser(Debiaser):
 
             orth_direction_prime = basis(np.vstack([bias_direction, orth_direction]))
 
-
             step2 = self.animator.add_anim_step()
             step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
             step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
@@ -501,18 +500,25 @@ class INLPDebiaser(Debiaser):
         step0.add_points(prebase_projector.project(self.base_emb, evalwords, group=3))
         step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
-        x_projected = self.base_emb.get_vecs(seedwords1 + seedwords2).copy()
-        x_eval = self.base_emb.get_vecs(evalwords).copy()
+        base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
+        base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+
+        step1 = self.animator.add_anim_step(camera_step=True)
+        step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
+        step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
+        step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
+        step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
         y = np.array([0] * len(seedwords1) + [1] * len(seedwords2))
         rowspace_projections = []
 
-        base_projector = self.animator.add_projector(PCA(n_components=2), name='base_projector')
-        base_projector.fit(self.base_emb, seedwords1 + seedwords2)
-
         for iter_idx in range(num_iters):
+            x_projected = self.debiased_emb.get_vecs(seedwords1 + seedwords2).copy()
+            x_eval = self.debiased_emb.get_vecs(evalwords).copy()
+
             classifier_i = SVM().fit(x_projected, y)
             weights = np.expand_dims(classifier_i.coef_[0], 0)
+            bias_direction = weights[0] / np.linalg.norm(bias_direction)
 
             if np.linalg.norm(weights) < 1e-10:
                 break
@@ -530,13 +536,22 @@ class INLPDebiaser(Debiaser):
             # self.debiased_emb.normalize(center=True)
 
             base_projector = self.animator.add_projector(PCA(n_components=2), name='base_projector')
-            base_projector.fit(self.base_emb, seedwords1 + seedwords2)
+            base_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
             step_iter = self.animator.add_anim_step()
             step_iter.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
             step_iter.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
             step_iter.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
-            step_iter.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=weights[0]))
+            step_iter.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+
+            align_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
+            align_projector.fit(self.debiased_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+
+            step1 = self.animator.add_anim_step(camera_step=True)
+            step1.add_points(align_projector.project(self.debiased_emb, seedwords1, group=1))
+            step1.add_points(align_projector.project(self.debiased_emb, seedwords2, group=2))
+            step1.add_points(align_projector.project(self.debiased_emb, evalwords, group=3))
+            step1.add_points(align_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
         debiased_projector = self.animator.projectors['debiased_projector']
@@ -546,7 +561,7 @@ class INLPDebiaser(Debiaser):
         step_final.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
         step_final.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step_final.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
-        step_final.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=weights[0]))
+        step_final.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
     @staticmethod
     def get_rowspace_projection(W):

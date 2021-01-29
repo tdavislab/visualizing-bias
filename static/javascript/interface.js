@@ -664,6 +664,11 @@ $('#seedword-form-submit').click(function () {
         svg_cleanup();
         ANIMSTEP_COUNTER = 0;
 
+        $('#toggle-eval-chk').prop('checked', true);
+        $('#toggle-mean-chk').prop('checked', true);
+        $('#data-label-chk').prop('checked', true);
+        $('#remove-points-chk').prop('checked', true);
+
         let seedwords1 = $('#seedword-text-1').val();
         let seedwords2 = $('#seedword-text-2').val();
         let evalwords = $('#evaluation-list').val();
