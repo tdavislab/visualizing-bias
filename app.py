@@ -157,7 +157,7 @@ def get_seedwords2():
 
     elif algorithm == 'OSCaR':
         debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding)
-        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words)
+        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
 
     elif algorithm == 'INLP':
         debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)

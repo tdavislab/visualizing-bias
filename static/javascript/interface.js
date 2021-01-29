@@ -11,7 +11,7 @@ let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
-let ANIMATION_DURATION = 2000;
+let ANIMATION_DURATION = 3000;
 let AXIS_TOLERANCE = 0.05;
 
 // Set global color-scale
@@ -120,7 +120,12 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     let y = d3.scaleLinear().range([height, 0]);
     // x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
     // y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
-    let axes_limits = compute_axes_limits_sym(response.anim_steps[0]);
+    let axes_limits;
+    if (debiased) {
+        axes_limits = compute_axes_limits_sym(response.anim_steps[response.anim_steps.length - 1]);
+    } else {
+        axes_limits = compute_axes_limits_sym(response.anim_steps[0]);
+    }
     x.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
     y.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
 
@@ -320,8 +325,9 @@ function compute_axes_limits_sym(points) {
     let y_coords = points.map(d => Math.abs(d.y));
     let x = Math.max(...x_coords), y = Math.max(...y_coords);
     return {
-        x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
-        y_min: -y - 0.2 * y, y_max: y + 0.2 * y
+        // x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
+        // y_min: -y - 0.2 * y, y_max: y + 0.2 * y
+        x_min: -1.1, x_max: 1.1, y_min: -1.1, y_max: 1.1
     }
 }
 
@@ -545,7 +551,7 @@ $('#subspace-dropdown a').click(function (e) {
 });
 
 // Functionality for various toggle buttons
-$('#toggle-labels-btn').click(function () {
+$('#data-label-chk').click(function () {
     if (LABEL_VISIBILITY === true) {
         d3.selectAll('.fobj').attr('hidden', true);
         d3.select('#toggle-label-icon').attr('class', 'fa fa-toggle-on fa-rotate-180');
@@ -556,7 +562,7 @@ $('#toggle-labels-btn').click(function () {
     LABEL_VISIBILITY = !LABEL_VISIBILITY;
 });
 
-$('#toggle-eval-btn').click(function () {
+$('#toggle-eval-chk').click(function () {
     if (EVAL_VISIBILITY === true) {
         d3.selectAll('.group-3').attr('hidden', true);
         d3.selectAll('.group-4').attr('hidden', true);
@@ -571,7 +577,7 @@ $('#toggle-eval-btn').click(function () {
     EVAL_VISIBILITY = !EVAL_VISIBILITY;
 });
 
-$('#toggle-mean-btn').click(function () {
+$('#toggle-mean-chk').click(function () {
     if (MEAN_VISIBILITY === true) {
         d3.selectAll('#bias-direction-line').attr('hidden', true);
         d3.selectAll('.group-0').attr('hidden', true);
@@ -584,7 +590,7 @@ $('#toggle-mean-btn').click(function () {
     MEAN_VISIBILITY = !MEAN_VISIBILITY;
 });
 
-$('#remove-points-btn').click(function () {
+$('#remove-points-chk').click(function () {
     let cross_buttons = d3.selectAll('.cross-button')
     if (REMOVE_POINTS === true) {
         cross_buttons.attr('visibility', 'hidden');

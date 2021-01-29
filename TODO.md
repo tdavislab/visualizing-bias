@@ -110,3 +110,8 @@ _______________________________________
 - Send github invite
 - Meet friday 3-4
 - On update send email
+
+-----------------------------------
+- [ ] Toggle buttons
+- [ ] Camera movement indicator
+- [ ] INLP break down classifier finding and rotation step

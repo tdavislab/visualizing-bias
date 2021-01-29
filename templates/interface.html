@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
   <meta charset="UTF-8">
   <title>Visualizing Word Vector Biases</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../static/css/style.css">
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
@@ -63,7 +64,7 @@
     <div id="top-bar" class="col-8">
       <div id="input-two-col" class="input-group">
         <div class="input-group-prepend">
-          <span class="input-group-text" id="concept-label-1">Concept 1</span>
+          <input type="text" class="input-group-text" id="concept-label-1" value="Concept 1"></input>
         </div>
         <input id="seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
 
@@ -72,7 +73,7 @@
 
       <div id="input-two-col-oscar" class="input-group mt-3">
         <div class="input-group-prepend">
-          <span class="input-group-text" id="concept-label-2">Concept 2</span>
+          <input type="text" class="input-group-text" id="concept-label-2" value="Concept 2"></input>
         </div>
         <input id="oscar-seedword-text-1" class="form-control input-group-text" type="text" placeholder="Add seed set 1...">
         {#        <input id="oscar-seedword-text-2" class="form-control input-group-text" type="text" placeholder="Add seed set 2...">#}
@@ -82,15 +83,15 @@
 
   <div id="equalize-holder" class="mt-3 input-group" style="display: None">
     <div class="input-group-prepend">
-          <span class="input-group-text" id="equalize-label">Equalize set</span>
-        </div>
+      <span class="input-group-text" id="equalize-label">Equalize set</span>
+    </div>
     <input id="equalize-list" class="form-control input-group-text" type="text" placeholder="Add equalize set for Hard Debiasing...">
   </div>
 
   <div id="eval-and-run" class=" mt-3 input-group">
     <div class="input-group-prepend">
-          <span class="input-group-text" id="eval-label">Evaluation set</span>
-        </div>
+      <span class="input-group-text" id="eval-label">Evaluation set</span>
+    </div>
     <input id="evaluation-list" class="form-control input-group-text" type="text" placeholder="Add evaluation set...">
     <div class="input-group-append">
       <button id="seedword-form-submit" class="btn btn-outline-primary">Run</button>
@@ -152,27 +153,31 @@
     </div>
   </div>
 
-  <div id="toolbar" class="row justify-content-center">
+  <div id="toolbar" class="m-1 row justify-content-center">
     <div class="btn-toolbar">
-      <button id='toggle-labels-btn' class="btn btn-success mr-2" disabled>
-        <i id='toggle-label-icon' class="fa fa-toggle-on" aria-hidden="true"></i>
-        <span>Data labels</span>
-      </button>
+      <div id='toggle-labels-btn' class="custom-switch custom-control mr-4" disabled>
+        {#        <i id='toggle-label-icon' class="fa fa-toggle-on" aria-hidden="true"></i>#}
+        <input type="checkbox" id="data-label-chk" class="custom-control-input">
+        <label for="data-label-chk" class="custom-control-label">Data labels</label>
+      </div>
 
-      <button id='remove-points-btn' class="btn btn-success mr-2" disabled>
-        <i class="fa fa-trash" aria-hidden="true"></i>
-        <span>Remove points</span>
-      </button>
+      <div id='remove-points-btn' class="custom-switch custom-control mr-4" disabled>
+        {#        <i class="fa fa-trash" aria-hidden="true"></i>#}
+        <input type="checkbox" id="remove-points-chk" class="custom-control-input">
+        <label for="remove-points-chk" class="custom-control-label">Remove points</label>
+      </div>
 
-      <button id='toggle-mean-btn' class="btn btn-success mr-2" disabled>
-        <i id='toggle-mean-icon' class="fa fa-toggle-on" aria-hidden="true"></i>
-        <span>Show bias direction</span>
-      </button>
+      <dib id='toggle-mean-btn' class="custom-switch custom-control mr-4" disabled>
+        {#        <i id='toggle-mean-icon' class="fa fa-toggle-on" aria-hidden="true"></i>#}
+        <input type="checkbox" id="toggle-mean-chk" class="custom-control-input">
+        <label for="toggle-mean-chk" class="custom-control-label">Show bias direction</label>
+      </dib>
 
-      <button id='toggle-eval-btn' class="btn btn-success mr-2" disabled>
-        <i id='toggle-eval-icon' class="fa fa-toggle-on" aria-hidden="true"></i>
-        <span>Show evaluation points</span>
-      </button>
+      <div id='toggle-eval-btn' class="custom-switch custom-control mr-4" disabled>
+        {#        <i id='toggle-eval-icon' class="fa fa-toggle-on" aria-hidden="true"></i>#}
+        <input type="checkbox" id="toggle-eval-chk" class="custom-control-input">
+        <label for="toggle-eval-chk" class="custom-control-label">Show evaluation points</label>
+      </div>
     </div>
   </div>
 
@@ -192,6 +197,7 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.0/Chart.js"></script>
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 <script src="../static/javascript/d3.v5.min.js"></script>
 <script src="../static/javascript/interface.js"></script>
 </html>
