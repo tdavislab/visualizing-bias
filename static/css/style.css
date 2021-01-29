@@ -1,11 +1,13 @@
 body {
-    height: 100vh;
+    height: 95vh;
+    overflow: hidden;
 }
 
 canvas {
     /*background-color: #000000;*/
     width: 100%;
     height: auto;
+
 }
 
 svg {

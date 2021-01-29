@@ -247,7 +247,6 @@ function draw_axes(svg, width, height, x, y) {
 
 function draw_scatter(svg, point_data, x, y) {
     // Add the scatterplot
-
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
         .enter()
@@ -334,58 +333,73 @@ function compute_axes_limits_sym(points) {
 }
 
 function setup_animation(anim_svg, response, identifier) {
-    console.log(response)
-    function compute_axes_limits(points) {
-        let x_coords = points.map(d => d.x);
-        let x_min = Math.min(...x_coords), x_max = Math.max(...x_coords);
-        let y_coords = points.map(d => d.y);
-        let y_min = Math.min(...y_coords), y_max = Math.max(...y_coords);
-        return {
-            x_min: x_min - 0.5 * Math.abs(x_min), x_max: x_max + 0.5 * Math.abs(x_max),
-            y_min: y_min - 0.5 * Math.abs(y_min), y_max: y_max + 0.5 * Math.abs(y_max)
-        }
-    }
-
-    function update_anim_svg(svg, x_axis, y_axis, step, camera_step=false) {
-        let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
-        $('#explanation-text').text(explanation_text);
-
-        let axes_limits = compute_axes_limits_sym(response.anim_steps[step]);
-
-        let x_axis_obj = svg.select('.x');
-        let y_axis_obj = svg.select('.y');
-        x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
-        y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
-        x_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisBottom(x_axis));
-        y_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisLeft(y_axis));
-
-        svg.selectAll('g')
-            .data(response.anim_steps[step])
-            .transition()
-            .duration(ANIMATION_DURATION)
-            .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
-
-        let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
-        if (camera_step) {
-            svg.select('#bias-direction-line')
-                .transition()
-                .duration(ANIMATION_DURATION)
-                .on('start', function () {
-                    d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
-                })
-                .on('end', function () {
-                    d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
-                })
-                .attr('d', d3.line()(arrow_endpoints));
-        } else {
-            svg.select('#bias-direction-line')
-                .transition()
-                .duration(ANIMATION_DURATION)
-                .attr('d', d3.line()(arrow_endpoints));
-        }
-    }
-
     try {
+        console.log(response);
+
+        function compute_axes_limits(points) {
+            let x_coords = points.map(d => d.x);
+            let x_min = Math.min(...x_coords), x_max = Math.max(...x_coords);
+            let y_coords = points.map(d => d.y);
+            let y_min = Math.min(...y_coords), y_max = Math.max(...y_coords);
+            return {
+                x_min: x_min - 0.5 * Math.abs(x_min), x_max: x_max + 0.5 * Math.abs(x_max),
+                y_min: y_min - 0.5 * Math.abs(y_min), y_max: y_max + 0.5 * Math.abs(y_max)
+            }
+        }
+
+        function update_anim_svg(svg, x_axis, y_axis, step, camera_step = false) {
+            let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
+            $('#explanation-text').text(explanation_text);
+
+            let axes_limits = compute_axes_limits_sym(response.anim_steps[step]);
+
+            svg.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+
+            let x_axis_obj = svg.select('.x');
+            let y_axis_obj = svg.select('.y');
+            x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
+            y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
+            x_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisBottom(x_axis));
+            y_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisLeft(y_axis));
+
+            svg.selectAll('g')
+                .data(response.anim_steps[step])
+                .transition()
+                .duration(ANIMATION_DURATION)
+                .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+
+            let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
+            if (camera_step) {
+                svg.select('#bias-direction-line')
+                    .transition()
+                    .duration(ANIMATION_DURATION)
+                    .on('start', function () {
+                        d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
+                    })
+                    .on('end', function () {
+                        d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
+                    })
+                    .attr('d', d3.line()(arrow_endpoints));
+            } else {
+                svg.select('#bias-direction-line')
+                    .transition()
+                    .duration(ANIMATION_DURATION)
+                    .attr('d', d3.line()(arrow_endpoints));
+            }
+        }
+
+        function zoom_actions() {
+            console.log(d3.event.transform);
+            var newX = d3.event.transform.rescaleX(x_axis);
+            var newY = d3.event.transform.rescaleY(y_axis);
+            // anim_svg.select('.x').call(d3.axisBottom(newX));
+            // anim_svg.select('.y').call(d3.axisLeft(newY));
+            // anim_svg.selectAll('.datapoint-group').attr('transform', d => 'translate(' + newX(d.x) + ',' + newY(d.y) + ')');
+            // anim_svg.selectAll('#bias-direction-line').
+            anim_svg.select('#animationgroup').attr('transform', d3.event.transform);
+        }
+
         let margin = {top: 20, right: 20, bottom: 20, left: 40};
         let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
         let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
@@ -413,9 +427,17 @@ function setup_animation(anim_svg, response, identifier) {
             .attr('text-anchor', 'end')
             .text('Step=0');
 
+
         let svg = anim_svg.append('g')
             .attr('id', identifier + 'group')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        // let zoom = d3.zoom()
+        //     .scaleExtent([.5, 20])
+        //     .extent([[0, 0], [width, height]])
+        //     .on("zoom", zoom_actions);
+        //
+        // svg.call(zoom);
 
         // let data = add_groups(response.anim_steps[0]);
         draw_scatter(svg, response.anim_steps[0], x_axis, y_axis);
