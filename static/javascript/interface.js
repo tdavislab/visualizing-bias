@@ -366,7 +366,7 @@ function setup_animation(anim_svg, response, identifier) {
             .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
 
         let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
-        if (response.camera_steps[ANIMSTEP_COUNTER]) {
+        if (camera_step) {
             svg.select('#bias-direction-line')
                 .transition()
                 .duration(ANIMATION_DURATION)
@@ -444,7 +444,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(step_forward_btn, true);
                 btn_active(fast_forward_btn, true);
 
-                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, response.camera_steps[ANIMSTEP_COUNTER + 1]);
 
                 if (ANIMSTEP_COUNTER === 0) {
                     btn_active(step_backward_btn, false);
@@ -463,7 +463,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(step_forward_btn, true);
                 btn_active(fast_forward_btn, true);
 
-                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, true);
 
                 if (ANIMSTEP_COUNTER === 0) {
                     btn_active(step_backward_btn, false);
@@ -483,7 +483,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(step_backward_btn, true);
                 btn_active(fast_backward_btn, true);
 
-                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, response.camera_steps[ANIMSTEP_COUNTER]);
 
                 if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
                     btn_active(step_forward_btn, false);
@@ -502,7 +502,7 @@ function setup_animation(anim_svg, response, identifier) {
                 btn_active(step_backward_btn, true);
                 btn_active(fast_backward_btn, true);
 
-                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER);
+                update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, true);
 
                 if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
                     btn_active(step_forward_btn, false);
