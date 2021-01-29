@@ -112,7 +112,7 @@
     </div>
   </div>
 
-  <div id="projections" class="row m-3" style="height: 45% !important;">
+  <div id="projections" class="row m-3" style="height: 50% !important;">
     <div class="col-md-4" align="center">
       <h5 class="text-center">Initial Embedding</h5>
       <svg id="pre-debiased-svg" width="100%" height="100%"></svg>
@@ -158,25 +158,25 @@
     <div class="btn-toolbar">
       <div id='toggle-labels-btn' class="custom-switch custom-control mr-4" disabled>
         {#        <i id='toggle-label-icon' class="fa fa-toggle-on" aria-hidden="true"></i>#}
-        <input type="checkbox" id="data-label-chk" class="custom-control-input">
+        <input type="checkbox" id="data-label-chk" class="custom-control-input" checked>
         <label for="data-label-chk" class="custom-control-label">Data labels</label>
       </div>
 
       <div id='remove-points-btn' class="custom-switch custom-control mr-4" disabled>
         {#        <i class="fa fa-trash" aria-hidden="true"></i>#}
-        <input type="checkbox" id="remove-points-chk" class="custom-control-input">
+        <input type="checkbox" id="remove-points-chk" class="custom-control-input" checked>
         <label for="remove-points-chk" class="custom-control-label">Remove points</label>
       </div>
 
       <dib id='toggle-mean-btn' class="custom-switch custom-control mr-4" disabled>
         {#        <i id='toggle-mean-icon' class="fa fa-toggle-on" aria-hidden="true"></i>#}
-        <input type="checkbox" id="toggle-mean-chk" class="custom-control-input">
+        <input type="checkbox" id="toggle-mean-chk" class="custom-control-input" checked>
         <label for="toggle-mean-chk" class="custom-control-label">Show bias direction</label>
       </dib>
 
       <div id='toggle-eval-btn' class="custom-switch custom-control mr-4" disabled>
         {#        <i id='toggle-eval-icon' class="fa fa-toggle-on" aria-hidden="true"></i>#}
-        <input type="checkbox" id="toggle-eval-chk" class="custom-control-input">
+        <input type="checkbox" id="toggle-eval-chk" class="custom-control-input" checked>
         <label for="toggle-eval-chk" class="custom-control-label">Show evaluation points</label>
       </div>
     </div>

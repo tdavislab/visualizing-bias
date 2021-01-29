@@ -61,9 +61,13 @@ class Embedding:
         for i, word in enumerate(words):
             self.word_vectors[word].vector = new_vectors[i]
 
-    def normalize(self):
+    def normalize(self, center=False):
         vectors = self.vectors()
-        normed_vectors = vectors / np.linalg.norm(vectors)
+        if center:
+            mean = np.mean(vectors, axis=0)
+            normed_vectors = (vectors - mean) / np.linalg.norm(vectors - mean)
+        else:
+            normed_vectors = vectors / np.linalg.norm(vectors)
         self.update_vectors(self.words(), normed_vectors)
 
 
@@ -284,6 +288,7 @@ class OscarDebiaser(Debiaser):
             # self.debiased_emb.normalize()
             # orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
             # orth_direction_prime = orth_direction_prime / np.linalg.norm(orth_direction_prime)
+            # self.debiased_emb.normalize()
 
             base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
             base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction_prime)
@@ -295,6 +300,7 @@ class OscarDebiaser(Debiaser):
             step2.add_points(base_projector.project(self.debiased_emb, orth_subspace_words, group=4))
             step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
             step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=orth_direction_prime, concept_idx=2))
+            print(self.base_emb.get('scientist').vector, self.debiased_emb.get('scientist').vector)
 
             # ---------------------------------------------------------
             # Step 3 - Project points such the orth direction is aligned with y-axis
@@ -352,6 +358,7 @@ class OscarDebiaser(Debiaser):
                                                                               self.base_emb.word_vectors[word].vector)
 
             orth_direction_prime = basis(np.vstack([bias_direction, orth_direction]))
+
 
             step2 = self.animator.add_anim_step()
             step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
@@ -506,6 +513,10 @@ class INLPDebiaser(Debiaser):
         for iter_idx in range(num_iters):
             classifier_i = SVM().fit(x_projected, y)
             weights = np.expand_dims(classifier_i.coef_[0], 0)
+
+            if np.linalg.norm(weights) < 1e-10:
+                break
+
             p_rowspace_wi = self.get_rowspace_projection(weights)
             rowspace_projections.append(p_rowspace_wi)
 
@@ -516,7 +527,10 @@ class INLPDebiaser(Debiaser):
 
             self.debiased_emb.update_vectors(seedwords1 + seedwords2, x_projected)
             self.debiased_emb.update_vectors(evalwords, x_eval)
-            # self.debiased_emb.normalize()
+            # self.debiased_emb.normalize(center=True)
+
+            base_projector = self.animator.add_projector(PCA(n_components=2), name='base_projector')
+            base_projector.fit(self.base_emb, seedwords1 + seedwords2)
 
             step_iter = self.animator.add_anim_step()
             step_iter.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))

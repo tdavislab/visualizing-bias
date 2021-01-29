@@ -332,20 +332,20 @@ function compute_axes_limits_sym(points) {
     }
 }
 
+function compute_axes_limits(points) {
+    let x_coords = points.map(d => d.x);
+    let x_min = Math.min(...x_coords), x_max = Math.max(...x_coords);
+    let y_coords = points.map(d => d.y);
+    let y_min = Math.min(...y_coords), y_max = Math.max(...y_coords);
+    return {
+        x_min: x_min - 0.2 * Math.abs(x_min), x_max: x_max + 0.2 * Math.abs(x_max),
+        y_min: y_min - 0.2 * Math.abs(y_min), y_max: y_max + 0.2 * Math.abs(y_max)
+    }
+}
+
 function setup_animation(anim_svg, response, identifier) {
     try {
         console.log(response);
-
-        function compute_axes_limits(points) {
-            let x_coords = points.map(d => d.x);
-            let x_min = Math.min(...x_coords), x_max = Math.max(...x_coords);
-            let y_coords = points.map(d => d.y);
-            let y_min = Math.min(...y_coords), y_max = Math.max(...y_coords);
-            return {
-                x_min: x_min - 0.5 * Math.abs(x_min), x_max: x_max + 0.5 * Math.abs(x_max),
-                y_min: y_min - 0.5 * Math.abs(y_min), y_max: y_max + 0.5 * Math.abs(y_max)
-            }
-        }
 
         function update_anim_svg(svg, x_axis, y_axis, step, camera_step = false) {
             let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
@@ -354,7 +354,6 @@ function setup_animation(anim_svg, response, identifier) {
             let axes_limits = compute_axes_limits_sym(response.anim_steps[step]);
 
             svg.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
 
             let x_axis_obj = svg.select('.x');
             let y_axis_obj = svg.select('.y');
@@ -387,6 +386,7 @@ function setup_animation(anim_svg, response, identifier) {
                     .duration(ANIMATION_DURATION)
                     .attr('d', d3.line()(arrow_endpoints));
             }
+            d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
         }
 
         function zoom_actions() {
