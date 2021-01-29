@@ -104,7 +104,7 @@ class LinearDebiaser(Debiaser):
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
         base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
-        step1 = self.animator.add_anim_step()
+        step1 = self.animator.add_anim_step(camera_step=True)
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
@@ -126,7 +126,7 @@ class LinearDebiaser(Debiaser):
         debiased_projector = self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
         debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
-        step3 = self.animator.add_anim_step()
+        step3 = self.animator.add_anim_step(camera_step=True)
         step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
         step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
@@ -157,7 +157,7 @@ class HardDebiaser(Debiaser):
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
         base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
 
-        step1 = self.animator.add_anim_step()
+        step1 = self.animator.add_anim_step(camera_step=True)
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
@@ -209,7 +209,7 @@ class HardDebiaser(Debiaser):
         debiased_projector = self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
         debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
-        step4 = self.animator.add_anim_step()
+        step4 = self.animator.add_anim_step(camera_step=True)
         step4.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
         step4.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step4.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
@@ -250,7 +250,7 @@ class OscarDebiaser(Debiaser):
             base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
             base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction)
 
-            step1 = self.animator.add_anim_step()
+            step1 = self.animator.add_anim_step(camera_step=True)
             step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
             step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
             step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
@@ -300,7 +300,7 @@ class OscarDebiaser(Debiaser):
             debiased_projector = self.animator.projectors['debiased_projector']
             debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
-            step3 = self.animator.add_anim_step()
+            step3 = self.animator.add_anim_step(camera_step=True)
             step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
             step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
             step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
@@ -331,7 +331,7 @@ class OscarDebiaser(Debiaser):
             base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
             base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction)
 
-            step1 = self.animator.add_anim_step()
+            step1 = self.animator.add_anim_step(camera_step=True)
             step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
             step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
             step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
@@ -365,7 +365,7 @@ class OscarDebiaser(Debiaser):
             debiased_projector = self.animator.projectors['debiased_projector']
             debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
-            step3 = self.animator.add_anim_step()
+            step3 = self.animator.add_anim_step(camera_step=True)
             step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
             step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
             step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
@@ -513,7 +513,7 @@ class INLPDebiaser(Debiaser):
 
             self.debiased_emb.update_vectors(seedwords1 + seedwords2, x_projected)
             self.debiased_emb.update_vectors(evalwords, x_eval)
-            self.debiased_emb.normalize()
+            # self.debiased_emb.normalize()
 
             step_iter = self.animator.add_anim_step()
             step_iter.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
@@ -525,7 +525,7 @@ class INLPDebiaser(Debiaser):
         debiased_projector = self.animator.projectors['debiased_projector']
         debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
 
-        step_final = self.animator.add_anim_step()
+        step_final = self.animator.add_anim_step(camera_step=True)
         step_final.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
         step_final.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step_final.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
@@ -653,8 +653,9 @@ class WordVec2D:
 
 
 class AnimStep:
-    def __init__(self):
+    def __init__(self, camera_step=False):
         self.points = []
+        self.camera_step = camera_step
 
     def add_points(self, word_vecs_2d):
         self.points += word_vecs_2d
@@ -669,8 +670,8 @@ class Animator:
         self.projectors[name] = Projector(projector, name)
         return self.projectors[name]
 
-    def add_anim_step(self):
-        new_step = AnimStep()
+    def add_anim_step(self, camera_step=False):
+        new_step = AnimStep(camera_step=camera_step)
         self.anim_steps.append(new_step)
         return new_step
 
@@ -680,6 +681,13 @@ class Animator:
             payload.append([point.to_dict() for point in step.points])
 
         return payload
+
+    def get_camera_steps(self):
+        camera_steps = []
+        for step in self.anim_steps:
+            camera_steps.append(step.camera_step)
+
+        return camera_steps
 
     def get_bounds(self):
         vectors = []

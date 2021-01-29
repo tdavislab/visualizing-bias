@@ -154,10 +154,12 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .attr('transform', d => 'translate(' + x(d.x) + ',' + y(d.y) + ')')
         .on('mouseover', function () {
             parent_svg.selectAll('g.datapoint-group').classed('translucent', true);
+            parent_svg.select('#bias-direction-line').classed('translucent', true);
             d3.select(this).classed('translucent', false);
         })
         .on('mouseout', function () {
             parent_svg.selectAll('g.datapoint-group').classed('translucent', false);
+            parent_svg.selectAll('#bias-direction-line').classed('translucent', false);
         })
 
     // Class label
@@ -332,6 +334,7 @@ function compute_axes_limits_sym(points) {
 }
 
 function setup_animation(anim_svg, response, identifier) {
+    console.log(response)
     function compute_axes_limits(points) {
         let x_coords = points.map(d => d.x);
         let x_min = Math.min(...x_coords), x_max = Math.max(...x_coords);
@@ -343,7 +346,7 @@ function setup_animation(anim_svg, response, identifier) {
         }
     }
 
-    function update_anim_svg(svg, x_axis, y_axis, step) {
+    function update_anim_svg(svg, x_axis, y_axis, step, camera_step=false) {
         let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
         $('#explanation-text').text(explanation_text);
 
@@ -363,10 +366,23 @@ function setup_animation(anim_svg, response, identifier) {
             .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
 
         let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
-        svg.select('#bias-direction-line')
-            .transition()
-            .duration(ANIMATION_DURATION)
-            .attr('d', d3.line()(arrow_endpoints));
+        if (response.camera_steps[ANIMSTEP_COUNTER]) {
+            svg.select('#bias-direction-line')
+                .transition()
+                .duration(ANIMATION_DURATION)
+                .on('start', function () {
+                    d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
+                })
+                .on('end', function () {
+                    d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
+                })
+                .attr('d', d3.line()(arrow_endpoints));
+        } else {
+            svg.select('#bias-direction-line')
+                .transition()
+                .duration(ANIMATION_DURATION)
+                .attr('d', d3.line()(arrow_endpoints));
+        }
     }
 
     try {
@@ -383,10 +399,17 @@ function setup_animation(anim_svg, response, identifier) {
         x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
         y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
 
+        let camera_icon = anim_svg.append('image')
+            .attr('id', 'camera-indicator')
+            .attr('x', 50)
+            .attr('y', height - 30)
+            .attr('href', 'static/assets/camera.svg')
+            .attr('visibility', 'hidden')
+
         let step_indicator = anim_svg.append('text')
             .attr('id', 'step-indicator')
             .attr('x', width)
-            .attr('y', 20)
+            .attr('y', 25)
             .attr('text-anchor', 'end')
             .text('Step=0');
 
@@ -620,13 +643,15 @@ $('#seedword-form-submit').click(function () {
         let orth_subspace = $('#oscar-seedword-text-1').val();
         let algorithm = $('#algorithm-selection-button').text();
         let subspace_method = $('#subspace-selection-button').text();
+        let concept1_name = $('#concept-label-1').val();
+        let concept2_name = $('#concept-label-2').val();
 
         $.ajax({
             type: 'POST',
             url: '/seedwords2',
             data: {
                 seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, equalize: equalize, orth_subspace: orth_subspace,
-                algorithm: algorithm, subspace_method: subspace_method
+                algorithm: algorithm, subspace_method: subspace_method, concept1_name: concept1_name, concept2_name: concept2_name
             },
             success: function (response) {
                 let predebiased_svg = d3.select('#pre-debiased-svg');

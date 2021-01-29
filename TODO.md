@@ -89,16 +89,16 @@ _______________________________________
 - [x] Linear debiasing - use same fitted PCA for base and debiased 
 - [x] Add step to show subspace method computations
 - [ ] Rotation for bias direction alignment instead of flipping
-- [ ] Visual indication for camera movement vs actual projections
+- [x] Visual indication for camera movement vs actual projections
 - [ ] gendered words instead of names, use names in the critiques of debiasing
 - [x] Bias direction projection
-- [ ] Checkbox for toggle buttons
+- [x] Checkbox for toggle buttons
 - [ ] Do not remove origin bias labels on toggle data labels
 - [ ] WEAT score in initial and debiased embedding
 - [x] Not show all equalize set
 - [x] Bias1 and Bias 2 -> ~concept 1 and concept 2~; subspace 1 and subspace 2 
 - [ ] ability to name the subspaces
-- [ ] Update v to v' in Oscar step
+- [x] Update v to v' in Oscar step
 - [x] Disable other subspace methods
 - [ ] INLP - always reorient to classifier at each step, should be two steps - reorient to classifier direciton and project away from it
 - [x] Scale of x and y-axis be same, balance +-x and +-y, animate axes
@@ -112,6 +112,7 @@ _______________________________________
 - On update send email
 
 -----------------------------------
-- [ ] Toggle buttons
-- [ ] Camera movement indicator
+- [x] Toggle buttons
+- [x] Camera movement indicator
+- [x] Custom names for subspaces
 - [ ] INLP break down classifier finding and rotation step

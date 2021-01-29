@@ -35,6 +35,15 @@ def reload_embeddings():
     # app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
 
+def rename_concepts(anim_steps, c1_name, c2_name):
+    for step in anim_steps:
+        for point in step:
+            if point['label'] == 'Concept1':
+                point['label'] = c1_name.replace(' ', '_')
+            if point['label'] == 'Concept2':
+                point['label'] = c2_name.replace(' ', '_')
+
+
 @app.route('/')
 def index():
     return render_template('interface.html')
@@ -128,6 +137,7 @@ def get_seedwords2():
     seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
     equalize_set = request.values['equalize']
     orth_subspace_words = request.values['orth_subspace']
+    concept1_name, concept2_name = request.values['concept1_name'], request.values['concept2_name']
 
     algorithm, subspace_method = ALGORITHMS[request.values['algorithm']], SUBSPACE_METHODS[request.values['subspace_method']]
 
@@ -164,11 +174,14 @@ def get_seedwords2():
         debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
 
     anim_steps = debiaser.animator.convert_to_payload()
+    rename_concepts(anim_steps, concept1_name, concept2_name)
+
     data_payload = {'base': anim_steps[0],
                     'debiased': anim_steps[-1],
                     'anim_steps': anim_steps,
                     'bounds': debiaser.animator.get_bounds(),
-                    'explanations': app.explanations[algorithm]
+                    'explanations': app.explanations[algorithm],
+                    'camera_steps': debiaser.animator.get_camera_steps()
                     }
 
     return jsonify(data_payload)
