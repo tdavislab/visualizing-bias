@@ -1,26 +1,28 @@
 {
   "Linear": [
     "[Step=0] The points show the PCA projection of the original word vector embeddings.",
-    "[Step=1] Reorient points to a new space where the bias direction is aligned to the x-axis.",
-    "[Step=2] From each word's embedding vector, remove the component along the bias direction.",
-    "[Step=3] Reorient the embeddings using PCA projection of the debiased word vectors in the new debiased space."
+    "[Step=1] Points reoriented to a new view where the concept direction is aligned with the x-axis.",
+    "[Step=2] From each word's embedding vector, the component along the concept direction is removed.",
+    "[Step=3] Points reoriented using PCA projection of the debiased word vectors in the new debiased space."
   ],
   "Hard": [
     "[Step=0] The points show the PCA projection of the original word vector embeddings.",
-    "[Step=1] Reorient points to a new space where the bias direction is aligned to the x-axis.",
-    "[Step=2] Remove the gender component from all but the gender-specific words.",
-    "[Step=3] Modify the equalize set such that they are equidistant (?).",
-    "[Step=4] Reorient the embeddings using PCA projection of the debiased word vectors in the new debiased space."
+    "[Step=1] Points reoriented to a new view where the concept direction is aligned with the x-axis.",
+    "[Step=2] The gender component is removed from all but a set of pre-specified, unpaired gender-specific words using linear projection.",
+    "[Step=3] Word pairs (e.g., 'man-woman', 'he-she') equalized such that they are equidistant from the origin along the concept axis.",
+    "[Step=4] Points reoriented using PCA projection of the debiased word vectors in the new debiased space."
   ],
   "OSCaR": [
     "[Step=0] The points show the PCA projection of the original word vector embeddings.",
-    "[Step=1] Reorient points to a new space where the bias direction is aligned to the x-axis.",
-    "[Step=2] Orthogonalize the concept 2 subspace direction to that of concept 1",
-    "[Step=3] Reorient the embeddings using PCA projection of the debiased word vectors in the new debiased space."
+    "[Step=1] Points reoriented to a new view where the direction of concept 1 is aligned with the x-axis and concept 2 is aligned with the component of y-axis that is orthogonal to concept 1.",
+    "[Step=2] Orthogonalize the direction of concept 2 to that of concept 1 and move all points accordingly.",
+    "[Step=3] Points reoriented using PCA projection of the debiased word vectors in the new debiased space."
   ],
   "INLP": [
-    "Step1 explanation",
-    "Step2 explanation",
-    "Step3 explanation"
+    "[Step=0] The points show the PCA projection of the original word vector embeddings.",
+    "[Step=1] Points reoriented to a new view where the concept direction is aligned with the x-axis.",
+    "[Step=2] The gender component is removed from all but a set of pre-specified gender-specific words using linear projection.",
+    "[Step=3] Points reoriented using PCA projection of the debiased word vectors in the new debiased space.",
+    "[Step=4] Steps 1 through 3 iterated over until significant residual bias removed."
   ]
 }
