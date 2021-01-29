@@ -3,6 +3,8 @@
 <hr>
 
 ### Requirements
+The web interface is supported only for Chrome and Firefox.
+
 Python 3.6+, pip
 
 The following libraries are also required to run the code:

@@ -285,6 +285,9 @@ class OscarDebiaser(Debiaser):
             # orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
             # orth_direction_prime = orth_direction_prime / np.linalg.norm(orth_direction_prime)
 
+            base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
+            base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction_prime)
+
             step2 = self.animator.add_anim_step()
             step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
             step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
