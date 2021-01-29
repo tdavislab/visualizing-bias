@@ -282,8 +282,8 @@ class OscarDebiaser(Debiaser):
                                                                                 self.base_emb.word_vectors[word].vector)
 
             # self.debiased_emb.normalize()
-            orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
-            orth_direction_prime = orth_direction_prime / np.linalg.norm(orth_direction_prime)
+            # orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
+            # orth_direction_prime = orth_direction_prime / np.linalg.norm(orth_direction_prime)
 
             step2 = self.animator.add_anim_step()
             step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
@@ -580,9 +580,9 @@ class Projector:
         if direction is not None:
             dim = direction.shape[0]
             origin = np.zeros(dim)
-            projection = self.projector.transform(np.vstack([origin, direction / np.linalg.norm(direction)]))
+            projection = self.projector.transform(np.vstack([origin, direction]))
             projection = projection - projection[0]
-            projection[1] = projection[1] / np.linalg.norm(projection[1])
+            # projection[1] = projection[1] / np.linalg.norm(projection[1])
             words = ['Origin', 'Concept' + str(concept_idx)]
         else:
             if len(words) != 0:

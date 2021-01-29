@@ -521,6 +521,12 @@ function btn_active(btn, bool_active) {
     btn.prop('disabled', !bool_active);
 }
 
+function captureEnter(e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+        $('#seedword-form-submit').click();
+    }
+}
+
 // Functionality for the dropdown-menus
 $('#example-dropdown a').click(function (e) {
     $('#example-selection-button').text(this.innerHTML);
@@ -687,6 +693,13 @@ $('#seedword-form-submit').click(function () {
         console.log(e);
     }
 });
+
+$('#seedword-text-1').on('keyup', captureEnter);
+$('#seedword-text-2').on('keyup', captureEnter);
+$('#evaluation-list').on('keyup', captureEnter);
+$('#equalize-list').on('keyup', captureEnter);
+$('#oscar-seedword-text-1').on('keyup', captureEnter);
+
 
 if (TESTING) {
     try { // $('#seedword-text-1').val('mike, lewis, noah, james, lucas, william, jacob, daniel, henry, matthew');
