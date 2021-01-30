@@ -326,9 +326,9 @@ function compute_axes_limits_sym(points) {
     let y_coords = points.map(d => Math.abs(d.y));
     let x = Math.max(...x_coords), y = Math.max(...y_coords);
     return {
-        // x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
-        // y_min: -y - 0.2 * y, y_max: y + 0.2 * y
-        x_min: -1.1, x_max: 1.1, y_min: -1.1, y_max: 1.1
+        x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
+        y_min: -y - 0.2 * y, y_max: y + 0.2 * y
+        // x_min: -1.1, x_max: 1.1, y_min: -1.1, y_max: 1.1
     }
 }
 
@@ -374,10 +374,10 @@ function setup_animation(anim_svg, response, identifier) {
                     .transition()
                     .duration(ANIMATION_DURATION)
                     .on('start', function () {
-                        d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
+                        // d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
                     })
                     .on('end', function () {
-                        d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
+                        // d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
                     })
                     .attr('d', d3.line()(arrow_endpoints));
             } else {
@@ -399,6 +399,9 @@ function setup_animation(anim_svg, response, identifier) {
             // anim_svg.selectAll('#bias-direction-line').
             anim_svg.select('#animationgroup').attr('transform', d3.event.transform);
         }
+
+        // let zoom = d3.zoom().scaleExtent([0.2, 5])
+        // anim_svg.call(zoom, zoom_actions);
 
         let margin = {top: 20, right: 20, bottom: 20, left: 40};
         let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;

@@ -112,7 +112,25 @@ _______________________________________
 - On update send email
 
 -----------------------------------
+
 - [x] Toggle buttons
 - [x] Camera movement indicator
 - [x] Custom names for subspaces
 - [ ] INLP break down classifier finding and rotation step
+
+----------------------------------
+
+- [ ] INLP, 4 steps
+- [ ] Fix Oscar
+- [ ] Linear projection, Hard debiasing: concept vector shrink to origin
+- [ ] INLP, stop when score < 0.5 + epsilon
+- [ ] Fix flicker-class camera
+- [ ] move to preloaded examples
+- [ ] For axes - same-scale, symmetric, square around origin
+- [ ] Zoom for initial and debiased embedding
+- [ ] Fixed set of algo+subspace method
+- [ ] Combinations: Linear + Hard + Oscar - Two Means + PCA; INLP - classification
+- [ ] On error, dialog box
+- [ ] Support ~empty~ evalset, single word evaluation
+- [ ] brother-sister, father-mother; eval=professor, receptionist, pregnant; seed=he,man,she,woman
+- [ ] WEAT 

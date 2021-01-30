@@ -23,7 +23,7 @@ pip install flask scikit-learn scipy numpy networkx tqdm
 ```
 Alternately, you can also use conda to install the packages:
 ```
-pip install flask scikit-learn scipy numpy networkx tqdm
+conda install flask scikit-learn scipy numpy networkx tqdm
 ```
 
 ### Installation
@@ -31,6 +31,7 @@ Clone this repository to your local machine, make sure the requirement are insta
 Then navigate to the cloned repository and in the base directory, type the following
 command in the terminal.
 ```shell script
+git clone https://github.com/architrathore/visualizing-bias.git
 python -m flask run
 ```
 

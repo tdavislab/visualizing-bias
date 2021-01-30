@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
-from sklearn.svm import LinearSVC as SVM
+from sklearn.svm import SVC
 import networkx as nx
 from tqdm import tqdm
 from weat import weat_score
@@ -106,7 +106,7 @@ class LinearDebiaser(Debiaser):
         # Step 1 - Project points such that bias direction is aligned with the x-axis
         # ---------------------------------------------------------
         base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-        base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+        base_projector.fit(self.base_emb, seedwords1 + seedwords2 + evalwords, bias_direction=bias_direction)
 
         step1 = self.animator.add_anim_step(camera_step=True)
         step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
@@ -128,7 +128,7 @@ class LinearDebiaser(Debiaser):
         # Step 3 - Project to the space of debiased embeddings
         # ---------------------------------------------------------
         debiased_projector = self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
-        debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
+        debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2 + evalwords)
 
         step3 = self.animator.add_anim_step(camera_step=True)
         step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
@@ -228,9 +228,13 @@ class OscarDebiaser(Debiaser):
             self.base_emb.update_vectors(self.base_emb.words(), PCA(n_components=2).fit_transform(self.base_emb.vectors()))
             self.debiased_emb.update_vectors(self.base_emb.words(), self.base_emb.vectors())
 
-            bias_direction = bias_direction = get_bias_direction(self.base_emb, seedwords1, seedwords2, bias_method)
+            bias_direction = get_bias_direction(self.base_emb, seedwords1, seedwords2, bias_method)
             pca_projector = PCA(n_components=2).fit(self.base_emb.get_vecs(orth_subspace_words))
             orth_direction = pca_projector.components_[0]
+
+            # if orth_direction.dot(bias_direction) < 0:
+            #     orth_direction = -orth_direction
+
             orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
             orth_direction_prime = orth_direction_prime / np.linalg.norm(orth_direction_prime)
 
@@ -279,10 +283,13 @@ class OscarDebiaser(Debiaser):
             # ---------------------------------------------------------
             # Step 2 - Make orth_direction orthogonal to bias direction
             # ---------------------------------------------------------
-            rot_matrix = self.gs_constrained2d(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
+            # rot_matrix = self.gs_constrained2d(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
+            rot_matrix = self.gs_constrained2d_new(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
 
-            for word in seedwords1 + seedwords2 + evalwords + orth_subspace_words:
-                self.debiased_emb.word_vectors[word].vector = self.correction2d(rot_matrix, bias_direction, orth_direction,
+            for word in seedwords1 + seedwords2 + evalwords + orth_subspace_words + evalwords:
+                # self.debiased_emb.word_vectors[word].vector = self.correction2d(rot_matrix, bias_direction, orth_direction,
+                #                                                                 self.base_emb.word_vectors[word].vector)
+                self.debiased_emb.word_vectors[word].vector = self.correction2d_new(rot_matrix, bias_direction, orth_direction,
                                                                                 self.base_emb.word_vectors[word].vector)
 
             # self.debiased_emb.normalize()
@@ -291,7 +298,8 @@ class OscarDebiaser(Debiaser):
             # self.debiased_emb.normalize()
 
             base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-            base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction_prime)
+            base_projector.fit(self.base_emb, seedwords1 + seedwords2 + orth_subspace_words, bias_direction=bias_direction,
+                               secondary_direction=orth_direction_prime)
 
             step2 = self.animator.add_anim_step()
             step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
@@ -307,7 +315,7 @@ class OscarDebiaser(Debiaser):
             # ---------------------------------------------------------
             self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
             debiased_projector = self.animator.projectors['debiased_projector']
-            debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
+            debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2 + orth_subspace_words)
 
             step3 = self.animator.add_anim_step(camera_step=True)
             step3.add_points(debiased_projector.project(self.debiased_emb, seedwords1, group=1))
@@ -485,6 +493,55 @@ class OscarDebiaser(Debiaser):
         u[1] = u[1] / np.linalg.norm(u[1])
         return u
 
+    @staticmethod
+    def correction2d_new(U, v1, v2, x):
+        def rotation(v1, v2, x):
+            def proj(u, a):
+                return (np.dot(u, a)) * u
+
+            v2P = v2 - proj(v1, v2)
+            v2P = v2P / np.linalg.norm(v2P)
+
+            thetaP = np.arccos(np.dot(v1, v2))
+            theta = (np.pi / 2.0) - thetaP
+            phi = np.arccos(np.dot(v1, (x / np.linalg.norm(x))))
+            d = np.dot(v2P, (x / np.linalg.norm(x)))
+            thetaX = 1.0
+            if d > 0 and phi < thetaP:
+                thetaX = theta * (phi / thetaP)
+            elif d > 0 and phi > thetaP:
+                thetaX = theta * ((np.pi - phi) / (np.pi - thetaP))
+            elif d < 0 and phi >= np.pi - thetaP:
+                thetaX = theta * ((np.pi - phi) / thetaP)
+            elif d < 0 and phi < np.pi - thetaP:
+                thetaX = theta * (phi / (np.pi - thetaP))
+            else:
+                return x
+            R = np.zeros((2, 2))
+            print('Theta', thetaX)
+            R[0][0] = np.cos(thetaX)
+            R[0][1] = -np.sin(thetaX)
+            R[1][0] = np.sin(thetaX)
+            R[1][1] = np.cos(thetaX)
+            return np.matmul(R, x)
+
+        if np.count_nonzero(x) != 0:
+            return np.matmul(U.T, rotation(v1, v2, np.matmul(U, x)))
+        else:
+            return x
+
+    @staticmethod
+    def gs_constrained2d_new(matrix, v1, v2):
+        def proj(u, a):
+            return (np.dot(u, a)) * u
+
+        u = np.zeros((np.shape(matrix)[0], np.shape(matrix)[1]))
+        u[0] = v1
+        u[0] = u[0] / np.linalg.norm(u[0])
+        u[1] = v2 - proj(u[0], v2)
+        u[1] = u[1] / np.linalg.norm(u[1])
+        return u
+
 
 class INLPDebiaser(Debiaser):
     def debias(self, bias_direction, seedwords1, seedwords2, evalwords, num_iters=35):
@@ -516,12 +573,14 @@ class INLPDebiaser(Debiaser):
             x_projected = self.debiased_emb.get_vecs(seedwords1 + seedwords2).copy()
             x_eval = self.debiased_emb.get_vecs(evalwords).copy()
 
-            classifier_i = SVM().fit(x_projected, y)
+            classifier_i = SVC(kernel='linear').fit(x_projected, y)
             weights = np.expand_dims(classifier_i.coef_[0], 0)
             bias_direction = weights[0] / np.linalg.norm(bias_direction)
 
-            if np.linalg.norm(weights) < 1e-10:
-                break
+            print(classifier_i.score(x_projected, y), np.linalg.norm(weights))
+
+            # if np.linalg.norm(weights) < 1e-10:
+            #     break
 
             p_rowspace_wi = self.get_rowspace_projection(weights)
             rowspace_projections.append(p_rowspace_wi)
@@ -614,7 +673,7 @@ class Projector:
             origin = np.zeros(dim)
             projection = self.projector.transform(np.vstack([origin, direction]))
             projection = projection - projection[0]
-            # projection[1] = projection[1] / np.linalg.norm(projection[1])
+            projection[1] = projection[1] / np.linalg.norm(projection[1])
             words = ['Origin', 'Concept' + str(concept_idx)]
         else:
             if len(words) != 0:
@@ -766,7 +825,7 @@ def bias_classification(embedding, seedwords1, seedwords2):
     x = np.vstack([vec1, vec2])
     y = np.concatenate([[0] * vec1.shape[0], [1] * vec2.shape[0]])
 
-    classifier = SVM().fit(x, y)
+    classifier = SVC(kernel='linear').fit(x, y)
     bias_direction = classifier.coef_[0]
 
     return bias_direction / np.linalg.norm(bias_direction)
