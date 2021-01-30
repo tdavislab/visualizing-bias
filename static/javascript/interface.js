@@ -755,6 +755,7 @@ $('#preloaded-examples').on('click', function () {
                 .classed(index === 0 ? 'active' : '', true)
                 .text(example.name);
             dropdown_item.on('click', function () {
+                $('#example-selection-button').text('Chosen example: ' + example.name);
                 $('#algorithm-dropdown').children()[ALGO_MAP[example.algorithm]].click();
                 $('#subspace-dropdown-items').children()[SUBSPACE_MAP[example.subspace]].click();
                 if (example.hasOwnProperty('seedwords-1')) {
