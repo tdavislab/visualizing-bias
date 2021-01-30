@@ -122,7 +122,7 @@ class LinearDebiaser(Debiaser):
         step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
         step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
         step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
-        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
 
         # ---------------------------------------------------------
         # Step 3 - Project to the space of debiased embeddings
@@ -183,7 +183,7 @@ class HardDebiaser(Debiaser):
         step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
         step2.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
         step2.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
-        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
 
         # Equalize words in equalize_set such that they are equidistant to set defining the gender direction
         for a, b in equalize_set:
@@ -206,7 +206,7 @@ class HardDebiaser(Debiaser):
         step3.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
         step3.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
         step3.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
-        step3.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step3.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
 
         # Step 4 - Reorient the embeddings back to the debiased space
         # ---------------------------------------------------------
@@ -219,7 +219,7 @@ class HardDebiaser(Debiaser):
         step4.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
         step4.add_points(debiased_projector.project(self.debiased_emb, equalize_words[0], group=4))
         step4.add_points(debiased_projector.project(self.debiased_emb, equalize_words[1], group=5))
-        step4.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+        step4.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
 
 
 class OscarDebiaser(Debiaser):
@@ -308,7 +308,6 @@ class OscarDebiaser(Debiaser):
             step2.add_points(base_projector.project(self.debiased_emb, orth_subspace_words, group=4))
             step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
             step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=orth_direction_prime, concept_idx=2))
-            # print(self.base_emb.get('scientist').vector, self.debiased_emb.get('scientist').vector)
 
             # ---------------------------------------------------------
             # Step 3 - Project points such the orth direction is aligned with y-axis
@@ -674,14 +673,12 @@ class Projector:
         self.name = name
 
     def fit(self, embedding, words, bias_direction=None, secondary_direction=None):
-        print(f'Fitting {len(words)} words = {words}')
         if bias_direction is None:
             self.projector.fit(embedding.get_vecs(words))
         else:
             self.projector.fit(embedding.get_vecs(words), bias_direction=bias_direction, secondary_direction=secondary_direction)
 
     def project(self, embedding, words, group=None, direction=None, concept_idx=1):
-        print(f'Projecting {len(words)} words = {words}')
         word_vecs_2d = []
         if direction is not None:
             dim = direction.shape[0]

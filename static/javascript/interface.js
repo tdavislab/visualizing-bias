@@ -102,6 +102,11 @@ function remove_point() {
     $('#seedword-form-submit').click();
 }
 
+function sample_label_position(scale) {
+    let pos = Math.random() + 1;
+    return parseInt(pos * scale);
+}
+
 function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     parent_svg.selectAll('*').remove();
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
@@ -178,14 +183,16 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
 
     // Class label
     datapoint_group.append('foreignObject')
-        .attr('x', 15)
-        .attr('y', -10)
+        .attr('x', getRandomInt(10, 20))
+        .attr('y', getRandomInt(-10, -20))
         .attr('width', '1px')
         .attr('height', '1px')
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
+        .attr('style', d => 'color:' + color(d.group) + '; font-weight: 450; opacity:0.7')
         .html(d => d.label);
+
 
     // Remove buttons
     datapoint_group.append('text')
@@ -277,13 +284,14 @@ function draw_scatter(svg, point_data, x, y) {
 
     // Class label
     datapoint_group.append('foreignObject')
-        .attr('x', 15)
-        .attr('y', -10)
+        .attr('x', getRandomInt(10, 20))
+        .attr('y', getRandomInt(-10, -20))
         .attr('width', '1px')
         .attr('height', '1px')
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
+        .attr('style', d => 'color:' + color(d.group) + '; font-weight: 450; opacity:0.7')
         .html(d => d.label);
 
     // Remove buttons
