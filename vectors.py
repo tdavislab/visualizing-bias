@@ -325,10 +325,6 @@ class OscarDebiaser(Debiaser):
             step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
             step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=orth_direction_prime, concept_idx=2))
 
-            b1 = self.base_emb.get('doctor').vector
-            b2 = self.debiased_emb.get('doctor').vector
-            print([b1.dot(bias_direction), b1.dot(orth_direction_prime)], [b2.dot(bias_direction), b2.dot(orth_direction_prime)])
-
         else:
             orth_direction = bias_pca(self.base_emb, orth_subspace_words)
 
@@ -594,7 +590,7 @@ class INLPDebiaser(Debiaser):
             weights = np.expand_dims(classifier_i.coef_[0], 0)
             bias_direction = weights[0] / np.linalg.norm(bias_direction)
 
-            print(classifier_i.score(x_projected, y), np.linalg.norm(weights))
+            # print(classifier_i.score(x_projected, y), np.linalg.norm(weights))
 
             # if np.linalg.norm(weights) < 1e-10:
             #     break
@@ -678,19 +674,21 @@ class Projector:
         self.name = name
 
     def fit(self, embedding, words, bias_direction=None, secondary_direction=None):
+        print(f'Fitting {len(words)} words = {words}')
         if bias_direction is None:
             self.projector.fit(embedding.get_vecs(words))
         else:
             self.projector.fit(embedding.get_vecs(words), bias_direction=bias_direction, secondary_direction=secondary_direction)
 
     def project(self, embedding, words, group=None, direction=None, concept_idx=1):
+        print(f'Projecting {len(words)} words = {words}')
         word_vecs_2d = []
         if direction is not None:
             dim = direction.shape[0]
             origin = np.zeros(dim)
             projection = self.projector.transform(np.vstack([origin, direction]))
             projection = projection - projection[0]
-            projection[1] = projection[1] / np.linalg.norm(projection[1])
+            # projection[1] = projection[1] / np.linalg.norm(projection[1])
             words = ['Origin', 'Concept' + str(concept_idx)]
         else:
             if len(words) != 0:
@@ -700,7 +698,7 @@ class Projector:
 
         for i, word in enumerate(words):
             x, y = projection[i][0], projection[i][1]
-            word_vecs_2d.append(WordVec2D(word, x, y, group=group))
+            word_vecs_2d.append(WordVec2D(word, np.round(x, 6), np.round(y, 6), group=group))
 
         return word_vecs_2d
 

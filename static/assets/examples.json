@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "name": "Lipstick on a Pig - Hard debiasing",
+      "algorithm": "Hard debiasing",
+      "seedwords-1": "he",
+      "seedwords-2": "she",
+      "subspace": "Two means",
+      "equalize": "john-amy, paul-joan, mike-lisa, kevin-sarah, steve-diana, greg-kate, jeff-ann, bill-donna",
+      "evalset": "engineer, lawyer, receptionist, homemaker"
+    },
+    {
+      "name": "Lipstick on a Pig - Linear debiasing",
+      "algorithm": "Linear debiasing",
+      "seedwords-1": "he",
+      "seedwords-2": "she",
+      "subspace": "Two means",
+      "evalset": "engineer, lawyer, receptionist, homemaker"
+    },
+    {
+      "name": "Lipstick on a Pig - OSCaR",
+      "algorithm": "OSCaR",
+      "seedwords-1": "he",
+      "seedwords-2": "she",
+      "subspace": "Two means",
+      "oscar-c2-seedwords": "engineer, lawyer, receptionist, homemaker",
+      "evalset": "john, amy, paul, joan, mike, lisa, kevin, sarah, steve, diana, greg, kate, jeff, ann, bill, donna"
+    },
+    {
+      "name": "Weird case - opposite directions from concept1 and concept2",
+      "algorithm": "OSCaR",
+      "seedwords-1": "man, boy, he, grandpa",
+      "seedwords-2": "woman, girl, she, grandma",
+      "subspace": "Two means",
+      "oscar-c2-seedwords": "maid, dancer, cleaner, advocate, player, banker",
+      "evalset": "engineer, lawyer, mathematician, receptionist, homemaker, nurse, doctor"
+    },
+    {
+      "name": "Weird case - acute angle",
+      "algorithm": "OSCaR",
+      "seedwords-1": "he, man",
+      "seedwords-2": "she, woman",
+      "subspace": "Two means",
+      "oscar-c2-seedwords": "waiter, paramedic, dentist, nurse",
+      "evalset": "banker, homemaker"
+    }
+  ]
+}

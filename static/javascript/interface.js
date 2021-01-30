@@ -14,6 +14,20 @@ let ANIMSTEP_COUNTER = 0;
 let ANIMATION_DURATION = 3000;
 let AXIS_TOLERANCE = 0.05;
 
+let ALGO_MAP = {
+    'Linear debiasing': 1,
+    'Hard debiasing': 2,
+    'OSCaR': 3,
+    'Iterative Null Space Projection': 4
+}
+
+let SUBSPACE_MAP = {
+    'Two means': 1,
+    'PCA': 2,
+    'PCA-paired': 3,
+    'Classification': 4
+}
+
 // Set global color-scale
 let color = d3.scaleOrdinal(d3.schemeDark2);
 let shape = d3.scaleOrdinal([0, 1, 2, 3, 4, 5, 6],
@@ -728,12 +742,49 @@ $('#seedword-form-submit').click(function () {
     }
 });
 
+// Allow enter in text inputs to press Run button
 $('#seedword-text-1').on('keyup', captureEnter);
 $('#seedword-text-2').on('keyup', captureEnter);
 $('#evaluation-list').on('keyup', captureEnter);
 $('#equalize-list').on('keyup', captureEnter);
 $('#oscar-seedword-text-1').on('keyup', captureEnter);
 
+// Preloaded examples
+$('#preloaded-examples').on('click', function () {
+    $("#example-dropdown").empty();
+    $.getJSON('static/assets/examples.json', {_: new Date().getTime()}, function (examples) {
+        examples.data.forEach(function (example, index) {
+            console.log(example);
+            let dropdown = d3.select('#example-dropdown');
+            let dropdown_item = dropdown.append('a')
+                .classed('dropdown-item', true)
+                .classed(index === 0 ? 'active' : '', true)
+                .text(example.name);
+            dropdown_item.on('click', function () {
+                $('#algorithm-dropdown').children()[ALGO_MAP[example.algorithm]].click();
+                $('#subspace-dropdown-items').children()[SUBSPACE_MAP[example.subspace]].click();
+                if (example.hasOwnProperty('seedwords-1')) {
+                    $('#seedword-text-1').val(example["seedwords-1"]);
+                }
+                if (example.hasOwnProperty('seedwords-2')) {
+                    $('#seedword-text-2').val(example["seedwords-2"]);
+                }
+                if (example.hasOwnProperty('equalize')) {
+                    $('#equalize-list').val(example["equalize"]);
+                }
+                if (example.hasOwnProperty('evalset')) {
+                    $('#evaluation-list').val(example["evalset"]);
+                }
+                if (example.hasOwnProperty('oscar-c2-seedwords')) {
+                    $('#oscar-seedword-text-1').val(example["oscar-c2-seedwords"]);
+                }
+                $('#seedword-form-submit').click();
+            })
+        })
+    }).fail(function (e) {
+        console.log(e);
+    })
+})
 
 if (TESTING) {
     try { // $('#seedword-text-1').val('mike, lewis, noah, james, lucas, william, jacob, daniel, henry, matthew');
@@ -749,9 +800,10 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[3].click();
+        $('#algorithm-dropdown').children()[1].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
+        // $('#preloaded-examples').click();
     } catch (e) {
         console.log(e);
     }
