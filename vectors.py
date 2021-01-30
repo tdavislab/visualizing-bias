@@ -242,7 +242,7 @@ class OscarDebiaser(Debiaser):
             # Step 0 - PCA of points in the original word vector space
             # ---------------------------------------------------------
             prebase_projector = self.animator.add_projector(CoordinateProjector(), name='prebase_projector')
-            prebase_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction)
+            prebase_projector.fit(self.base_emb, seedwords1 + seedwords2 + orth_subspace_words, bias_direction=bias_direction)
 
             step0 = self.animator.add_anim_step()
             step0.add_points(prebase_projector.project(self.base_emb, seedwords1, group=1))
@@ -256,7 +256,8 @@ class OscarDebiaser(Debiaser):
             # Step 1 - Project points such that bias direction is aligned with the x-axis
             # ----------------------------------------------------------
             base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-            base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction)
+            base_projector.fit(self.base_emb, seedwords1 + seedwords2 + orth_subspace_words, bias_direction=bias_direction,
+                               secondary_direction=orth_direction_prime)
 
             step1 = self.animator.add_anim_step(camera_step=True)
             step1.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
@@ -284,13 +285,12 @@ class OscarDebiaser(Debiaser):
             # Step 2 - Make orth_direction orthogonal to bias direction
             # ---------------------------------------------------------
             # rot_matrix = self.gs_constrained2d(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
+
             rot_matrix = self.gs_constrained2d_new(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
 
-            for word in seedwords1 + seedwords2 + evalwords + orth_subspace_words + evalwords:
-                # self.debiased_emb.word_vectors[word].vector = self.correction2d(rot_matrix, bias_direction, orth_direction,
-                #                                                                 self.base_emb.word_vectors[word].vector)
+            for word in seedwords1 + seedwords2 + evalwords + orth_subspace_words:
                 self.debiased_emb.word_vectors[word].vector = self.correction2d_new(rot_matrix, bias_direction, orth_direction,
-                                                                                self.base_emb.word_vectors[word].vector)
+                                                                                    self.base_emb.word_vectors[word].vector)
 
             # self.debiased_emb.normalize()
             # orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
@@ -308,7 +308,7 @@ class OscarDebiaser(Debiaser):
             step2.add_points(base_projector.project(self.debiased_emb, orth_subspace_words, group=4))
             step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
             step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=orth_direction_prime, concept_idx=2))
-            print(self.base_emb.get('scientist').vector, self.debiased_emb.get('scientist').vector)
+            # print(self.base_emb.get('scientist').vector, self.debiased_emb.get('scientist').vector)
 
             # ---------------------------------------------------------
             # Step 3 - Project points such the orth direction is aligned with y-axis
@@ -324,6 +324,10 @@ class OscarDebiaser(Debiaser):
             step3.add_points(debiased_projector.project(self.debiased_emb, orth_subspace_words, group=4))
             step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
             step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=orth_direction_prime, concept_idx=2))
+
+            b1 = self.base_emb.get('doctor').vector
+            b2 = self.debiased_emb.get('doctor').vector
+            print([b1.dot(bias_direction), b1.dot(orth_direction_prime)], [b2.dot(bias_direction), b2.dot(orth_direction_prime)])
 
         else:
             orth_direction = bias_pca(self.base_emb, orth_subspace_words)
@@ -502,11 +506,22 @@ class OscarDebiaser(Debiaser):
             v2P = v2 - proj(v1, v2)
             v2P = v2P / np.linalg.norm(v2P)
 
+            # x_temp = x.copy()
+            # x[0] = v1.dot(x_temp)
+            # x[1] = v2P.dot(x_temp)
+
             thetaP = np.arccos(np.dot(v1, v2))
-            theta = (np.pi / 2.0) - thetaP
-            phi = np.arccos(np.dot(v1, (x / np.linalg.norm(x))))
-            d = np.dot(v2P, (x / np.linalg.norm(x)))
-            thetaX = 1.0
+            # if thetaP < np.pi / 2.0:
+            #     theta = (np.pi / 2.0) - thetaP
+            # else:
+            #     theta = thetaP - np.pi / 2.0
+            theta = np.abs(thetaP - np.pi / 2)
+            # theta = (np.pi / 2.0) - thetaP
+
+            phi = np.arccos(np.dot(v1 / np.linalg.norm(v1), (x / np.linalg.norm(x))))
+            d = np.dot(v2P / np.linalg.norm(v2P), (x / np.linalg.norm(x)))
+
+            # thetaX = 1.0
             if d > 0 and phi < thetaP:
                 thetaX = theta * (phi / thetaP)
             elif d > 0 and phi > thetaP:
@@ -517,8 +532,8 @@ class OscarDebiaser(Debiaser):
                 thetaX = theta * (phi / (np.pi - thetaP))
             else:
                 return x
+
             R = np.zeros((2, 2))
-            print('Theta', thetaX)
             R[0][0] = np.cos(thetaX)
             R[0][1] = -np.sin(thetaX)
             R[1][0] = np.sin(thetaX)
@@ -526,7 +541,9 @@ class OscarDebiaser(Debiaser):
             return np.matmul(R, x)
 
         if np.count_nonzero(x) != 0:
-            return np.matmul(U.T, rotation(v1, v2, np.matmul(U, x)))
+            # if not np.isclose(x, np.zeros_like(x)):
+            rotated_x = rotation(v1, v2, x)
+            return rotated_x
         else:
             return x
 
@@ -699,15 +716,16 @@ class BiasPCA:
         self.vectors = vectors
         self.bias_direction = bias_direction
         self.secondary_direction = secondary_direction
-        self.pca.fit(vectors - vectors.dot(self.bias_direction.reshape(-1, 1)) * self.bias_direction)
+        if self.secondary_direction is None:  # if not Oscar case
+            self.pca.fit(vectors - vectors.dot(self.bias_direction.reshape(-1, 1)) * self.bias_direction)
 
     def transform(self, vectors):
         debiased_vectors = vectors - vectors.dot(self.bias_direction.reshape(-1, 1)) * self.bias_direction
         x_component = np.expand_dims(vectors.dot(self.bias_direction), 1)
-        if self.secondary_direction is None:
+        if self.secondary_direction is None:  # General case where there is no secondary direction
             y_component = np.expand_dims(self.pca.transform(debiased_vectors)[:, 0], 1)
-        else:
-            y_component = np.expand_dims(debiased_vectors.dot(self.secondary_direction), 1)
+        else:  # Oscar
+            y_component = np.expand_dims(vectors.dot(self.secondary_direction), 1)
 
         return np.hstack([x_component, y_component])
 
@@ -950,3 +968,5 @@ if __name__ == '__main__':
 
     emb = Embedding('data/glove.6B.50d.txt')
     save('data/glove.6B.50d.pkl', emb)
+    # emb = Embedding('data/glove.42B.300d.txt')
+    # save('data/glove.42B.300d.pkl', emb)

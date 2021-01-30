@@ -325,10 +325,14 @@ function compute_axes_limits_sym(points) {
     let x_coords = points.map(d => Math.abs(d.x));
     let y_coords = points.map(d => Math.abs(d.y));
     let x = Math.max(...x_coords), y = Math.max(...y_coords);
+    coord_max = Math.max(x, y);
     return {
-        x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
-        y_min: -y - 0.2 * y, y_max: y + 0.2 * y
+        // x_min: -x - 0.2 * x, x_max: x + 0.2 * x,
+        // y_min: -y - 0.2 * y, y_max: y + 0.2 * y
         // x_min: -1.1, x_max: 1.1, y_min: -1.1, y_max: 1.1
+        // x_min: -1.1, x_max: 1.1, y_min: -1.1, y_max: 1.1
+        x_min: -coord_max - 0.2 * coord_max, x_max: coord_max + 0.2 * coord_max,
+        y_min: -coord_max - 0.2 * coord_max, y_max: coord_max + 0.2 * coord_max
     }
 }
 
@@ -374,10 +378,10 @@ function setup_animation(anim_svg, response, identifier) {
                     .transition()
                     .duration(ANIMATION_DURATION)
                     .on('start', function () {
-                        // d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
+                        d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
                     })
                     .on('end', function () {
-                        // d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
+                        d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
                     })
                     .attr('d', d3.line()(arrow_endpoints));
             } else {
@@ -745,7 +749,7 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[1].click();
+        $('#algorithm-dropdown').children()[3].click();
         $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
     } catch (e) {

@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # app.embedding = Embedding('data/glove.6B.50d.txt')
 app.base_embedding = load('data/glove.6B.50d.pkl')
-app.debiased_embedding = load('data/glove.6B.50d.pkl')  # Embedding(None)
+app.debiased_embedding = load('data/glove.6B.50d.pkl')
 with open('static/assets/explanations.json', 'r') as explanation_json:
     app.explanations = json.load(explanation_json)
 
