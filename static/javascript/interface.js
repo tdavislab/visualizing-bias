@@ -748,7 +748,6 @@ $('#preloaded-examples').on('click', function () {
     $("#example-dropdown").empty();
     $.getJSON('static/assets/examples.json', {_: new Date().getTime()}, function (examples) {
         examples.data.forEach(function (example, index) {
-            console.log(example);
             let dropdown = d3.select('#example-dropdown');
             let dropdown_item = dropdown.append('a')
                 .classed('dropdown-item', true)
