@@ -148,20 +148,6 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
     x.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
     y.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
 
-    // If two-means then draw the line
-    // if (mean) {
-    //     let mean1 = data[data.length - 2];
-    //     let mean2 = data[data.length - 1];
-    //     svg.append('line')
-    //         .attr('id', 'mean-line')
-    //         .attr('stroke', 'black')
-    //         .attr('stroke-width', 8)
-    //         .attr('stroke-opacity', 0.5)
-    //         .attr('x1', x(mean1.position[0]))
-    //         .attr('y1', y(mean1.position[1]))
-    //         .attr('x2', x(mean2.position[0]))
-    //         .attr('y2', y(mean2.position[1]));
-    // }
     let data = debiased ? response.debiased : response.base;
 
     // Add the scatterplot
@@ -183,8 +169,8 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
 
     // Class label
     datapoint_group.append('foreignObject')
-        .attr('x', getRandomInt(10, 20))
-        .attr('y', getRandomInt(-10, -20))
+        .attr('x', 15)
+        .attr('y', -10)
         .attr('width', '1px')
         .attr('height', '1px')
         .attr('class', 'fobj')
@@ -284,8 +270,8 @@ function draw_scatter(svg, point_data, x, y) {
 
     // Class label
     datapoint_group.append('foreignObject')
-        .attr('x', getRandomInt(10, 20))
-        .attr('y', getRandomInt(-10, -20))
+        .attr('x', 15)
+        .attr('y', -10)
         .attr('width', '1px')
         .attr('height', '1px')
         .attr('class', 'fobj')
