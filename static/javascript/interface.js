@@ -4,7 +4,7 @@ $(document).ready(function () {
 
 // Fill the textboxes while testing
 // let TESTING = false;
-let TESTING = true;
+let TESTING = false;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
@@ -164,7 +164,7 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
-        .attr('style', d => 'color:' + (d.group === 0 ? 'black' : color(d.group)) + '; font-weight: 450; opacity:0.7')
+        .attr('style', d => 'color:' + (d.group === 0 ? 'black' : color(d.group)) + '; font-weight: 430; opacity:0.8; font-size: 0.9em')
         .html(d => d.label);
 
 
@@ -255,7 +255,7 @@ function draw_scatter_anim(svg, point_data, x, y, width, height, margin) {
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
-        .attr('style', d => 'color:' + (d.group === 0 ? 'black' : color(d.group)) + '; font-weight: 450; opacity:0.7')
+        .attr('style', d => 'color:' + (d.group === 0 ? 'black' : color(d.group)) + '; font-weight: 430; opacity:0.8; font-size: 0.9em')
         .html(d => d.label);
 
     // Remove buttons
@@ -710,6 +710,7 @@ $('#seedword-form-submit').click(function () {
                 algorithm: algorithm, subspace_method: subspace_method, concept1_name: concept1_name, concept2_name: concept2_name
             },
             beforeSend: function () {
+                $('.overlay').addClass('d-flex').show();
                 $('#spinner-holder').show();
                 $('#seedword-form-submit').attr('disabled', 'disabled');
             },
@@ -743,6 +744,7 @@ $('#seedword-form-submit').click(function () {
                 }
             },
             complete: function () {
+                $('.overlay').removeClass('d-flex').hide();
                 $('#spinner-holder').hide();
                 $('#seedword-form-submit').removeAttr('disabled');
             },

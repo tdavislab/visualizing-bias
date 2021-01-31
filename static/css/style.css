@@ -223,3 +223,14 @@ switch to violet when it is active*/
 rect {
     cursor: move;
 }
+
+.overlay {
+    background: #000000;
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0.5;
+}
