@@ -703,6 +703,7 @@ $('#seedword-form-submit').click(function () {
             },
             beforeSend: function() {
                 $('#spinner-holder').show();
+                $('#seedword-form-submit').attr('disabled', 'disabled');
             },
             success: function (response) {
                 let predebiased_svg = d3.select('#pre-debiased-svg');
@@ -735,6 +736,7 @@ $('#seedword-form-submit').click(function () {
             },
             complete: function() {
                 $('#spinner-holder').hide();
+                $('#seedword-form-submit').removeAttr('disabled');
             },
 
         });
