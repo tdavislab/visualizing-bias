@@ -1,7 +1,5 @@
 # Visualizing Word Vector Biases
 
-<hr>
-
 ### Requirements
 The web interface is supported only for Chrome and Firefox.
 
