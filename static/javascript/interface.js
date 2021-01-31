@@ -701,6 +701,9 @@ $('#seedword-form-submit').click(function () {
                 seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, equalize: equalize, orth_subspace: orth_subspace,
                 algorithm: algorithm, subspace_method: subspace_method, concept1_name: concept1_name, concept2_name: concept2_name
             },
+            beforeSend: function() {
+                $('#spinner-holder').show();
+            },
             success: function (response) {
                 let predebiased_svg = d3.select('#pre-debiased-svg');
                 draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', false,);
@@ -729,7 +732,11 @@ $('#seedword-form-submit').click(function () {
                     LABEL_VISIBILITY = true;
                     $('#toggle-labels-btn').click();
                 }
-            }
+            },
+            complete: function() {
+                $('#spinner-holder').hide();
+            },
+
         });
     } catch (e) {
         console.log(e);
