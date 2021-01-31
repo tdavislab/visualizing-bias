@@ -23,7 +23,7 @@
       "seedwords-1": "he",
       "seedwords-2": "she",
       "subspace": "Two means",
-      "oscar-c2-seedwords": "engineer, lawyer, receptionist, homemaker",
+      "oscar-c2-seedwords": "scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker",
       "evalset": "john, amy, paul, joan, mike, lisa, kevin, sarah, steve, diana, greg, kate, jeff, ann, bill, donna"
     },
     {
@@ -43,6 +43,24 @@
       "subspace": "Two means",
       "oscar-c2-seedwords": "waiter, paramedic, dentist, nurse",
       "evalset": "banker, homemaker"
+    },
+    {
+      "name": "Paper - Oscar",
+      "algorithm": "OSCaR",
+      "seedwords-1": "he",
+      "seedwords-2": "she",
+      "subspace": "Two means",
+      "oscar-c2-seedwords": "scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker",
+      "evalset": "receptionist, homemaker"
+    },
+    {
+      "name": "Acute angle Sunipa - Oscar",
+      "algorithm": "OSCaR",
+      "seedwords-1": "he, man, boy, him",
+      "seedwords-2": "she, woman, girl, her",
+      "subspace": "Two means",
+      "oscar-c2-seedwords": "scientist, doctor, nurse, secretary",
+      "evalset": "receptionist, homemaker"
     }
   ]
 }

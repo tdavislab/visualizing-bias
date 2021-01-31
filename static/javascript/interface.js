@@ -1,9 +1,10 @@
-// mike, lewis, noah, james, lucas, william, jacob, daniel, henry, matthew
-// lisa, emma, sophia, emily, chloe, hannah, lily, claire, anna
+$(document).ready(function() {
+  $.ajaxSetup({ cache: false });
+});
 
 // Fill the textboxes while testing
 // let TESTING = false;
-let TESTING = false;
+let TESTING = true;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
@@ -176,7 +177,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
-        .attr('style', d => 'color:' + color(d.group) + '; font-weight: 450; opacity:0.7')
+        .attr('style', d => 'color:' + d.group === 0 ? 'black' : color(d.group) + '; font-weight: 450; opacity:0.7')
         .html(d => d.label);
 
 
@@ -277,7 +278,7 @@ function draw_scatter(svg, point_data, x, y) {
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
-        .attr('style', d => 'color:' + color(d.group) + '; font-weight: 450; opacity:0.7')
+        .attr('style', d => 'color:' + d.group === 0 ? 'black' : color(d.group) + '; font-weight: 450; opacity:0.7')
         .html(d => d.label);
 
     // Remove buttons
@@ -701,7 +702,7 @@ $('#seedword-form-submit').click(function () {
                 seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, equalize: equalize, orth_subspace: orth_subspace,
                 algorithm: algorithm, subspace_method: subspace_method, concept1_name: concept1_name, concept2_name: concept2_name
             },
-            beforeSend: function() {
+            beforeSend: function () {
                 $('#spinner-holder').show();
                 $('#seedword-form-submit').attr('disabled', 'disabled');
             },
@@ -734,7 +735,7 @@ $('#seedword-form-submit').click(function () {
                     $('#toggle-labels-btn').click();
                 }
             },
-            complete: function() {
+            complete: function () {
                 $('#spinner-holder').hide();
                 $('#seedword-form-submit').removeAttr('disabled');
             },
@@ -755,7 +756,7 @@ $('#oscar-seedword-text-1').on('keyup', captureEnter);
 // Preloaded examples
 $('#preloaded-examples').on('click', function () {
     $("#example-dropdown").empty();
-    $.getJSON('static/assets/examples.json', {_: new Date().getTime()}, function (examples) {
+    $.getJSON('static/assets/examples.json', '{_: new Date().getTime()}', function (examples) {
         examples.data.forEach(function (example, index) {
             let dropdown = d3.select('#example-dropdown');
             let dropdown_item = dropdown.append('a')
@@ -803,8 +804,8 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[1].click();
-        $('#subspace-dropdown-items').children()[1].click();
+        $('#algorithm-dropdown').children()[4].click();
+        // $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
         // $('#preloaded-examples').click();
     } catch (e) {

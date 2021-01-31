@@ -1,6 +1,6 @@
 body {
     height: 95vh;
-    overflow: hidden;
+    overflow: scroll;
 }
 
 canvas {
