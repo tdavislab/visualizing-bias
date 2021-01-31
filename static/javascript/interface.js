@@ -230,7 +230,7 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
     }
 }
 
-function draw_scatter_anim(svg, point_data, x, y) {
+function draw_scatter_anim(svg, point_data, x, y, width, height, margin) {
     // Add the scatterplot
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
@@ -293,7 +293,6 @@ function draw_scatter_anim(svg, point_data, x, y) {
     // svg.call(zoom);
     //
     // function update_plot() {
-    //     console.log('captured')
     //     let newX = d3.event.transform.rescaleX(x);
     //     let newY = d3.event.transform.rescaleY(y);
     //
@@ -306,6 +305,7 @@ function draw_scatter_anim(svg, point_data, x, y) {
     //         .attr('transform', d => 'translate(' + newX(d.x) + ',' + newY(d.y) + ')');
     //
     //     bias_line.attr('d', d3.line()(point_data.filter(d => d.group === 0).map(d => [newX(d.x), newY(d.y)])));
+    //     // console.log(d3.line()(point_data.filter(d => d.group === 0).map(d => [newX(d.x), newY(d.y)])));
     // }
 }
 
@@ -447,7 +447,7 @@ function setup_animation(anim_svg, response, identifier) {
             .attr('id', identifier + 'group')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        draw_scatter_anim(svg, response.anim_steps[0], x_axis, y_axis);
+        draw_scatter_anim(svg, response.anim_steps[0], x_axis, y_axis, width, height, margin);
         let axes = draw_axes(svg, width, height, x_axis, y_axis);
         let x_axes_obj = axes[0], y_axes_obj = axes[1];
         $('#explanation-text').text(response.explanations[0]);
@@ -814,8 +814,8 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[4].click();
-        // $('#subspace-dropdown-items').children()[1].click();
+        $('#algorithm-dropdown').children()[1].click();
+        $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
         // $('#preloaded-examples').click();
     } catch (e) {
