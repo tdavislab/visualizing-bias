@@ -4,7 +4,7 @@ $(document).ready(function () {
 
 // Fill the textboxes while testing
 // let TESTING = false;
-let TESTING = false;
+let TESTING = true;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
@@ -110,26 +110,29 @@ function sample_label_position(scale) {
 
 function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) {
     parent_svg.selectAll('*').remove();
+
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
     let width = parent_svg.node().width.baseVal.value - margin.left - margin.right;
     let height = parent_svg.node().height.baseVal.value - margin.top - margin.bottom;
 
     // Append group to the svg
-    let svg = parent_svg.append('g')
+    let svg = parent_svg
+        .append('g')
         .attr('id', plotTitle + 'group')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
 
     // set the ranges
     let x = d3.scaleLinear().range([0, width - 30]);
     let y = d3.scaleLinear().range([height, 0]);
-    // x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
-    // y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
+
     let axes_limits;
     if (debiased) {
         axes_limits = compute_axes_limits_sym(response.anim_steps[response.anim_steps.length - 1]);
     } else {
         axes_limits = compute_axes_limits_sym(response.anim_steps[0]);
     }
+
     x.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
     y.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
 
@@ -180,24 +183,51 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
 
 
     // Add the X Axis
-    svg.append('g')
+    let x_axis_g = svg.append('g')
         .attr('transform', 'translate(0,' + height + ')')
         .classed('axis', true)
         .call(d3.axisBottom(x));
 
     // Add the Y Axis
-    svg.append('g')
+    let y_axis_g = svg.append('g')
         .classed('axis', true)
         .call(d3.axisLeft(y));
 
     // Draw the bias direction arrow
     let arrow_endpoints = data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
-    let arrow_group = d3.select
-    svg.append('path')
+
+    let bias_line = svg.append('path')
         .attr('id', 'bias-direction-line')
         .attr('d', d3.line()(arrow_endpoints))
         .attr('stroke', '#5b5b5b')
         .attr('stroke-width', '4px');
+
+    let zoom = d3.zoom().scaleExtent([0.5, 20]).extent([[0, 0], [width, height]]).on("zoom", update_plot);
+
+    parent_svg.append('rect')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'none')
+        .attr('pointer-events', 'all')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+        .lower();
+
+    parent_svg.call(zoom)
+
+    function update_plot() {
+        let newX = d3.event.transform.rescaleX(x);
+        let newY = d3.event.transform.rescaleY(y);
+
+        // update axes with these new boundaries
+        x_axis_g.call(d3.axisBottom(newX))
+        y_axis_g.call(d3.axisLeft(newY));
+
+        datapoint_group.transition()
+            .duration(0)
+            .attr('transform', d => 'translate(' + newX(d.x) + ',' + newY(d.y) + ')');
+
+        bias_line.attr('d', d3.line()(data.filter(d => d.group === 0).map(d => [newX(d.x), newY(d.y)])));
+    }
 }
 
 function draw_scatter_anim(svg, point_data, x, y) {
@@ -244,11 +274,39 @@ function draw_scatter_anim(svg, point_data, x, y) {
 
     // Draw the bias direction arrow
     let arrow_endpoints = point_data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
-    svg.append('path')
+    let bias_line = svg.append('path')
         .attr('id', 'bias-direction-line')
         .attr('d', d3.line()(arrow_endpoints))
         .attr('stroke', '#5b5b5b')
         .attr('stroke-width', '4px');
+
+    // let zoom = d3.zoom().scaleExtent([0.5, 20]).extent([[0, 0], [width, height]]).on("zoom", update_plot);
+    //
+    // svg.append('rect')
+    //     .attr('width', width)
+    //     .attr('height', height)
+    //     .attr('fill', 'none')
+    //     .attr('pointer-events', 'all')
+    //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    //     .lower();
+    //
+    // svg.call(zoom);
+    //
+    // function update_plot() {
+    //     console.log('captured')
+    //     let newX = d3.event.transform.rescaleX(x);
+    //     let newY = d3.event.transform.rescaleY(y);
+    //
+    //     // update axes with these new boundaries
+    //     svg.select('.x').call(d3.axisBottom(newX))
+    //     svg.select('.y').call(d3.axisLeft(newY));
+    //
+    //     datapoint_group.transition()
+    //         .duration(0)
+    //         .attr('transform', d => 'translate(' + newX(d.x) + ',' + newY(d.y) + ')');
+    //
+    //     bias_line.attr('d', d3.line()(point_data.filter(d => d.group === 0).map(d => [newX(d.x), newY(d.y)])));
+    // }
 }
 
 function draw_axes(svg, width, height, x, y) {
@@ -312,7 +370,7 @@ function compute_axes_limits(points) {
 
 function setup_animation(anim_svg, response, identifier) {
     try {
-        console.log(response);
+        console.log(response, anim_svg);
 
         function update_anim_svg(svg, x_axis, y_axis, step, camera_step = false) {
             let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';

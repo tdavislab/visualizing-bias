@@ -219,3 +219,7 @@ switch to violet when it is active*/
     -o-animation: flickerAnimation 2s infinite;
     animation: flickerAnimation 2s infinite;
 }
+
+rect {
+    cursor: move;
+}
