@@ -16,7 +16,7 @@ let ANIMATION_DURATION = 3000;
 let AXIS_TOLERANCE = 0.05;
 
 let ALGO_MAP = {
-    'Linear debiasing': 1,
+    'Linear projection': 1,
     'Hard debiasing': 2,
     'OSCaR': 3,
     'Iterative Null Space Projection': 4
@@ -575,7 +575,7 @@ $('#algorithm-dropdown a').click(function (e) {
     $('#algorithm-selection-button').text('Algorithm: ' + algorithm);
     subspace_selector.removeClass('disabled');
 
-    if (algorithm === 'Linear debiasing') {
+    if (algorithm === 'Linear projection') {
         subspace_selector.addClass('disabled');
         subspace_selector[1].click();
         $(subspace_selector[1]).removeClass('disabled');

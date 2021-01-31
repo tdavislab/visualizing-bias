@@ -5,7 +5,7 @@
 - [x] PCA on A + B only, then apply the projection matrix on the third.
 
 ### Different debiasing techniques
-- [x] Linear Debiasing
+- [x] Linear projection
 - [ ] OSCaR - Orthogonal Subspace Correction and Rectification
 
 ### UI changes
@@ -86,7 +86,7 @@ _______________________________________
 - preloaded examples
 
 --------------------------------------
-- [x] Linear debiasing - use same fitted PCA for base and debiased 
+- [x] Linear projection - use same fitted PCA for base and debiased 
 - [x] Add step to show subspace method computations
 - [ ] Rotation for bias direction alignment instead of flipping
 - [x] Visual indication for camera movement vs actual projections
@@ -135,3 +135,4 @@ _______________________________________
 - [ ] brother-sister, father-mother; eval=professor, receptionist, pregnant; seed=he,man,she,woman
 - [ ] WEAT 
 - [ ] Legend
+- [x] Linear projection - Linear projection

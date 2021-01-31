@@ -15,7 +15,7 @@ with open('static/assets/explanations.json', 'r') as explanation_json:
 # app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
 ALGORITHMS = {
-    'Algorithm: Linear debiasing': 'Linear',
+    'Algorithm: Linear projection': 'Linear',
     'Algorithm: Hard debiasing': 'Hard',
     'Algorithm: OSCaR': 'OSCaR',
     'Algorithm: Iterative Null Space Projection': 'INLP'
@@ -60,7 +60,7 @@ def get_seedwords():
     evalwords = utils.process_seedwords(evalwords)
 
     # Perform debiasing
-    if method == 'Algorithm: Linear debiasing':
+    if method == 'Algorithm: Linear projection':
         _, _, bias_direction = two_means(app.base_embedding, seedwords1, seedwords2)
         app.debiased_embedding.vectors = debias_linear_projection(app.base_embedding, bias_direction)
     elif method == 'Algorithm: Hard debiasing':

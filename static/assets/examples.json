@@ -10,8 +10,8 @@
       "evalset": "engineer, lawyer, receptionist, homemaker"
     },
     {
-      "name": "Lipstick on a Pig: Linear debiasing",
-      "algorithm": "Linear debiasing",
+      "name": "Lipstick on a Pig: Linear projection",
+      "algorithm": "Linear projection",
       "seedwords-1": "he",
       "seedwords-2": "she",
       "subspace": "Two means",
@@ -37,7 +37,7 @@
     },
     {
       "name": "Adjectives: Linear Projection",
-      "algorithm": "Linear debiasing",
+      "algorithm": "Linear projection",
       "seedwords-1": "he, him",
       "seedwords-2": "she, her",
       "subspace": "Two means",
@@ -54,7 +54,7 @@
     },
     {
       "name": "Nationality: Linear Projection",
-      "algorithm": "Linear debiasing",
+      "algorithm": "Linear projection",
       "seedwords-1": "arab, persian",
       "seedwords-2": "american, canadian",
       "subspace": "Two means",
@@ -62,7 +62,7 @@
     },
     {
       "name": "Nationality: Linear Projection",
-      "algorithm": "Linear debiasing",
+      "algorithm": "Linear projection",
       "seedwords-1": "persian, american, canadian, chinese, indian, british, arab",
       "subspace": "PCA",
       "evalset": "good, evil, smart,  greedy, nice"
