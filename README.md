@@ -43,7 +43,7 @@ python -m flask run
 
 #### Error: Could  not locate a Flask application on command `python -m flask run`
 If you get the following error, it might indicate that you are not in the correct directory. Open a terminal in the 
-base directory of the cloned repo
+base directory of the cloned repository.
 ```
 Error: Could not locate a Flask application. You did not provide the
 "FLASK_APP" environment variable, and a "wsgi.py" or "app.py" module
@@ -53,7 +53,7 @@ was not found in the current directory
 
 #### Python version
 The tool is written with Python 3.6+ support, and may/may not work with earlier versions of Python3.x. It will not 
-work with Python 2.x
+work with Python 2.x.
 
 #### Missing libraries
 Make sure you install the requirements before running the application. 
