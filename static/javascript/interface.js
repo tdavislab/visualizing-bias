@@ -574,6 +574,7 @@ $('#algorithm-dropdown a').click(function (e) {
         subspace_selector[1].click();
         $(subspace_selector[1]).removeClass('disabled');
         $(subspace_selector[2]).removeClass('disabled');
+        $(subspace_selector[3]).removeClass('disabled');
     }
 
     if (algorithm === 'Hard debiasing') {
@@ -582,6 +583,7 @@ $('#algorithm-dropdown a').click(function (e) {
         subspace_selector[1].click();
         $(subspace_selector[1]).removeClass('disabled');
         $(subspace_selector[2]).removeClass('disabled');
+        $(subspace_selector[3]).removeClass('disabled');
     } else {
         $('#equalize-holder').hide();
     }
@@ -592,6 +594,7 @@ $('#algorithm-dropdown a').click(function (e) {
         subspace_selector[1].click();
         $(subspace_selector[1]).removeClass('disabled');
         $(subspace_selector[2]).removeClass('disabled');
+        $(subspace_selector[3]).removeClass('disabled');
     } else {
         $('#input-two-col-oscar').hide();
     }
