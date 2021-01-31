@@ -1,5 +1,5 @@
-$(document).ready(function() {
-  $.ajaxSetup({ cache: false });
+$(document).ready(function () {
+    $.ajaxSetup({cache: false});
 });
 
 // Fill the textboxes while testing
@@ -177,7 +177,7 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
-        .attr('style', d => 'color:' + d.group === 0 ? 'black' : color(d.group) + '; font-weight: 450; opacity:0.7')
+        .attr('style', d => 'color:' + (d.group === 0 ? 'black' : color(d.group)) + '; font-weight: 450; opacity:0.7')
         .html(d => d.label);
 
 
@@ -278,7 +278,7 @@ function draw_scatter(svg, point_data, x, y) {
         .attr('class', 'fobj')
         .append('xhtml:div')
         .attr('class', 'class-label')
-        .attr('style', d => 'color:' + d.group === 0 ? 'black' : color(d.group) + '; font-weight: 450; opacity:0.7')
+        .attr('style', d => 'color:' + (d.group === 0 ? 'black' : color(d.group)) + '; font-weight: 450; opacity:0.7')
         .html(d => d.label);
 
     // Remove buttons
