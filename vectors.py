@@ -235,10 +235,6 @@ class OscarDebiaser(Debiaser):
             # if orth_direction.dot(bias_direction) < 0:
             #     orth_direction = orth_direction
 
-            print('Dot product between v1 and v2', bias_direction.dot(orth_direction))
-            # orth_direction = np.random.rand(2)
-            # orth_direction = orth_direction / np.linalg.norm(orth_direction)
-
             orth_direction_prime = orth_direction - bias_direction * (orth_direction.dot(bias_direction))
             orth_direction_prime = orth_direction_prime / np.linalg.norm(orth_direction_prime)
 
@@ -271,29 +267,9 @@ class OscarDebiaser(Debiaser):
             step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
             step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=orth_direction, concept_idx=2))
 
-            # # ---------------------------------------------------------
-            # # Step 1.5 - Project points such that bias direction is aligned with the x-axis
-            # # ----------------------------------------------------------
-            # base_projector = self.animator.add_projector(BiasPCA(), name='base_projector')
-            # base_projector.fit(self.base_emb, seedwords1 + seedwords2, bias_direction=bias_direction, secondary_direction=orth_direction)
-            #
-            # step1half = self.animator.add_anim_step()
-            # step1half.add_points(base_projector.project(self.base_emb, seedwords1, group=1))
-            # step1half.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
-            # step1half.add_points(base_projector.project(self.base_emb, evalwords, group=3))
-            # step1half.add_points(base_projector.project(self.base_emb, orth_subspace_words, group=4))
-            # step1half.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
-            # step1half.add_points(base_projector.project(self.base_emb, [], group=0, direction=orth_direction_prime, concept_idx=2))
-
-            # ---------------------------------------------------------
-            # Step 2 - Make orth_direction orthogonal to bias direction
-            # ---------------------------------------------------------
-            # rot_matrix = self.gs_constrained2d(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
-
             rot_matrix = self.gs_constrained2d_new(np.identity(bias_direction.shape[0]), bias_direction, orth_direction)
 
             for word in seedwords1 + seedwords2 + evalwords + orth_subspace_words:
-                print(f'Word={word}', end=', ')
                 self.debiased_emb.word_vectors[word].vector = self.correction2d_new(rot_matrix, bias_direction, orth_direction,
                                                                                     self.base_emb.word_vectors[word].vector)
 
@@ -524,23 +500,17 @@ class OscarDebiaser(Debiaser):
             # thetaX = 1.0
             if d > 0 and phi < thetaP:
                 thetaX = theta * (phi / thetaP)
-                # print(f'd > 0 and phi < thetaP || d={np.round(d, 4)}, thetaP={np.round(np.degrees(thetaP), 2)}, phi={np.round(np.degrees(phi), 2)}, thetaX={np.round(np.degrees(thetaX), 2)}')
             elif d > 0 and phi > thetaP:
                 thetaX = theta * ((np.pi - phi) / (np.pi - thetaP + 1e-10))
-                # print(f'd > 0 and phi > thetaP || d={np.round(d, 4)}, thetaP={np.round(np.degrees(thetaP), 2)}, phi={np.round(np.degrees(phi), 2)}, thetaX={np.round(np.degrees(thetaX), 2)}')
             elif d < 0 and phi >= np.pi - thetaP:
                 thetaX = theta * ((np.pi - phi) / thetaP)
-                # print(f'd < 0 and phi >= np.pi - thetaP || d={np.round(d, 4)}, thetaP={np.round(np.degrees(thetaP), 2)}, phi={np.round(np.degrees(phi), 2)}, thetaX={np.round(np.degrees(thetaX), 2)}')
             elif d < 0 and phi < np.pi - thetaP:
                 thetaX = theta * (phi / (np.pi - thetaP + 1e-10))
-                # print(f'd < 0 and phi < np.pi - thetaP || d={np.round(d, 4)}, thetaP={np.round(np.degrees(thetaP), 2)}, phi={np.round(np.degrees(phi), 2)}, thetaX={np.round(np.degrees(thetaX), 2)}')
             else:
                 return x
 
             # if v1.dot(v2) > 0:
             #     thetaX = -thetaX
-
-            # print(f'Dot={v1.dot(v2)}, thetaX={np.round(np.degrees(thetaX), 2)}')
 
             R = np.zeros((2, 2))
             R[0][0] = np.cos(thetaX)
@@ -548,11 +518,9 @@ class OscarDebiaser(Debiaser):
             R[1][0] = np.sin(thetaX)
             R[1][1] = np.cos(thetaX)
 
-            print('R,x= ', R, np.matmul(R, x))
             return np.matmul(R, x)
 
         if np.count_nonzero(x) != 0:
-            # if not np.isclose(x, np.zeros_like(x)):
             rotated_x = rotation(v1, v2, x)
             return rotated_x
         else:
@@ -605,7 +573,6 @@ class INLPDebiaser(Debiaser):
             weights = np.expand_dims(classifier_i.coef_[0], 0)
             bias_direction = weights[0] / np.linalg.norm(weights[0])
 
-            # print(classifier_i.score(x_projected, y), np.linalg.norm(weights))
             if np.linalg.norm(weights) < 1e-10 or classifier_i.score(x_projected, y) < 0.55:
                 break
 

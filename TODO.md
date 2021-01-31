@@ -124,7 +124,7 @@ _______________________________________
 - [x] Fix Oscar
 - [x] Linear projection, Hard debiasing: concept vector shrink to origin
 - [x] INLP, stop when score < 0.5 + epsilon
-- [ ] Fix flicker-class camera
+- [x] Fix flicker-class camera
 - [x] move to preloaded examples
 - [x] For axes - same-scale, symmetric, square around origin
 - [ ] Zoom for initial and debiased embedding
