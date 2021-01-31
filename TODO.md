@@ -120,13 +120,13 @@ _______________________________________
 
 ----------------------------------
 
-- [ ] INLP, 4 steps
-- [ ] Fix Oscar
-- [ ] Linear projection, Hard debiasing: concept vector shrink to origin
-- [ ] INLP, stop when score < 0.5 + epsilon
+- [x] INLP, 4 steps
+- [x] Fix Oscar
+- [x] Linear projection, Hard debiasing: concept vector shrink to origin
+- [x] INLP, stop when score < 0.5 + epsilon
 - [ ] Fix flicker-class camera
-- [ ] move to preloaded examples
-- [ ] For axes - same-scale, symmetric, square around origin
+- [x] move to preloaded examples
+- [x] For axes - same-scale, symmetric, square around origin
 - [ ] Zoom for initial and debiased embedding
 - [ ] Fixed set of algo+subspace method
 - [ ] Combinations: Linear + Hard + Oscar - Two Means + PCA; INLP - classification

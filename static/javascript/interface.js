@@ -12,7 +12,7 @@ let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
-let ANIMATION_DURATION = 3000;
+let ANIMATION_DURATION = 5000;
 let AXIS_TOLERANCE = 0.05;
 
 let ALGO_MAP = {
@@ -740,6 +740,9 @@ $('#seedword-form-submit').click(function () {
                 $('#spinner-holder').hide();
                 $('#seedword-form-submit').removeAttr('disabled');
             },
+            error: function(request, status, error) {
+                alert(request.responseJSON.message);
+            }
 
         });
     } catch (e) {

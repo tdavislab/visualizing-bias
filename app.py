@@ -133,58 +133,84 @@ def get_seedwords():
 
 @app.route('/seedwords2', methods=['POST'])
 def get_seedwords2():
-    reload_embeddings()
-    seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
-    equalize_set = request.values['equalize']
-    orth_subspace_words = request.values['orth_subspace']
-    concept1_name, concept2_name = request.values['concept1_name'], request.values['concept2_name']
+    try:
+        reload_embeddings()
+        seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
+        equalize_set = request.values['equalize']
+        orth_subspace_words = request.values['orth_subspace']
+        concept1_name, concept2_name = request.values['concept1_name'], request.values['concept2_name']
 
-    algorithm, subspace_method = ALGORITHMS[request.values['algorithm']], SUBSPACE_METHODS[request.values['subspace_method']]
+        algorithm, subspace_method = ALGORITHMS[request.values['algorithm']], SUBSPACE_METHODS[request.values['subspace_method']]
 
-    seedwords1 = utils.process_seedwords(seedwords1)
-    seedwords2 = utils.process_seedwords(seedwords2)
-    evalwords = utils.process_seedwords(evalwords)
-    equalize_set = [word.split('-') for word in utils.process_seedwords(equalize_set)][:5]
-    orth_subspace_words = utils.process_seedwords(orth_subspace_words)
+        seedwords1 = utils.process_seedwords(seedwords1)
+        seedwords2 = utils.process_seedwords(seedwords2)
+        evalwords = utils.process_seedwords(evalwords)
+        equalize_set = [word.split('-') for word in utils.process_seedwords(equalize_set)][:5]
+        orth_subspace_words = utils.process_seedwords(orth_subspace_words)
 
-    if subspace_method == 'PCA-paired':
-        seedwords1, seedwords2 = list(zip(*[(w.split('-')[0], w.split('-')[1]) for w in seedwords1]))
+        if subspace_method == 'PCA-paired':
+            seedwords1, seedwords2 = list(zip(*[(w.split('-')[0], w.split('-')[1]) for w in seedwords1]))
 
-    if subspace_method == 'PCA':
-        seedwords2 = []
+        if subspace_method == 'PCA':
+            seedwords2 = []
 
-    # Perform debiasing according to algorithm and subspace direction method
-    bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
-    print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
+        # Perform debiasing according to algorithm and subspace direction method
+        bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
+        print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
 
-    explanations = app.explanations
+        explanations = app.explanations
 
-    if algorithm == 'Linear':
-        debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
-        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
+        if algorithm == 'Linear':
+            debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
 
-    elif algorithm == 'Hard':
-        debiaser = HardDebiaser(app.base_embedding, app.debiased_embedding)
-        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set=equalize_set)
+        elif algorithm == 'Hard':
+            debiaser = HardDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set=equalize_set)
 
-    elif algorithm == 'OSCaR':
-        debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding)
-        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
+        elif algorithm == 'OSCaR':
+            debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
 
-    elif algorithm == 'INLP':
-        debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)
-        debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
-        explanations['INLP'] += explanations['INLP'][1:5] * (len(debiaser.animator.anim_steps) // 5)
+        elif algorithm == 'INLP':
+            debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
+            explanations['INLP'] += explanations['INLP'][1:5] * (len(debiaser.animator.anim_steps) // 5)
 
-    anim_steps = debiaser.animator.convert_to_payload()
-    rename_concepts(anim_steps, concept1_name, concept2_name)
+        anim_steps = debiaser.animator.convert_to_payload()
+        rename_concepts(anim_steps, concept1_name, concept2_name)
 
-    data_payload = {'base': anim_steps[0],
-                    'debiased': anim_steps[-1],
-                    'anim_steps': anim_steps,
-                    'bounds': debiaser.animator.get_bounds(),
-                    'explanations': explanations[algorithm],
-                    'camera_steps': debiaser.animator.get_camera_steps()
-                    }
+        data_payload = {'base': anim_steps[0],
+                        'debiased': anim_steps[-1],
+                        'anim_steps': anim_steps,
+                        'bounds': debiaser.animator.get_bounds(),
+                        'explanations': explanations[algorithm],
+                        'camera_steps': debiaser.animator.get_camera_steps()
+                        }
 
-    return jsonify(data_payload)
+        return jsonify(data_payload)
+    except KeyError as e:
+        raise InvalidUsage(f'Something went wrong! Could not find the key {str(e)} in embedding', 404)
+
+
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response

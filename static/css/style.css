@@ -157,7 +157,7 @@ switch to violet when it is active*/
         opacity: 1;
     }
     50% {
-        opacity: 0;
+        opacity: 0.8;
     }
     100% {
         opacity: 1;
@@ -169,7 +169,7 @@ switch to violet when it is active*/
         opacity: 1;
     }
     50% {
-        opacity: 0;
+        opacity: 0.8;
     }
     100% {
         opacity: 1;
@@ -181,7 +181,7 @@ switch to violet when it is active*/
         opacity: 1;
     }
     50% {
-        opacity: 0;
+        opacity: 0.8;
     }
     100% {
         opacity: 1;
@@ -193,16 +193,29 @@ switch to violet when it is active*/
         opacity: 1;
     }
     50% {
-        opacity: 0;
+        opacity: 0.8;
     }
     100% {
         opacity: 1;
     }
 }
 
+@keyframes spinner {
+    from {
+        -moz-transform: scale(1.0);
+        -ms-transform: scale(1.0);
+        transform: scale(1.0);
+    }
+    to {
+        -moz-transform: scale(1.2);
+        -ms-transform: scale(1.2);
+        transform: scale(1.2);
+    }
+}
+
 .animate-flicker {
-    -webkit-animation: flickerAnimation 1s infinite;
-    -moz-animation: flickerAnimation 1s infinite;
-    -o-animation: flickerAnimation 1s infinite;
-    animation: flickerAnimation 1s infinite;
+    -webkit-animation: flickerAnimation 2s infinite;
+    -moz-animation: flickerAnimation 2s infinite;
+    -o-animation: flickerAnimation 2s infinite;
+    animation: flickerAnimation 2s infinite;
 }
