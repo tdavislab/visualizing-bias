@@ -237,13 +237,6 @@ function draw_scatter_anim(svg, point_data, x, y) {
         .on('click', remove_point)
         .text('\uf057');
 
-    // datapoint_group.append('circle')
-    //     .attr('r', 8)
-    //     .attr('fill', d => color(d.group))
-    //     .attr('stroke', 'black')
-    //     .attr('stroke-width', d => check_if_mean(d) * 3)
-    //     .attr('class', 'point');
-
     datapoint_group.append('path')
         // .attr('fill', d => color(d.group))
         .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
@@ -251,7 +244,6 @@ function draw_scatter_anim(svg, point_data, x, y) {
 
     // Draw the bias direction arrow
     let arrow_endpoints = point_data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
-    let arrow_group = d3.select
     svg.append('path')
         .attr('id', 'bias-direction-line')
         .attr('d', d3.line()(arrow_endpoints))
@@ -367,20 +359,6 @@ function setup_animation(anim_svg, response, identifier) {
             d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
         }
 
-        function zoom_actions() {
-            console.log(d3.event.transform);
-            var newX = d3.event.transform.rescaleX(x_axis);
-            var newY = d3.event.transform.rescaleY(y_axis);
-            // anim_svg.select('.x').call(d3.axisBottom(newX));
-            // anim_svg.select('.y').call(d3.axisLeft(newY));
-            // anim_svg.selectAll('.datapoint-group').attr('transform', d => 'translate(' + newX(d.x) + ',' + newY(d.y) + ')');
-            // anim_svg.selectAll('#bias-direction-line').
-            anim_svg.select('#animationgroup').attr('transform', d3.event.transform);
-        }
-
-        // let zoom = d3.zoom().scaleExtent([0.2, 5])
-        // anim_svg.call(zoom, zoom_actions);
-
         let margin = {top: 20, right: 20, bottom: 20, left: 40};
         let width = anim_svg.node().width.baseVal.value - margin.left - margin.right;
         let height = anim_svg.node().height.baseVal.value - margin.top - margin.bottom;
@@ -388,8 +366,6 @@ function setup_animation(anim_svg, response, identifier) {
         // set the ranges
         let x_axis = d3.scaleLinear().range([0, width - 30]);
         let y_axis = d3.scaleLinear().range([height, 0]);
-        // x_axis.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
-        // y_axis.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
         let axes_limits = compute_axes_limits_sym(response.anim_steps[0]);
         x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
         y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
@@ -413,14 +389,6 @@ function setup_animation(anim_svg, response, identifier) {
             .attr('id', identifier + 'group')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        // let zoom = d3.zoom()
-        //     .scaleExtent([.5, 20])
-        //     .extent([[0, 0], [width, height]])
-        //     .on("zoom", zoom_actions);
-        //
-        // svg.call(zoom);
-
-        // let data = add_groups(response.anim_steps[0]);
         draw_scatter_anim(svg, response.anim_steps[0], x_axis, y_axis);
         let axes = draw_axes(svg, width, height, x_axis, y_axis);
         let x_axes_obj = axes[0], y_axes_obj = axes[1];
