@@ -372,19 +372,21 @@ function setup_animation(anim_svg, response, identifier) {
             let y_axis_obj = svg.select('.y');
             x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
             y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
-            x_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisBottom(x_axis));
-            y_axis_obj.transition().duration(ANIMATION_DURATION).call(d3.axisLeft(y_axis));
+            x_axis_obj.transition().duration(ANIMATION_DURATION).ease(d3.easeLinear).call(d3.axisBottom(x_axis));
+            y_axis_obj.transition().duration(ANIMATION_DURATION).ease(d3.easeLinear).call(d3.axisLeft(y_axis));
 
             svg.selectAll('g')
                 .data(response.anim_steps[step])
                 .transition()
                 .duration(ANIMATION_DURATION)
+                .ease(d3.easeLinear)
                 .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
 
             let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
             if (camera_step) {
                 svg.select('#bias-direction-line')
                     .transition()
+                    .ease(d3.easeLinear)
                     .duration(ANIMATION_DURATION)
                     .on('start', function () {
                         d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
@@ -397,6 +399,7 @@ function setup_animation(anim_svg, response, identifier) {
                 svg.select('#bias-direction-line')
                     .transition()
                     .duration(ANIMATION_DURATION)
+                    .ease(d3.easeLinear)
                     .attr('d', d3.line()(arrow_endpoints));
             }
             d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
@@ -740,7 +743,7 @@ $('#seedword-form-submit').click(function () {
                 $('#spinner-holder').hide();
                 $('#seedword-form-submit').removeAttr('disabled');
             },
-            error: function(request, status, error) {
+            error: function (request, status, error) {
                 alert(request.responseJSON.message);
             }
 
