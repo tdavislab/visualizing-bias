@@ -562,6 +562,7 @@ function btn_active(btn, bool_active) {
 function captureEnter(e) {
     if (e.key === 'Enter' || e.keyCode === 13) {
         $('#seedword-form-submit').click();
+        $('#example-selection-button').html('Choose an example or provide seedword sets below')
     }
 }
 

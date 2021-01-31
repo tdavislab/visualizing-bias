@@ -157,6 +157,8 @@ def get_seedwords2():
     bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
     print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
 
+    explanations = app.explanations
+
     if algorithm == 'Linear':
         debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
         debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
@@ -172,6 +174,7 @@ def get_seedwords2():
     elif algorithm == 'INLP':
         debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)
         debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
+        explanations['INLP'] += explanations['INLP'][1:5] * (len(debiaser.animator.anim_steps) // 5)
 
     anim_steps = debiaser.animator.convert_to_payload()
     rename_concepts(anim_steps, concept1_name, concept2_name)
@@ -180,7 +183,7 @@ def get_seedwords2():
                     'debiased': anim_steps[-1],
                     'anim_steps': anim_steps,
                     'bounds': debiaser.animator.get_bounds(),
-                    'explanations': app.explanations[algorithm],
+                    'explanations': explanations[algorithm],
                     'camera_steps': debiaser.animator.get_camera_steps()
                     }
 
