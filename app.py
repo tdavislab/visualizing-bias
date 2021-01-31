@@ -190,7 +190,7 @@ def get_seedwords2():
 
         return jsonify(data_payload)
     except KeyError as e:
-        raise InvalidUsage(f'Something went wrong! Could not find the key {str(e)} in embedding', 404)
+        raise InvalidUsage(f'Something went wrong! Could not find the key {str(e).strip()}', 404)
 
 
 class InvalidUsage(Exception):

@@ -21,6 +21,11 @@ To install these libraries using pip, use the following command in the terminal:
 ```
 pip install flask scikit-learn scipy numpy networkx tqdm
 ```
+To install these packages only for current user (or if you do not write access to the python installation on the machine):
+```
+pip install flask scikit-learn scipy numpy networkx tqdm --user
+```
+
 Alternately, you can also use conda to install the packages:
 ```
 conda install flask scikit-learn scipy numpy networkx tqdm

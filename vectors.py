@@ -970,5 +970,5 @@ if __name__ == '__main__':
 
     emb = Embedding('data/glove.6B.50d.txt')
     save('data/glove.6B.50d.pkl', emb)
-    # emb = Embedding('data/glove.42B.300d.txt')
+    # emb = Embedding('data/glove.42B.300d.txt', limit=40000)
     # save('data/glove.42B.300d.pkl', emb)
