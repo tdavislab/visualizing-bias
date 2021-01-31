@@ -180,6 +180,9 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
     datapoint_group.append('path')
         .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
         .attr('d', d => shape(d.group))
+        .attr('stroke', 'black')
+        .attr('stroke-width', '1px')
+        .attr('stroke-opacity', '0.5')
 
 
     // Add the X Axis
@@ -271,6 +274,9 @@ function draw_scatter_anim(svg, point_data, x, y, width, height, margin) {
         // .attr('fill', d => color(d.group))
         .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
         .attr('d', d => shape(d.group))
+        .attr('stroke', 'black')
+        .attr('stroke-width', '1px')
+        .attr('stroke-opacity', '0.5')
 
     // Draw the bias direction arrow
     let arrow_endpoints = point_data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
