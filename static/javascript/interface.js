@@ -108,32 +108,16 @@ function sample_label_position(scale) {
     return parseInt(pos * scale);
 }
 
-function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
+function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) {
     parent_svg.selectAll('*').remove();
     let margin = {top: 20, right: 20, bottom: 20, left: 40};
     let width = parent_svg.node().width.baseVal.value - margin.left - margin.right;
     let height = parent_svg.node().height.baseVal.value - margin.top - margin.bottom;
-    // let data = process_response(response, eval, debiased);
-
-    // if (mean) {
-    //     let mean1 = vector_mean(response['vectors1']);
-    //     let mean2 = vector_mean(response['vectors2']);
-    //     data.push({'position': mean1, 'label': 'mean1', 'group': 1});
-    //     data.push({'position': mean2, 'label': 'mean2', 'group': 2});
-    // }
 
     // Append group to the svg
     let svg = parent_svg.append('g')
         .attr('id', plotTitle + 'group')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-    // set the ranges
-    // let x = d3.scaleLinear().range([0, width - 30]);
-    // let y = d3.scaleLinear().range([height, 0]);
-    // x.domain(d3.extent(data, d => d.position[0])).nice();
-    // y.domain(d3.extent(data, d => d.position[1])).nice();
-    // x.domain([response.bounds.xmin - AXIS_TOLERANCE, response.bounds.xmax + AXIS_TOLERANCE]).nice();
-    // y.domain([response.bounds.ymin - AXIS_TOLERANCE, response.bounds.ymax + AXIS_TOLERANCE]).nice();
 
     // set the ranges
     let x = d3.scaleLinear().range([0, width - 30]);
@@ -190,13 +174,6 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .on('click', remove_point)
         .text('\uf057');
 
-    // datapoint_group.append('circle')
-    //     .attr('r', 8)
-    //     .attr('fill', d => color(d.group))
-    //     .attr('stroke', 'black')
-    //     .attr('stroke-width', d => check_if_mean(d) * 3)
-    //     .attr('class', 'point');
-
     datapoint_group.append('path')
         .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
         .attr('d', d => shape(d.group))
@@ -221,39 +198,9 @@ function draw_svg_scatter(parent_svg, response, plotTitle, debiased = false) {
         .attr('d', d3.line()(arrow_endpoints))
         .attr('stroke', '#5b5b5b')
         .attr('stroke-width', '4px');
-
-    // d3.select('#play-control-play').on('click', function () {
-    //     let new_data = process_response(response, eval, false);
-    //
-    //     svg.selectAll('.datapoint-group').data(new_data)
-    //         .transition()
-    //         .duration(5)
-    //         .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')')
-    //         .on('end', function () {
-    //             svg.selectAll('.datapoint-group').data(process_response(response, eval, true))
-    //                 .transition()
-    //                 .duration(5000)
-    //                 .attr('transform', d => 'translate(' + x(d.position[0]) + ',' + y(d.position[1]) + ')');
-    //         })
-    // })
 }
 
-function draw_axes(svg, width, height, x, y) {
-    // Add the X Axis
-    let x_axis = svg.append('g')
-        .attr('transform', 'translate(0,' + height + ')')
-        .classed('x axis', true)
-        .call(d3.axisBottom(x));
-
-    // Add the Y Axis
-    let y_axis = svg.append('g')
-        .classed('y axis', true)
-        .call(d3.axisLeft(y));
-
-    return [x_axis, y_axis];
-}
-
-function draw_scatter(svg, point_data, x, y) {
+function draw_scatter_anim(svg, point_data, x, y) {
     // Add the scatterplot
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
@@ -310,6 +257,21 @@ function draw_scatter(svg, point_data, x, y) {
         .attr('d', d3.line()(arrow_endpoints))
         .attr('stroke', '#5b5b5b')
         .attr('stroke-width', '4px');
+}
+
+function draw_axes(svg, width, height, x, y) {
+    // Add the X Axis
+    let x_axis = svg.append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .classed('x axis', true)
+        .call(d3.axisBottom(x));
+
+    // Add the Y Axis
+    let y_axis = svg.append('g')
+        .classed('y axis', true)
+        .call(d3.axisLeft(y));
+
+    return [x_axis, y_axis];
 }
 
 function add_groups(data) {
@@ -459,7 +421,7 @@ function setup_animation(anim_svg, response, identifier) {
         // svg.call(zoom);
 
         // let data = add_groups(response.anim_steps[0]);
-        draw_scatter(svg, response.anim_steps[0], x_axis, y_axis);
+        draw_scatter_anim(svg, response.anim_steps[0], x_axis, y_axis);
         let axes = draw_axes(svg, width, height, x_axis, y_axis);
         let x_axes_obj = axes[0], y_axes_obj = axes[1];
         $('#explanation-text').text(response.explanations[0]);
@@ -727,14 +689,14 @@ $('#seedword-form-submit').click(function () {
             },
             success: function (response) {
                 let predebiased_svg = d3.select('#pre-debiased-svg');
-                draw_svg_scatter(predebiased_svg, response, 'Pre-debiasing', false,);
+                draw_scatter_static(predebiased_svg, response, 'Pre-debiasing', false,);
 
                 let animation_svg = d3.select('#animation-svg');
                 // draw_svg_scatter(animation_svg, response, 'Pre-debiasing', true, true);
                 setup_animation(animation_svg, response, 'animation')
 
                 let postdebiased_svg = d3.select('#post-debiased-svg');
-                draw_svg_scatter(postdebiased_svg, response, 'Post-debiasing', true,);
+                draw_scatter_static(postdebiased_svg, response, 'Post-debiasing', true,);
 
                 // $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
                 // $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
