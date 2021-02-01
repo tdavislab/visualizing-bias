@@ -12,8 +12,13 @@ let MEAN_VISIBILITY = true;
 let EVAL_VISIBILITY = true;
 let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
-let ANIMATION_DURATION = 3000;
+let ANIMATION_DURATION = 4000;
 let AXIS_TOLERANCE = 0.05;
+let INTERPOLATION = d3.easeCubic
+
+if (TESTING) {
+    ANIMATION_DURATION = 1000;
+}
 
 let ALGO_MAP = {
     'Linear projection': 1,
@@ -99,6 +104,16 @@ function remove_point() {
         let seedwords = $('#seedword-text-2').val().split(', ');
         let filtered = seedwords.filter(elem => elem !== label);
         $('#seedword-text-2').val(filtered.join(', '));
+    }
+    if (group === 3) {
+        let evalwords = $('#evaluation-list').val().split(', ');
+        let filtered = evalwords.filter(elem => elem !== label);
+        $('#evaluation-list').val(filtered.join(', '));
+    }
+    if (group === 4) {
+        let orth_subspace_words = $('#oscar-seedword-text-1').val().split(', ');
+        let filtered = orth_subspace_words.filter(elem => elem !== label);
+        $('#oscar-seedword-text-1').val(filtered.join(', '));
     }
     $('#seedword-form-submit').click();
 }
@@ -390,21 +405,21 @@ function setup_animation(anim_svg, response, identifier) {
             let y_axis_obj = svg.select('.y');
             x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
             y_axis.domain([axes_limits['y_min'], axes_limits['y_max']]).nice();
-            x_axis_obj.transition().duration(ANIMATION_DURATION).ease(d3.easeLinear).call(d3.axisBottom(x_axis));
-            y_axis_obj.transition().duration(ANIMATION_DURATION).ease(d3.easeLinear).call(d3.axisLeft(y_axis));
+            x_axis_obj.transition().duration(ANIMATION_DURATION).ease(INTERPOLATION).call(d3.axisBottom(x_axis));
+            y_axis_obj.transition().duration(ANIMATION_DURATION).ease(INTERPOLATION).call(d3.axisLeft(y_axis));
 
             svg.selectAll('g')
                 .data(response.anim_steps[step])
                 .transition()
                 .duration(ANIMATION_DURATION)
-                .ease(d3.easeLinear)
+                .ease(INTERPOLATION)
                 .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
 
             let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
             if (camera_step) {
                 svg.select('#bias-direction-line')
                     .transition()
-                    .ease(d3.easeLinear)
+                    .ease(INTERPOLATION)
                     .duration(ANIMATION_DURATION)
                     .on('start', function () {
                         d3.select('#camera-indicator').classed('animate-flicker', true).attr('visibility', 'visible');
@@ -417,7 +432,7 @@ function setup_animation(anim_svg, response, identifier) {
                 svg.select('#bias-direction-line')
                     .transition()
                     .duration(ANIMATION_DURATION)
-                    .ease(d3.easeLinear)
+                    .ease(INTERPOLATION)
                     .attr('d', d3.line()(arrow_endpoints));
             }
             d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
@@ -699,7 +714,7 @@ $('#seedword-form-submit').click(function () {
         $('#toggle-eval-chk').prop('checked', true);
         $('#toggle-mean-chk').prop('checked', true);
         $('#data-label-chk').prop('checked', true);
-        $('#remove-points-chk').prop('checked', true);
+        $('#remove-points-chk').prop('checked', false);
 
         let seedwords1 = $('#seedword-text-1').val();
         let seedwords2 = $('#seedword-text-2').val();
@@ -825,8 +840,8 @@ if (TESTING) {
             ' grandfather-grandmother, grandson-granddaughter, he-she, himself-herself, his-her, king-queen, kings-queens,' +
             ' male-female, males-females, man-woman, men-women, nephew-niece, prince-princess, schoolboy-schoolgirl, son-daughter, sons-daughters')
         $('#oscar-seedword-text-1').val('scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker')
-        $('#algorithm-dropdown').children()[1].click();
-        $('#subspace-dropdown-items').children()[1].click();
+        $('#algorithm-dropdown').children()[4].click();
+        // $('#subspace-dropdown-items').children()[1].click();
         $('#seedword-form-submit').click();
         // $('#preloaded-examples').click();
     } catch (e) {

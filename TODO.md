@@ -123,16 +123,18 @@ _______________________________________
 - [x] INLP, 4 steps
 - [x] Fix Oscar
 - [x] Linear projection, Hard debiasing: concept vector shrink to origin
-- [x] INLP, stop when score < 0.5 + epsilon
+- [x] INLP, stop when score < 0.5 + epsilon, atleast two rounds
 - [x] Fix flicker-class camera
 - [x] move to preloaded examples
 - [x] For axes - same-scale, symmetric, square around origin
-- [ ] Zoom for initial and debiased embedding
-- [ ] Fixed set of algo+subspace method
-- [ ] Combinations: Linear + Hard + Oscar - Two Means + PCA; INLP - classification
-- [ ] On error, dialog box
+- [x] Zoom for initial and debiased embedding
+- [x] Fixed set of algo+subspace method
+- [x] Combinations: Linear + Hard + Oscar - Two Means + PCA; INLP - classification
+- [x] On error, dialog box
 - [ ] Support ~empty~ evalset, single word evaluation
 - [ ] brother-sister, father-mother; eval=professor, receptionist, pregnant; seed=he,man,she,woman
 - [ ] WEAT 
 - [ ] Legend
 - [x] Linear projection - Linear projection
+- [ ] Correct remove points
+- [ ] Dotted line for classifier

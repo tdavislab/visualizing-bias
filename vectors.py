@@ -573,7 +573,7 @@ class INLPDebiaser(Debiaser):
             weights = np.expand_dims(classifier_i.coef_[0], 0)
             bias_direction = weights[0] / np.linalg.norm(weights[0])
 
-            if np.linalg.norm(weights) < 1e-10 or classifier_i.score(x_projected, y) < 0.55:
+            if (np.linalg.norm(weights) < 1e-10 or classifier_i.score(x_projected, y) < 0.55) and iter_idx > 1:
                 break
 
             # ---------------------------------------------------------
