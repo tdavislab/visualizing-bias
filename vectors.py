@@ -3,7 +3,6 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
 from sklearn.svm import SVC
-import networkx as nx
 from tqdm import tqdm
 from weat import weat_score
 import scipy
@@ -884,13 +883,13 @@ def basis(vec):
 
 # Legacy code fragments
 # -----------------------------------------------------
-def knn_graph(embedding, word_list):
-    vectors = embedding.get_many(word_list)
-    adjacency_matrix = kneighbors_graph(vectors, n_neighbors=3)
-    graph = nx.from_scipy_sparse_matrix(adjacency_matrix)
-    mapping = dict([(x, word_list[x]) for x in range(len(word_list))])
-    graph = nx.relabel.relabel_nodes(graph, mapping)
-    return nx.readwrite.json_graph.node_link_data(graph)
+# def knn_graph(embedding, word_list):
+#     vectors = embedding.get_many(word_list)
+#     adjacency_matrix = kneighbors_graph(vectors, n_neighbors=3)
+#     graph = nx.from_scipy_sparse_matrix(adjacency_matrix)
+#     mapping = dict([(x, word_list[x]) for x in range(len(word_list))])
+#     graph = nx.relabel.relabel_nodes(graph, mapping)
+#     return nx.readwrite.json_graph.node_link_data(graph)
 
 
 def two_means(embedding, word_list1, word_list2):
@@ -946,8 +945,8 @@ if __name__ == '__main__':
     # dirty hack to make sure the object can be unpickled in the flask app
     # noinspection PyUnresolvedReferences
     from vectors import Embedding
-
-    emb = Embedding('data/glove.6B.50d.txt')
+    datapath = 'data/glove.6B.50d.txt'
+    emb = Embedding(datapath)
     save('data/glove.6B.50d.pkl', emb)
     # emb = Embedding('data/glove.42B.300d.txt', limit=100000)
     # save('data/glove.42B.300d.pkl', emb)

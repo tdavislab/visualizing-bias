@@ -1,9 +1,9 @@
 # Visualizing Word Vector Biases
 
 ### Requirements
-The web interface is supported only for Chrome and Firefox.
-
 Python 3.6+, pip
+
+The web interface is supported only for Chrome and Firefox.
 
 The following libraries are also required to run the code:
 ```
@@ -11,17 +11,16 @@ flask
 sklearn
 scipy
 numpy
-networkx
 tqdm
 ```
 
 To install these libraries using pip, use the following command in the terminal:
 ```
-pip install flask scikit-learn scipy numpy networkx tqdm
+pip3 install flask scikit-learn scipy numpy tqdm
 ```
 To install these packages only for current user (or if you do not write access to the python installation on the machine):
 ```
-pip install flask scikit-learn scipy numpy networkx tqdm --user
+pip3 install flask scikit-learn scipy numpy tqdm --user
 ```
 
 Alternately, you can also use conda to install the packages:
@@ -29,7 +28,14 @@ Alternately, you can also use conda to install the packages:
 conda install flask scikit-learn scipy numpy networkx tqdm
 ```
 
-### 
+### Using larger word vector embeddings
+The project defaults to using GLoVe embeddings of 50 dimensions trained on the Wikipedia 2014 + Gigaword 5 corpus. 
+We also provide preprocessed data for the GLoVe embeddings from Common Crawl corpus - download the 
+[.pkl](https://drive.google.com/file/d/1u8kemdX9-BsdyNP9uCZQHFuw6n_SJtC0/view?usp=sharing) file here, 
+copy it to the data folder, and rename it to `embedding.pkl` to load this data instead.
+
+You can also create your own dataset by changing `datapath` variable in the `__main__` method of `vectors.py` to your own
+trained vectors in the GLoVe format.  
 
 ### Installation
 Clone this repository to your local machine, make sure the requirement are installed. 
@@ -41,7 +47,7 @@ cd <repo-location>
 python -m flask run
 ```
 
-### Common known issues and fixes
+### Common installation issues and fixes
 
 #### Error: Could  not locate a Flask application on command `python -m flask run`
 If you get the following error, it might indicate that you are not in the correct directory. Open a terminal in the 
