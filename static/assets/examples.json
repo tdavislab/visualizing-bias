@@ -50,12 +50,21 @@
       "concept1": "Gender"
     },
     {
+      "name": "INLP: gender",
+      "algorithm": "Iterative Null Space Projection",
+      "seedwords-1": "man, he, his, boy, grandpa, uncle, jack",
+      "seedwords-2": "woman, she, her, girl, grandma, aunt, jill",
+      "subspace": "Classification",
+      "evalset": "engineer, homemaker",
+      "concept1": "Gender"
+    },
+    {
       "name": "Adjectives: Linear Projection",
       "algorithm": "Linear projection",
       "seedwords-1": "he, him",
       "seedwords-2": "she, her",
       "subspace": "Two means",
-      "evalset": "beautiful, shy, docile, important, strong, intelligent",
+      "evalset": "beautiful, shy,  important, strong, ugly",
       "concept1": "Gender"
     },
     {
@@ -65,11 +74,11 @@
       "seedwords-2": "she, her",
       "subspace": "Two means",
       "equalize": "man-woman,he-him,she-her",
-      "evalset": "beautiful, shy, docile, important, strong, intelligent",
+      "evalset": "beautiful, shy,  important, strong, ugly",
       "concept1": "Gender"
     },
     {
-      "name": "Nationality: Linear Projection + Two means",
+      "name": "Nationality (Case1): Linear Projection",
       "algorithm": "Linear projection",
       "seedwords-1": "arab, persian",
       "seedwords-2": "american, canadian",
@@ -78,21 +87,12 @@
       "concept1": "Nationality"
     },
     {
-      "name": "Nationality: Linear Projection + PCA",
+      "name": "Nationality (Case 2): Linear Projection",
       "algorithm": "Linear projection",
       "seedwords-1": "persian, american, canadian, chinese, indian, british, arab",
       "subspace": "PCA",
       "evalset": "good, evil, smart,  greedy, nice",
       "concept1": "Nationality"
-    },
-    {
-      "name": "INLP: Gender",
-      "algorithm": "Iterative Null Space Projection",
-      "seedwords-1": "man, he, his, boy, grandpa, uncle, jack",
-      "seedwords-2": "woman, she, her, girl, grandma, aunt, jill",
-      "subspace": "Classification",
-      "evalset": "engineer, homemaker",
-      "concept1": "Gender"
     }
   ]
 }
