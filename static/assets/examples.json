@@ -1,6 +1,15 @@
 {
   "data": [
     {
+      "name": "Linear projection: Simple example",
+      "algorithm": "Linear projection",
+      "seedwords-1": "he, him",
+      "seedwords-2": "she, her",
+      "subspace": "Two means",
+      "evalset": "engineer, banker, nurse, receptionist",
+      "concept1": "Gender"
+    },
+    {
       "name": "Lipstick on a Pig: Hard debiasing",
       "algorithm": "Hard debiasing",
       "seedwords-1": "he",
@@ -60,7 +69,7 @@
       "concept1": "Gender"
     },
     {
-      "name": "Nationality: Linear Projection",
+      "name": "Nationality: Linear Projection + Two means",
       "algorithm": "Linear projection",
       "seedwords-1": "arab, persian",
       "seedwords-2": "american, canadian",
@@ -69,12 +78,21 @@
       "concept1": "Nationality"
     },
     {
-      "name": "Nationality: Linear Projection",
+      "name": "Nationality: Linear Projection + PCA",
       "algorithm": "Linear projection",
       "seedwords-1": "persian, american, canadian, chinese, indian, british, arab",
       "subspace": "PCA",
       "evalset": "good, evil, smart,  greedy, nice",
       "concept1": "Nationality"
+    },
+    {
+      "name": "INLP: Gender",
+      "algorithm": "Iterative Null Space Projection",
+      "seedwords-1": "man, he, his, boy, grandpa, uncle, jack",
+      "seedwords-2": "woman, she, her, girl, grandma, aunt, jill",
+      "subspace": "Classification",
+      "evalset": "engineer, homemaker",
+      "concept1": "Gender"
     }
   ]
 }

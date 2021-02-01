@@ -620,6 +620,8 @@ $('#example-dropdown a').click(function (e) {
 });
 
 $('#algorithm-dropdown a').click(function (e) {
+    $('#example-selection-button').html('Choose an example or provide seedword sets below');
+
     let algorithm = this.innerHTML;
     let subspace_selector = $('#subspace-dropdown-items').children();
 
@@ -664,6 +666,8 @@ $('#algorithm-dropdown a').click(function (e) {
 
 $('#subspace-dropdown a').click(function (e) {
     try {
+        $('#example-selection-button').html('Choose an example or provide seedword sets below')
+
         let subspace_method = this.innerHTML;
         $('#subspace-selection-button').text('Subspace method: ' + subspace_method);
 
@@ -835,9 +839,14 @@ $('#preloaded-examples').on('click', function () {
                 .classed(index === 0 ? 'active' : '', true)
                 .text((index + 1) + '. ' + example.name);
             dropdown_item.on('click', function () {
-                $('#example-selection-button').text('Chosen example: ' + (index + 1) + '. ' + example.name);
                 $('#algorithm-dropdown').children()[ALGO_MAP[example.algorithm]].click();
                 $('#subspace-dropdown-items').children()[SUBSPACE_MAP[example.subspace]].click();
+
+                $('#example-selection-button').text('Chosen example: ' + (index + 1) + '. ' + example.name);
+
+                $('#concept-label-1').val('Concept1');
+                $('#concept-label-2').val('Concept2');
+
                 if (example.hasOwnProperty('seedwords-1')) {
                     $('#seedword-text-1').val(example["seedwords-1"]);
                 }
