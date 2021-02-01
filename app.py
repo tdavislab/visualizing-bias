@@ -138,6 +138,7 @@ def get_seedwords():
 def get_seedwords2():
     try:
         reload_embeddings()
+
         seedwords1, seedwords2, evalwords = request.values['seedwords1'], request.values['seedwords2'], request.values['evalwords']
         equalize_set = request.values['equalize']
         orth_subspace_words = request.values['orth_subspace']
