@@ -3,8 +3,7 @@ $(document).ready(function () {
 });
 
 // Fill the textboxes while testing
-// let TESTING = false;
-let TESTING = false;
+let TESTING = true;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
@@ -115,7 +114,9 @@ function remove_point() {
         let filtered = orth_subspace_words.filter(elem => elem !== label);
         $('#oscar-seedword-text-1').val(filtered.join(', '));
     }
-    $('#seedword-form-submit').click();
+    console.log(element)
+    element.attr('visibility', 'hidden')
+    d3.select(this.parentNode).attr('visibility', 'hidden');
 }
 
 function sample_label_position(scale) {
@@ -197,7 +198,7 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
         .attr('d', d => shape(d.group))
         .attr('stroke', 'black')
         .attr('stroke-width', '1px')
-        .attr('stroke-opacity', '0.5')
+        .attr('stroke-opacity', '0.75')
 
 
     // Add the X Axis
@@ -291,7 +292,7 @@ function draw_scatter_anim(svg, point_data, x, y, width, height, margin) {
         .attr('d', d => shape(d.group))
         .attr('stroke', 'black')
         .attr('stroke-width', '1px')
-        .attr('stroke-opacity', '0.5')
+        .attr('stroke-opacity', '0.75')
 
     // Draw the bias direction arrow
     let arrow_endpoints = point_data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
@@ -572,6 +573,7 @@ function btn_active(btn, bool_active) {
 }
 
 function captureEnter(e) {
+    $(e.target).blur();
     if (e.key === 'Enter' || e.keyCode === 13) {
         $('#seedword-form-submit').click();
         $('#example-selection-button').html('Choose an example or provide seedword sets below')
@@ -689,14 +691,14 @@ $('#toggle-mean-chk').click(function () {
 });
 
 $('#remove-points-chk').click(function () {
-    let cross_buttons = d3.selectAll('.cross-button')
-    if (REMOVE_POINTS === true) {
+    let cross_buttons = d3.selectAll('.cross-button');
+    let chk_state = $(this).prop('checked');
+    if (chk_state === false) {
         cross_buttons.attr('visibility', 'hidden');
     } else {
-        cross_buttons.attr('visibility', 'visible');
+        cross_buttons.filter(d => d.group !== 0).attr('visibility', 'visible');
         // .classed('shaker', !cross_buttons.classed('shaker'));
     }
-    REMOVE_POINTS = !REMOVE_POINTS;
 });
 
 function svg_cleanup() {
@@ -714,7 +716,9 @@ $('#seedword-form-submit').click(function () {
         $('#toggle-eval-chk').prop('checked', true);
         $('#toggle-mean-chk').prop('checked', true);
         $('#data-label-chk').prop('checked', true);
-        $('#remove-points-chk').prop('checked', false);
+        if ($('#remove-points-chk').prop('checked', true)) {
+            $('#remove-points-chk').click()
+        }
 
         let seedwords1 = $('#seedword-text-1').val();
         let seedwords2 = $('#seedword-text-2').val();
@@ -754,13 +758,9 @@ $('#seedword-form-submit').click(function () {
 
                 // enable toolbar buttons
                 d3.select('#toggle-labels-btn').attr('disabled', null);
-                d3.select('#remove-points-btn').attr('disabled', null);
+                d3.select('#remove-points-chk').attr('disabled', null);
                 d3.select('#toggle-mean-btn').attr('disabled', null);
                 d3.select('#toggle-eval-btn').attr('disabled', null);
-                if (REMOVE_POINTS === true) {
-                    REMOVE_POINTS = false;
-                    $('#remove-points-btn').click();
-                }
 
                 if (LABEL_VISIBILITY === false) {
                     LABEL_VISIBILITY = true;
@@ -792,7 +792,7 @@ $('#oscar-seedword-text-1').on('keyup', captureEnter);
 // Preloaded examples
 $('#preloaded-examples').on('click', function () {
     $("#example-dropdown").empty();
-    $.getJSON('static/assets/examples.json', '{_: new Date().getTime()}', function (examples) {
+    $.getJSON('static/assets/examples.json', {ts: new Date().getTime()}, function (examples) {
         examples.data.forEach(function (example, index) {
             let dropdown = d3.select('#example-dropdown');
             let dropdown_item = dropdown.append('a')

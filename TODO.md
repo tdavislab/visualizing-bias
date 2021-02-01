@@ -136,5 +136,6 @@ _______________________________________
 - [ ] WEAT 
 - [ ] Legend
 - [x] Linear projection - Linear projection
-- [ ] Correct remove points
+- [x] Correct remove points
 - [ ] Dotted line for classifier
+- [x] lose focus in text field during overlay
