@@ -30,8 +30,8 @@ conda install flask scikit-learn scipy numpy networkx tqdm
 
 ### Using larger word vector embeddings
 The project defaults to using GLoVe embeddings of 50 dimensions trained on the Wikipedia 2014 + Gigaword 5 corpus. 
-We also provide preprocessed data for the GLoVe embeddings from Common Crawl corpus - download the 
-[.pkl](https://drive.google.com/file/d/1u8kemdX9-BsdyNP9uCZQHFuw6n_SJtC0/view?usp=sharing) file here, 
+We also provide preprocessed data for the GLoVe embeddings from Common Crawl corpus - [download the 
+preprocessed](https://drive.google.com/file/d/1u8kemdX9-BsdyNP9uCZQHFuw6n_SJtC0/view?usp=sharing) file here, 
 copy it to the data folder, and rename it to `embedding.pkl` to load this data instead.
 
 You can also create your own dataset by changing `datapath` variable in the `__main__` method of `vectors.py` to your own
@@ -42,7 +42,7 @@ Clone this repository to your local machine, make sure the requirement are insta
 Then navigate to the cloned repository and in the base directory, type the following
 command in the terminal.
 ```shell script
-git clone https://github.com/architrathore/visualizing-bias.git
+git clone https://github.com/tdavislab/visualizing-bias.git
 cd <repo-location>
 python -m flask run
 ```

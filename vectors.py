@@ -945,6 +945,7 @@ if __name__ == '__main__':
     # dirty hack to make sure the object can be unpickled in the flask app
     # noinspection PyUnresolvedReferences
     from vectors import Embedding
+
     datapath = 'data/glove.6B.50d.txt'
     emb = Embedding(datapath)
     save('data/glove.6B.50d.pkl', emb)

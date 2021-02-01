@@ -3,7 +3,7 @@ $(document).ready(function () {
 });
 
 // Fill the textboxes while testing
-let TESTING = true;
+let TESTING = false;
 
 // Initialize global variables
 let LABEL_VISIBILITY = true;
@@ -13,7 +13,7 @@ let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
 let ANIMATION_DURATION = 4000;
 let AXIS_TOLERANCE = 0.05;
-let INTERPOLATION = d3.easeCubic
+let INTERPOLATION = d3.easeCubic;
 
 if (TESTING) {
     ANIMATION_DURATION = 1000;
@@ -430,15 +430,14 @@ function setup_animation(anim_svg, response, identifier) {
                 let classifier_line = response.anim_steps[step].filter(d => d.group === 0).map(d => [d.x, d.y]);
                 classifier_line[1] = compute_perpendicular(classifier_line[1]);
                 classifier_line[0] = classifier_line[1].map(d => -d);
-                classifier_line = classifier_line.map(d => [x_axis(d[0]*10), y_axis(d[1]*10)]);
+                classifier_line = classifier_line.map(d => [x_axis(d[0] * 10), y_axis(d[1] * 10)]);
 
                 svg.select('#classification-line')
                     .transition()
                     .ease(INTERPOLATION)
                     .duration(ANIMATION_DURATION)
                     .attr('d', d3.line()(classifier_line));
-            }
-            else {
+            } else {
                 svg.select('#classification-line')
                     .selectAll('*')
                     .remove();
@@ -834,9 +833,9 @@ $('#preloaded-examples').on('click', function () {
             let dropdown_item = dropdown.append('a')
                 .classed('dropdown-item', true)
                 .classed(index === 0 ? 'active' : '', true)
-                .text(example.name);
+                .text((index + 1) + '. ' + example.name);
             dropdown_item.on('click', function () {
-                $('#example-selection-button').text('Chosen example: ' + example.name);
+                $('#example-selection-button').text('Chosen example: ' + (index + 1) + '. ' + example.name);
                 $('#algorithm-dropdown').children()[ALGO_MAP[example.algorithm]].click();
                 $('#subspace-dropdown-items').children()[SUBSPACE_MAP[example.subspace]].click();
                 if (example.hasOwnProperty('seedwords-1')) {
