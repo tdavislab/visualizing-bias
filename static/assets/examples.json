@@ -7,7 +7,8 @@
       "seedwords-2": "she",
       "subspace": "Two means",
       "equalize": "john-amy, paul-joan, mike-lisa, kevin-sarah, steve-diana, greg-kate, jeff-ann, bill-donna",
-      "evalset": "engineer, lawyer, receptionist, homemaker"
+      "evalset": "engineer, lawyer, receptionist, homemaker",
+      "concept1": "Gender"
     },
     {
       "name": "Lipstick on a Pig: Linear projection",
@@ -15,7 +16,8 @@
       "seedwords-1": "he",
       "seedwords-2": "she",
       "subspace": "Two means",
-      "evalset": "engineer, lawyer, receptionist, homemaker"
+      "evalset": "engineer, lawyer, receptionist, homemaker",
+      "concept1": "Gender"
     },
     {
       "name": "Lipstick on a Pig: OSCaR",
@@ -24,7 +26,9 @@
       "seedwords-2": "she",
       "subspace": "Two means",
       "oscar-c2-seedwords": "scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker",
-      "evalset": "john, amy, paul, joan, mike, lisa, kevin, sarah, steve, diana, greg, kate, jeff, ann, bill, donna"
+      "evalset": "john, amy, paul, joan, mike, lisa, kevin, sarah, steve, diana, greg, kate, jeff, ann, bill, donna",
+      "concept1": "Gender",
+      "concept2": "Occuptation"
     },
     {
       "name": "Example from paper: OSCaR",

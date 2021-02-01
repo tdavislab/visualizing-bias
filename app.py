@@ -6,11 +6,14 @@ import json
 
 app = Flask(__name__)
 
-# app.embedding = Embedding('data/glove.6B.50d.txt')
-app.base_embedding = load('data/glove.6B.50d.pkl')
-app.debiased_embedding = load('data/glove.6B.50d.pkl')
+app.base_embedding = load('data/embedding.pkl')
+app.debiased_embedding = load('data/embedding.pkl')
+
 with open('static/assets/explanations.json', 'r') as explanation_json:
     app.explanations = json.load(explanation_json)
+
+app.weat_A = ['doctor', 'engineer', 'lawyer', 'mathematician', 'banker']
+app.weat_B = ['receptionist', 'homemaker', 'nurse', 'dancer', 'maid']
 
 # app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
@@ -30,8 +33,8 @@ SUBSPACE_METHODS = {
 
 
 def reload_embeddings():
-    app.base_embedding = load('data/glove.6B.50d.pkl')
-    app.debiased_embedding = load('data/glove.6B.50d.pkl')  # Embedding(None)
+    app.base_embedding = load('data/embedding.pkl')
+    app.debiased_embedding = load('data/embedding.pkl')  # Embedding(None)
     # app.debiased_embedding.word_vectors = app.base_embedding.word_vectors.copy()
 
 
@@ -145,7 +148,8 @@ def get_seedwords2():
         seedwords1 = utils.process_seedwords(seedwords1)
         seedwords2 = utils.process_seedwords(seedwords2)
         evalwords = utils.process_seedwords(evalwords)
-        equalize_set = [word.split('-') for word in utils.process_seedwords(equalize_set)][:5]
+        equalize_set = [list(map(lambda x: x.lower(), word.split('-'))) for word in utils.process_seedwords(equalize_set)][:5]
+
         orth_subspace_words = utils.process_seedwords(orth_subspace_words)
 
         if subspace_method == 'PCA-paired':
@@ -159,21 +163,30 @@ def get_seedwords2():
         print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
 
         explanations = app.explanations
+        weatscore_predebiased = utils.get_weat_score(app.base_embedding, app.weat_A, app.weat_B)
+        weatscore_postdebiased = utils.get_weat_score(app.debiased_embedding, app.weat_A, app.weat_B)
 
         if algorithm == 'Linear':
-            debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser = LinearDebiaser(app.base_embedding, app.debiased_embedding, app)
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
 
         elif algorithm == 'Hard':
-            debiaser = HardDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser = HardDebiaser(app.base_embedding, app.debiased_embedding, app)
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set=equalize_set)
 
         elif algorithm == 'OSCaR':
-            debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding)
+            # weatscore_predebiased = utils.get_weat_score(app.base_embedding, app.weat_A, app.weat_B)
+            # debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding, app)
+            # debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
+            # weatscore_postdebiased = utils.get_weat_score(app.debiased_embedding, app.weat_A, app.weat_B)
+            #
+            # reload_embeddings()
+
+            debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding, app)
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
 
         elif algorithm == 'INLP':
-            debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding)
+            debiaser = INLPDebiaser(app.base_embedding, app.debiased_embedding, app)
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
             explanations['INLP'] += explanations['INLP'][1:5] * (len(debiaser.animator.anim_steps) // 5)
 
@@ -185,7 +198,8 @@ def get_seedwords2():
                         'anim_steps': anim_steps,
                         'bounds': debiaser.animator.get_bounds(),
                         'explanations': explanations[algorithm],
-                        'camera_steps': debiaser.animator.get_camera_steps()
+                        'camera_steps': debiaser.animator.get_camera_steps(),
+                        'weat_scores': {'pre-weat': weatscore_predebiased, 'post-weat': weatscore_postdebiased}
                         }
 
         return jsonify(data_payload)

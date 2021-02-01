@@ -390,6 +390,14 @@ function compute_axes_limits(points) {
     }
 }
 
+function compute_perpendicular(line) {
+    let x = line[0], y = line[1];
+    if (Math.abs(x) <= 0.0000001) {
+        return [0, 0]
+    }
+    return [-line[1] / line[0], 1];
+}
+
 function setup_animation(anim_svg, response, identifier) {
     try {
         console.log(response, anim_svg);
@@ -417,6 +425,25 @@ function setup_animation(anim_svg, response, identifier) {
                 .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
 
             let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
+
+            if ($('#algorithm-selection-button').text() === 'Algorithm: Iterative Null Space Projection') {
+                let classifier_line = response.anim_steps[step].filter(d => d.group === 0).map(d => [d.x, d.y]);
+                classifier_line[1] = compute_perpendicular(classifier_line[1]);
+                classifier_line[0] = classifier_line[1].map(d => -d);
+                classifier_line = classifier_line.map(d => [x_axis(d[0]*10), y_axis(d[1]*10)]);
+
+                svg.select('#classification-line')
+                    .transition()
+                    .ease(INTERPOLATION)
+                    .duration(ANIMATION_DURATION)
+                    .attr('d', d3.line()(classifier_line));
+            }
+            else {
+                svg.select('#classification-line')
+                    .selectAll('*')
+                    .remove();
+            }
+
             if (camera_step) {
                 svg.select('#bias-direction-line')
                     .transition()
@@ -432,8 +459,8 @@ function setup_animation(anim_svg, response, identifier) {
             } else {
                 svg.select('#bias-direction-line')
                     .transition()
-                    .duration(ANIMATION_DURATION)
                     .ease(INTERPOLATION)
+                    .duration(ANIMATION_DURATION)
                     .attr('d', d3.line()(arrow_endpoints));
             }
             d3.select('#camera-indicator').classed('animate-flicker', false).attr('visibility', 'hidden');
@@ -471,6 +498,14 @@ function setup_animation(anim_svg, response, identifier) {
 
         draw_scatter_anim(svg, response.anim_steps[0], x_axis, y_axis, width, height, margin);
         let axes = draw_axes(svg, width, height, x_axis, y_axis);
+
+        svg.append('path')
+            .attr('id', 'classification-line')
+            .attr('stroke', '#2751ac')
+            .attr('d', d3.line()([0, 0], [1, 1]))
+            .attr('stroke-width', '2px')
+            .attr('stroke-dasharray', '5, 5')
+
         let x_axes_obj = axes[0], y_axes_obj = axes[1];
         $('#explanation-text').text(response.explanations[0]);
 
@@ -573,8 +608,8 @@ function btn_active(btn, bool_active) {
 }
 
 function captureEnter(e) {
-    $(e.target).blur();
     if (e.key === 'Enter' || e.keyCode === 13) {
+        $(e.target).blur();
         $('#seedword-form-submit').click();
         $('#example-selection-button').html('Choose an example or provide seedword sets below')
     }
@@ -753,8 +788,9 @@ $('#seedword-form-submit').click(function () {
                 let postdebiased_svg = d3.select('#post-debiased-svg');
                 draw_scatter_static(postdebiased_svg, response, 'Post-debiasing', true,);
 
-                // $('#weat-predebiased').html('WEAT score = ' + response['weat_score_predebiased'].toFixed(3));
-                // $('#weat-postdebiased').html('WEAT score = ' + response['weat_score_postdebiased'].toFixed(3));
+                $('#weat-predebiased').html('WEAT score = ' + response['weat_scores']['pre-weat'].toFixed(3));
+                $('#weat-postdebiased').html('WEAT score = ' + response['weat_scores']['post-weat'].toFixed(3));
+                console.log(response.weat_scores);
 
                 // enable toolbar buttons
                 d3.select('#toggle-labels-btn').attr('disabled', null);
@@ -817,6 +853,9 @@ $('#preloaded-examples').on('click', function () {
                 }
                 if (example.hasOwnProperty('oscar-c2-seedwords')) {
                     $('#oscar-seedword-text-1').val(example["oscar-c2-seedwords"]);
+                }
+                if (example.hasOwnProperty('concept1')) {
+                    $('#concept-label-1').val(example['concept1']);
                 }
                 $('#seedword-form-submit').click();
             })

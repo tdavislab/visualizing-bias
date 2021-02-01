@@ -92,31 +92,22 @@
   <div id="weat-score" class="row center-block" hidden>
     <h5 id="weat-predebiased" style="margin: auto"></h5>
     <h5 id="weat-postdebiased" style="margin: auto"></h5>
-    <div class="dropdown mr-4">
-      <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true">
-        Debiasing Method
-      </button>
-      <div class="dropdown-menu">
-        <a class="dropdown-item">Linear projection</a>
-        <a class="dropdown-item">OSCaR</a>
-      </div>
-    </div>
   </div>
 
   <div id="projections" class="row m-3" style="height: 50% !important;">
     <div class="col-md-4" align="center">
-      <h5 class="text-center">Initial Embedding</h5>
+      <h5 id="initial-embedding-title" class="text-center">Initial Embedding</h5>
       <svg id="pre-debiased-svg" width="100%" height="100%"></svg>
     </div>
 
     <div class="col-md-4" align="center">
-      <h5 class="text-center">Intermediate Steps</h5>
+      <h5 id="intermediate-steps-title" class="text-center">Intermediate Steps</h5>
       <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
       <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="animation-svg" width="100%" height="100%"></svg>
     </div>
 
     <div class="col-md-4">
-      <h5 class="text-center">Debiased Embedding</h5>
+      <h5 id="debiased-embedding-title" class="text-center">Debiased Embedding</h5>
       <svg id="post-debiased-svg" width="100%" height="100%"></svg>
     </div>
   </div>
