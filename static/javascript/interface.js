@@ -195,7 +195,7 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
 
     datapoint_group.append('path')
         .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
-        .attr('d', d => shape(d.group))
+        .attr('d', d => (d.group === 0 && d.label !== 'Origin') ? '' : shape(d.group))
         .attr('stroke', 'black')
         .attr('stroke-width', '1px')
         .attr('stroke-opacity', '0.75')
@@ -251,6 +251,19 @@ function draw_scatter_static(parent_svg, response, plotTitle, debiased = false) 
 
 function draw_scatter_anim(svg, point_data, x, y, width, height, margin) {
     // Add the scatterplot
+    svg.append('defs')
+        .append('marker')
+        .attr('id', 'arrow')
+        .attr('viewBox', [0, 0, 10, 10])
+        .attr('refX', '5')
+        .attr('refY', '5')
+        .attr('markerWidth', '3')
+        .attr('markerHeight', '3')
+        .attr('stroke', '#5b5b5b')
+        .attr('orient', 'auto-start-reverse')
+        .append('path')
+        .attr('d', 'M 0 0 L 10 5 L 0 10 z');
+
     let datapoint_group = svg.selectAll('g')
         .data(point_data)
         .enter()
@@ -289,13 +302,14 @@ function draw_scatter_anim(svg, point_data, x, y, width, height, margin) {
     datapoint_group.append('path')
         // .attr('fill', d => color(d.group))
         .attr('fill', d => d.group === 0 ? '#414141' : color(d.group))
-        .attr('d', d => shape(d.group))
+        .attr('d', d => (d.group === 0 && d.label != 'Origin') ? '' : shape(d.group))
         .attr('stroke', 'black')
         .attr('stroke-width', '1px')
         .attr('stroke-opacity', '0.75')
 
     // Draw the bias direction arrow
     let arrow_endpoints = point_data.filter(d => d.group === 0).map(d => [x(d.x), y(d.y)]);
+
     let bias_line = svg.append('path')
         .attr('id', 'bias-direction-line')
         .attr('d', d3.line()(arrow_endpoints))
@@ -400,7 +414,7 @@ function compute_perpendicular(line) {
 
 function setup_animation(anim_svg, response, identifier) {
     try {
-        console.log(response, anim_svg);
+        console.log(response);
 
         function update_anim_svg(svg, x_axis, y_axis, step, camera_step = false) {
             let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
@@ -791,9 +805,9 @@ $('#seedword-form-submit').click(function () {
                 let postdebiased_svg = d3.select('#post-debiased-svg');
                 draw_scatter_static(postdebiased_svg, response, 'Post-debiasing', true,);
 
-                $('#weat-predebiased').html('WEAT score = ' + response['weat_scores']['pre-weat'].toFixed(3));
-                $('#weat-postdebiased').html('WEAT score = ' + response['weat_scores']['post-weat'].toFixed(3));
-                console.log(response.weat_scores);
+                // $('#weat-predebiased').html('WEAT score = ' + response['weat_scores']['pre-weat'].toFixed(3));
+                // $('#weat-postdebiased').html('WEAT score = ' + response['weat_scores']['post-weat'].toFixed(3));
+                // console.log(response.weat_scores);
 
                 // enable toolbar buttons
                 d3.select('#toggle-labels-btn').attr('disabled', null);
