@@ -44,7 +44,7 @@ command in the terminal.
 ```shell script
 git clone https://github.com/tdavislab/visualizing-bias.git
 cd <repo-location>
-python -m flask run
+python3 -m flask run
 ```
 
 ### Common installation issues and fixes
@@ -60,8 +60,8 @@ was not found in the current directory
 
 
 #### Python version
-The tool is written with Python 3.6+ support, and may/may not work with earlier versions of Python3.x. It will not 
-work with Python 2.x.
+The tool is written with Python 3.6+ support, and may/may not work with earlier versions of Python3.x. 
+Python 2.x. is not supported.
 
 #### Missing libraries
 Make sure you install the requirements before running the application. 
