@@ -161,7 +161,6 @@ def get_seedwords2():
 
         # Perform debiasing according to algorithm and subspace direction method
         bias_direction = get_bias_direction(app.base_embedding, seedwords1, seedwords2, subspace_method)
-        print(f'Performing debiasing={algorithm} with bias_method={subspace_method}')
 
         explanations = app.explanations
         weatscore_predebiased = utils.get_weat_score(app.base_embedding, app.weat_A, app.weat_B)

@@ -80,7 +80,7 @@
     {
       "name": "Nationality (Case1): Linear Projection",
       "algorithm": "Linear projection",
-      "seedwords-1": "arab, persian",
+      "seedwords-1": "syrian, persian",
       "seedwords-2": "american, canadian",
       "subspace": "Two means",
       "evalset": "good, bad, evil, smart, cunning, greedy, nice",
@@ -89,7 +89,7 @@
     {
       "name": "Nationality (Case 2): Linear Projection",
       "algorithm": "Linear projection",
-      "seedwords-1": "persian, american, canadian, chinese, indian, british, arab",
+      "seedwords-1": "persian, american, canadian, chinese, indian, british, syrian",
       "subspace": "PCA",
       "evalset": "good, evil, smart,  greedy, nice",
       "concept1": "Nationality"

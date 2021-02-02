@@ -122,7 +122,7 @@ class LinearDebiaser(Debiaser):
         step2.add_points(base_projector.project(self.debiased_emb, seedwords1, group=1))
         step2.add_points(base_projector.project(self.debiased_emb, seedwords2, group=2))
         step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
-        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # ---------------------------------------------------------
         # Step 3 - Project to the space of debiased embeddings
@@ -183,7 +183,7 @@ class HardDebiaser(Debiaser):
         step2.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
         step2.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
         step2.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
-        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
+        step2.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # Equalize words in equalize_set such that they are equidistant to set defining the gender direction
         for a, b in equalize_set:
@@ -206,7 +206,7 @@ class HardDebiaser(Debiaser):
         step3.add_points(base_projector.project(self.debiased_emb, evalwords, group=3))
         step3.add_points(base_projector.project(self.debiased_emb, equalize_words[0], group=4))
         step3.add_points(base_projector.project(self.debiased_emb, equalize_words[1], group=5))
-        step3.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction + 1e-8))
+        step3.add_points(base_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         # Step 4 - Reorient the embeddings back to the debiased space
         # ---------------------------------------------------------
@@ -608,7 +608,7 @@ class INLPDebiaser(Debiaser):
             step4.add_points(align_projector.project(self.debiased_emb, seedwords1, group=1))
             step4.add_points(align_projector.project(self.debiased_emb, seedwords2, group=2))
             step4.add_points(align_projector.project(self.debiased_emb, evalwords, group=3))
-            step4.add_points(align_projector.project(self.debiased_emb, [], group=0, direction=bias_direction - bias_direction))
+            step4.add_points(align_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
 
         debiased_projector = self.animator.add_projector(PCA(n_components=2), name='debiased_projector')
         debiased_projector.fit(self.debiased_emb, seedwords1 + seedwords2)
