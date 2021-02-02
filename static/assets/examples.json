@@ -105,9 +105,9 @@
     },
     {
       "name": "OSCaR: gender-occupations",
-      "algorithm": "OSCAR",
+      "algorithm": "OSCaR",
       "seedwords-1": "he, man, boy, him, she, woman, girl, her",
-      "seedwords-2": "scientist, doctor, nurse, secretary",
+      "oscar-c2-seedwords": "scientist, doctor, nurse, secretary",
       "subspace": "PCA",
       "evalset": "engineer, tiger, tigress",
       "concept1": "Gender",
@@ -115,9 +115,9 @@
     },
     {
       "name": "OSCaR: gender-names",
-      "algorithm": "OSCAR",
+      "algorithm": "OSCaR",
       "seedwords-1": "he, man, boy, him, she, woman, girl, her",
-      "seedwords-2": "jim, tom, mike, steve, mary, jane, sue, kim",
+      "oscar-c2-seedwords": "jim, tom, mike, steve, mary, jane, sue, kim",
       "subspace": "PCA",
       "evalset": "tiger, tigress",
       "concept1": "Gender",
