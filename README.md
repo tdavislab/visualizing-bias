@@ -25,7 +25,7 @@ pip3 install flask scikit-learn scipy numpy tqdm --user
 
 Alternately, you can also use conda to install the packages:
 ```
-conda install flask scikit-learn scipy numpy networkx tqdm
+conda install flask scikit-learn scipy numpy tqdm
 ```
 
 ### Using larger word vector embeddings

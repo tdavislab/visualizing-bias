@@ -93,6 +93,35 @@
       "subspace": "PCA",
       "evalset": "good, evil, smart,  greedy, nice",
       "concept1": "Nationality"
+    },
+    {
+      "name": "INLP: gender",
+      "algorithm": "Iterative Null Space Projection",
+      "seedwords-1": "man, he, his, boy, grandpa, uncle, jack",
+      "seedwords-2": "woman, she, her, girl, grandma, aunt, jill",
+      "subspace": "Classification",
+      "evalset": "engineer, homemaker",
+      "concept1": "Gender"
+    },
+    {
+      "name": "OSCaR: gender-occupations",
+      "algorithm": "OSCAR",
+      "seedwords-1": "he, man, boy, him, she, woman, girl, her",
+      "seedwords-2": "scientist, doctor, nurse, secretary",
+      "subspace": "PCA",
+      "evalset": "engineer, tiger, tigress",
+      "concept1": "Gender",
+      "concept2": "Occupations"
+    },
+    {
+      "name": "OSCaR: gender-names",
+      "algorithm": "OSCAR",
+      "seedwords-1": "he, man, boy, him, she, woman, girl, her",
+      "seedwords-2": "jim, tom, mike, steve, mary, jane, sue, kim",
+      "subspace": "PCA",
+      "evalset": "tiger, tigress",
+      "concept1": "Gender",
+      "concept2": "Names"
     }
   ]
 }
