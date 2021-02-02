@@ -715,18 +715,13 @@ $('#data-label-chk').click(function () {
 });
 
 $('#toggle-eval-chk').click(function () {
-    if (EVAL_VISIBILITY === true) {
+
+    let eval_state = $(this).prop('checked');
+    if (eval_state === false) {
         d3.selectAll('.group-3').attr('hidden', true);
-        d3.selectAll('.group-4').attr('hidden', true);
-        d3.selectAll('.group-5').attr('hidden', true);
-        d3.select('#toggle-eval-icon').attr('class', 'fa fa-toggle-on fa-rotate-180');
     } else {
         d3.selectAll('.group-3').attr('hidden', null);
-        d3.selectAll('.group-4').attr('hidden', null);
-        d3.selectAll('.group-5').attr('hidden', null);
-        d3.selectAll('#toggle-eval-icon').attr('class', 'fa fa-toggle-on');
     }
-    EVAL_VISIBILITY = !EVAL_VISIBILITY;
 });
 
 $('#toggle-mean-chk').click(function () {
@@ -786,8 +781,15 @@ $('#seedword-form-submit').click(function () {
             type: 'POST',
             url: '/seedwords2',
             data: {
-                seedwords1: seedwords1, seedwords2: seedwords2, evalwords: evalwords, equalize: equalize, orth_subspace: orth_subspace,
-                algorithm: algorithm, subspace_method: subspace_method, concept1_name: concept1_name, concept2_name: concept2_name
+                seedwords1: seedwords1,
+                seedwords2: seedwords2,
+                evalwords: evalwords,
+                equalize: equalize,
+                orth_subspace: orth_subspace,
+                algorithm: algorithm,
+                subspace_method: subspace_method,
+                concept1_name: concept1_name,
+                concept2_name: concept2_name
             },
             beforeSend: function () {
                 $('.overlay').addClass('d-flex').show();
@@ -878,6 +880,9 @@ $('#preloaded-examples').on('click', function () {
                 }
                 if (example.hasOwnProperty('concept1')) {
                     $('#concept-label-1').val(example['concept1']);
+                }
+                if (example.hasOwnProperty('concept2')) {
+                    $('#concept-label-2').val(example['concept2']);
                 }
                 $('#seedword-form-submit').click();
             })

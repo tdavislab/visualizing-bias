@@ -47,7 +47,8 @@
       "subspace": "Two means",
       "oscar-c2-seedwords": "scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker",
       "evalset": "receptionist, homemaker",
-      "concept1": "Gender"
+      "concept1": "Gender",
+      "concept2": "Occupations"
     },
     {
       "name": "INLP: gender",
