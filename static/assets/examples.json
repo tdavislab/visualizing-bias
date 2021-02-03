@@ -29,15 +29,13 @@
       "concept1": "Gender"
     },
     {
-      "name": "Lipstick on a Pig: OSCaR",
-      "algorithm": "OSCaR",
-      "seedwords-1": "he",
-      "seedwords-2": "she",
-      "subspace": "Two means",
-      "oscar-c2-seedwords": "scientist, doctor, nurse, secretary, maid, dancer, cleaner, advocate, player, banker",
-      "evalset": "john, amy, paul, joan, mike, lisa, kevin, sarah, steve, diana, greg, kate, jeff, ann, bill, donna",
-      "concept1": "Gender",
-      "concept2": "Occuptation"
+      "name": "Lipstick on a Pig: INLP",
+      "algorithm": "Iterative Null Space Projection",
+      "seedwords-1": "he,engineer,banker",
+      "seedwords-2": "she,nurse, receptionist",
+      "subspace": "Classification",
+      "evalset": "doctor, maid",
+      "concept1": "Gender"
     },
     {
       "name": "Example from paper: OSCaR",
