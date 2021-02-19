@@ -6,6 +6,7 @@ from sklearn.svm import SVC
 from tqdm import tqdm
 from weat import weat_score
 import scipy
+from dynamicProj import generateFullDynamicProjPath
 
 
 class WordVector:
@@ -102,6 +103,9 @@ class LinearDebiaser(Debiaser):
         step0.add_points(prebase_projector.project(self.base_emb, evalwords, group=3))
         step0.add_points(prebase_projector.project(self.base_emb, [], group=0, direction=bias_direction))
 
+        # step1_source = step0.get_point_array()
+        # print(step1_source)
+
         # ---------------------------------------------------------
         # Step 1 - Project points such that bias direction is aligned with the x-axis
         # ---------------------------------------------------------
@@ -113,6 +117,17 @@ class LinearDebiaser(Debiaser):
         step1.add_points(base_projector.project(self.base_emb, seedwords2, group=2))
         step1.add_points(base_projector.project(self.base_emb, evalwords, group=3))
         step1.add_points(base_projector.project(self.base_emb, [], group=0, direction=bias_direction))
+
+        # step1_target = step1.get_point_array()
+        # print(step1_target)
+        # projection_path = generateFullDynamicProjPath(step1_source, step1_target)
+        # for proj in projection_path:
+        #     step1_5 = self.animator.add_anim_step()
+        #     word_vecs_2d = []
+        #     for i, vec in enumerate(np.array(proj)):
+        #         x, y = vec[0], vec[1]
+        #         word_vecs_2d.append(WordVec2D('word', np.round(x, 6), np.round(y, 6), group=1))
+        #     step1_5.add_points(word_vecs_2d)
 
         # ---------------------------------------------------------
         # Step 2 - Show the bias-x aligned projection of the debiased embedding
@@ -135,6 +150,10 @@ class LinearDebiaser(Debiaser):
         step3.add_points(debiased_projector.project(self.debiased_emb, seedwords2, group=2))
         step3.add_points(debiased_projector.project(self.debiased_emb, evalwords, group=3))
         step3.add_points(debiased_projector.project(self.debiased_emb, [], group=0, direction=bias_direction))
+
+        self.animator.make_transition(step0, step1)
+        self.animator.make_transition(step1, step2)
+        self.animator.make_transition(step2, step3)
 
 
 class HardDebiaser(Debiaser):
@@ -740,6 +759,9 @@ class WordVec2D:
     def __repr__(self):
         return f'WordVec2D("{self.label}", {self.x}, {self.y}, group={self.group}))'
 
+    def copy(self):
+        return WordVec2D(self.label, self.x, self.y, group=self.group, meta=self.meta)
+
 
 class AnimStep:
     def __init__(self, camera_step=False):
@@ -749,10 +771,18 @@ class AnimStep:
     def add_points(self, word_vecs_2d):
         self.points += word_vecs_2d
 
+    def get_point_array(self, filter_groups=[]):
+        point_coords = []
+        for point in self.points:
+            if point.group not in filter_groups:
+                point_coords.append([point.x, point.y])
+        return np.array(point_coords)
+
 
 class Animator:
     def __init__(self):
         self.anim_steps = []
+        self.transitions = []
         self.projectors = {}
 
     def add_projector(self, projector, name='GenericProjector'):
@@ -764,12 +794,43 @@ class Animator:
         self.anim_steps.append(new_step)
         return new_step
 
-    def convert_to_payload(self):
+    def make_transition(self, source, target):
+        if source is None:
+            self.transitions.append(None)
+
+        projection_path = generateFullDynamicProjPath(source.get_point_array(), target.get_point_array())
+        transitions = []
+
+        for proj in projection_path:
+            transition = []
+            for index, vec in enumerate(proj):
+                word_vec_copy = source.points[index].copy()
+                word_vec_copy.x, word_vec_copy.y = vec[0], vec[1]
+                transition.append(word_vec_copy)
+            transitions.append(transition)
+
+        self.transitions.append(transitions)
+
+    def convert_animations_to_payload(self):
         payload = []
+
         for step in self.anim_steps:
             payload.append([point.to_dict() for point in step.points])
 
         return payload
+
+    def convert_transitions_to_payload(self):
+        payload = []
+
+        for transition in self.transitions:
+            payload_step = []
+            for step in transition:
+                payload_step.append([point.to_dict() for point in step])
+
+            payload.append(payload_step)
+
+        return payload
+
 
     def get_camera_steps(self):
         camera_steps = []

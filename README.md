@@ -47,6 +47,7 @@ cd <repo-location>
 python3 -m flask run
 ```
 
+
 ### Common installation issues and fixes
 
 #### Error: Could  not locate a Flask application on command `python -m flask run`

@@ -51,6 +51,7 @@ def rename_concepts(anim_steps, c1_name, c2_name):
 def index():
     return render_template('interface.html')
 
+
 @app.route('/seedwords2', methods=['POST'])
 def get_seedwords2():
     try:
@@ -107,12 +108,14 @@ def get_seedwords2():
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords)
             explanations['INLP'] += explanations['INLP'][1:5] * (len(debiaser.animator.anim_steps) // 5)
 
-        anim_steps = debiaser.animator.convert_to_payload()
+        anim_steps = debiaser.animator.convert_animations_to_payload()
+        transitions = debiaser.animator.convert_transitions_to_payload()
         rename_concepts(anim_steps, concept1_name, concept2_name)
 
         data_payload = {'base': anim_steps[0],
                         'debiased': anim_steps[-1],
                         'anim_steps': anim_steps,
+                        'transitions': transitions,
                         'bounds': debiaser.animator.get_bounds(),
                         'explanations': explanations[algorithm],
                         'camera_steps': debiaser.animator.get_camera_steps(),
