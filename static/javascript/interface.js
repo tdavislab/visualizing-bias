@@ -13,10 +13,10 @@ let REMOVE_POINTS = false;
 let ANIMSTEP_COUNTER = 0;
 let ANIMATION_DURATION = 4000;
 let AXIS_TOLERANCE = 0.05;
-let INTERPOLATION = d3.easeCubic;
+let INTERPOLATION = d3.easeLinear;
 
 if (TESTING) {
-  ANIMATION_DURATION = 200;
+  ANIMATION_DURATION = 100;
 }
 
 let ALGO_MAP = {
@@ -416,14 +416,14 @@ function setup_animation(anim_svg, response, identifier) {
   try {
     console.log(response);
 
-    function update_anim_svg(svg, x_axis, y_axis, step, camera_step = false) {
+    function update_anim_svg(svg, x_axis, y_axis, step, transition_info, camera_step = false) {
       let explanation_text = step <= response.explanations.length ? response.explanations[step] : 'No explanation found.';
       $('#explanation-text').text(explanation_text);
 
-      let axes_limits = compute_axes_limits_sym(response.anim_steps[step]);
-
       svg.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+      // Adjust the axis
+      let axes_limits = compute_axes_limits_sym(response.anim_steps[step]);
       let x_axis_obj = svg.select('.x');
       let y_axis_obj = svg.select('.y');
       x_axis.domain([axes_limits['x_min'], axes_limits['x_max']]).nice();
@@ -431,12 +431,40 @@ function setup_animation(anim_svg, response, identifier) {
       x_axis_obj.transition().duration(ANIMATION_DURATION).ease(INTERPOLATION).call(d3.axisBottom(x_axis));
       y_axis_obj.transition().duration(ANIMATION_DURATION).ease(INTERPOLATION).call(d3.axisLeft(y_axis));
 
-      svg.selectAll('g')
-        .data(response.anim_steps[step])
-        .transition()
-        .duration(ANIMATION_DURATION)
-        .ease(INTERPOLATION)
-        .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+      if (transition_info.index !== -1) {
+        let transition_array = transition_info.forward ? response.transitions[transition_info.index] : response.transitions[transition_info.index].map(d => d.reverse());
+        console.log(transition_array)
+        let i = 0;
+        svg.selectAll('g')
+          .data(transition_array[i])
+          .transition()
+          .duration(ANIMATION_DURATION)
+          .ease(INTERPOLATION)
+          .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')')
+          .end()
+          .then(function repeat() {
+            i += 1;
+            if (i < transition_array.length) {
+              {
+                svg.selectAll('g')
+                  .data(transition_array[i])
+                  .transition()
+                  .duration(ANIMATION_DURATION)
+                  .ease(INTERPOLATION)
+                  .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')')
+                  .end()
+                  .then(repeat)
+              }
+            }
+          })
+      } else {
+        svg.selectAll('g')
+          .data(response.anim_steps[step])
+          .transition()
+          .duration(ANIMATION_DURATION)
+          .ease(INTERPOLATION)
+          .attr('transform', d => 'translate(' + x_axis(d.x) + ',' + y_axis(d.y) + ')');
+      }
 
       let arrow_endpoints = response.anim_steps[step].filter(d => d.group === 0).map(d => [x_axis(d.x), y_axis(d.y)]);
 
@@ -543,7 +571,7 @@ function setup_animation(anim_svg, response, identifier) {
         btn_active(step_forward_btn, true);
         btn_active(fast_forward_btn, true);
 
-        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, response.camera_steps[ANIMSTEP_COUNTER + 1]);
+        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, {index: ANIMSTEP_COUNTER, forward: false}, response.camera_steps[ANIMSTEP_COUNTER + 1]);
 
         if (ANIMSTEP_COUNTER === 0) {
           btn_active(step_backward_btn, false);
@@ -562,7 +590,7 @@ function setup_animation(anim_svg, response, identifier) {
         btn_active(step_forward_btn, true);
         btn_active(fast_forward_btn, true);
 
-        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, true);
+        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, {index: -1, forward: false}, true);
 
         if (ANIMSTEP_COUNTER === 0) {
           btn_active(step_backward_btn, false);
@@ -582,7 +610,7 @@ function setup_animation(anim_svg, response, identifier) {
         btn_active(step_backward_btn, true);
         btn_active(fast_backward_btn, true);
 
-        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, response.camera_steps[ANIMSTEP_COUNTER]);
+        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, {index: ANIMSTEP_COUNTER - 1, forward: true}, response.camera_steps[ANIMSTEP_COUNTER]);
 
         if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
           btn_active(step_forward_btn, false);
@@ -601,7 +629,7 @@ function setup_animation(anim_svg, response, identifier) {
         btn_active(step_backward_btn, true);
         btn_active(fast_backward_btn, true);
 
-        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, true);
+        update_anim_svg(svg, x_axis, y_axis, ANIMSTEP_COUNTER, {index: -1, forward: true}, true);
 
         if (ANIMSTEP_COUNTER === response.anim_steps.length - 1) {
           btn_active(step_forward_btn, false);
