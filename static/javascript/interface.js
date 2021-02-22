@@ -14,6 +14,7 @@ let ANIMSTEP_COUNTER = 0;
 let ANIMATION_DURATION = 4000;
 let AXIS_TOLERANCE = 0.05;
 let INTERPOLATION = d3.easeLinear;
+let DYNAMIC_PROJ = false;
 
 if (TESTING) {
   ANIMATION_DURATION = 100;
@@ -431,8 +432,8 @@ function setup_animation(anim_svg, response, identifier) {
       x_axis_obj.transition().duration(ANIMATION_DURATION).ease(INTERPOLATION).call(d3.axisBottom(x_axis));
       y_axis_obj.transition().duration(ANIMATION_DURATION).ease(INTERPOLATION).call(d3.axisLeft(y_axis));
 
-      if (transition_info.index !== -1) {
-        let transition_array = transition_info.forward ? response.transitions[transition_info.index] : response.transitions[transition_info.index].map(d => d.reverse());
+      if (DYNAMIC_PROJ && transition_info.index !== -1) {
+        let transition_array = transition_info.forward ? response.transitions[transition_info.index] : response.transitions[transition_info.index].slice().reverse();
         console.log(transition_array)
         let i = 0;
         svg.selectAll('g')
@@ -543,7 +544,7 @@ function setup_animation(anim_svg, response, identifier) {
     svg.append('path')
       .attr('id', 'classification-line')
       .attr('stroke', '#2751ac')
-      .attr('d', d3.line()([0, 0], [1, 1]))
+      .attr('d', d3.line()([[0, 0], [1, 1]]))
       .attr('stroke-width', '2px')
       .attr('stroke-dasharray', '5, 5')
 

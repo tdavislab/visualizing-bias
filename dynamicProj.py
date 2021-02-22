@@ -24,43 +24,18 @@ def generateDynamicProjPath(projS, projE, mode='FIX_STEPNUM'):
     Ga = Fa * Va
     Gz = Fz * Vz.T
 
-    # print "U*np.diag(s)*V:\n", Va*np.diag(s)*Vz
-    # print "Fa.T*Fz:\n", Fa.T*Fz
-    #
-    # print 'Ga.T*Gz:\n', Ga.T*Gz
-    # print 'Ga*Sigma:\n', Ga*np.diag(s)
-
     # print ('s:',s)
     tau = np.arccos(s)
-    print('principal angle:', tau)
     # euclidean norm of principal angles
     dist_az = np.sqrt(np.sum(np.multiply(tau, tau)))
-    # dist_az = np.sqrt(np.sum(np.multiply(tau, tau)))
-    # print ('dist_az:', dist_az)
-    # print ('tau:', tau)
 
     if (dist_az < 0.001):
         return [Fz]  # the span(Fa) is equal to span(Fz)
-
-    # northongoalize Ga, Gz
-    # U = np.hstack([Ga, Gz])
-    # Gz = gs(U)[:,[2,3]]
-    # Gz[:,0] = gs(np.hstack([Ga[:,0], Gz[:,0]]))[:, 0]
-    # Gz[:,1] = gs(np.hstack([Ga[:,1], Gz[:,1]]))[:, 1]
 
     Gz[:, 0] = gram_schmidt(Ga[:, 0], Gz[:, 0])
     Gz[:, 1] = gram_schmidt(Ga[:, 1], Gz[:, 1])
 
     Gz = normalizeBasis(orthnogoalize(Gz))
-
-    # rotation = Va*Vz
-    # print 'rotation', rotation
-    # theta = math.acos(rotation[0,0])
-    # r2 = math.asin(rotation[0,1])
-    print("==== det(Fa.T*Fz) ====:", np.linalg.det(Fa.T * Fz))
-    # print "theta:", theta
-    # print "cos(theta)", math.cos(theta)
-    # print "sin(theta)", math.sin(theta)
 
     # generate path
     projPath = []
@@ -80,23 +55,12 @@ def generateDynamicProjPath(projS, projE, mode='FIX_STEPNUM'):
 
 def projPath_t(tau_t, Ga, Gz, Va, Vz):
     G = np.matrix(np.zeros(Ga.shape))
-    # np.diag(tau_t)*Ga
     for i in range(Ga.shape[1]):  # num of column
         ct = np.cos(tau_t[i])
         st = np.sin(tau_t[i])
         G[:, i] = ct * Ga[:, i] + st * Gz[:, i]
 
-    # cosr1 = abs(math.cos(theta*t))
-    # sinr2 = abs(math.sin(theta*t))
-    # rotation= np.matrix( np.array([[cosr1, sinr2],[sinr2, cosr1]]))
-    # rotation = np.multiply(np.sign(Va*Vz), rotation)
-    # print rotation
-    # in-plan rotation
     F = G * Va.T
-    # F = F*rotation
-    # print "rotation:", rotation
-    # print "Va*Vz:", Va*Vz
-    # F = F*Va*Vz
     return F
 
 
@@ -122,7 +86,7 @@ def generateFullDynamicProjPath(Fa, Fz, stepsize=50):
                 tWz = R * tWz
 
     # projPath = [Fa]
-    projPath = []
+    projPath = [Fa]
 
     for i in range(0, stepsize + 1):
         t = i / float(stepsize)

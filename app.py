@@ -93,13 +93,6 @@ def get_seedwords2():
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, equalize_set=equalize_set)
 
         elif algorithm == 'OSCaR':
-            # weatscore_predebiased = utils.get_weat_score(app.base_embedding, app.weat_A, app.weat_B)
-            # debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding, app)
-            # debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
-            # weatscore_postdebiased = utils.get_weat_score(app.debiased_embedding, app.weat_A, app.weat_B)
-            #
-            # reload_embeddings()
-
             debiaser = OscarDebiaser(app.base_embedding, app.debiased_embedding, app)
             debiaser.debias(bias_direction, seedwords1, seedwords2, evalwords, orth_subspace_words, bias_method=subspace_method)
 

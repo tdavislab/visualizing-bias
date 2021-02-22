@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from tqdm import tqdm
 from weat import weat_score
 import scipy
-from dynamicProj import generateFullDynamicProjPath
+from dynamicProj import generateFullDynamicProjPath, generateDynamicProjPath
 
 
 class WordVector:
